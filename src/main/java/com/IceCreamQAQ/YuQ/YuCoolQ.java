@@ -1,31 +1,14 @@
 package com.IceCreamQAQ.YuQ;
 
+import com.IceCreamQAQ.YuQ.loader.ReloadAble;
 import com.sobte.cqp.jcq.entity.*;
 import com.sobte.cqp.jcq.event.JcqAppAbstract;
-import lombok.val;
 
 import javax.swing.*;
 
-/**
- * 本文件是JCQ插件的主类<br>
- * <br>
- * <p>
- * 注意修改json中的class来加载主类，如不设置则利用appid加载，最后一个单词自动大写查找<br>
- * 例：appid(com.example.demo) 则加载类 Yu<br>
- * 文档地址： https://gitee.com/Sobte/JCQ-CoolQ <br>
- * 帖子：https://cqp.cc/t/37318 <br>
- * 辅助开发变量: {@link JcqAppAbstract#CQ CQ}({@link CoolQ 酷Q核心操作类}),
- * {@link JcqAppAbstract#CC CC}({@link com.sobte.cqp.jcq.message.CQCode 酷Q码操作类}),
- * 具体功能可以查看文档
- */
-public abstract class YuCoolQ extends JcqAppAbstract implements ICQVer, IMsg, IRequest , ReloadAble{
+public abstract class YuCoolQ extends JcqAppAbstract implements ICQVer, IMsg, IRequest , ReloadAble {
 
-    /**
-     * 用main方法调试可以最大化的加快开发效率，检测和定位错误位置<br/>
-     * 以下就是使用Main方法进行测试的一个简易案例
-     *
-     * @param args 系统参数
-     */
+
 
     App app;
 
@@ -37,8 +20,6 @@ public abstract class YuCoolQ extends JcqAppAbstract implements ICQVer, IMsg, IR
         }
     }
     /**
-     * 打包后将不会调用 请不要在此事件中写其他代码
-     *
      * @return 返回应用的ApiVer、Appid
      */
     public String appInfo(){
@@ -55,10 +36,6 @@ public abstract class YuCoolQ extends JcqAppAbstract implements ICQVer, IMsg, IR
      * @return 请固定返回0
      */
     public int startup() {
-        // 获取应用数据目录(无需储存数据时，请将此行注释)
-        String appDirectory = CQ.getAppDirectory();
-        // 返回如：D:\CoolQ\app\com.sobte.cqp.jcq\app\com.example.demo\
-        // 应用的所有数据、配置【必须】存放于此目录，避免给用户带来困扰。
         try {
             app = new App(this,CQ);
         } catch (Exception e) {
@@ -66,70 +43,26 @@ public abstract class YuCoolQ extends JcqAppAbstract implements ICQVer, IMsg, IR
         }
 
         CQ.logInfo("YuQ","初始化加载完成！");
-//        Group.cq = CQ;
-//
-//        try {
-//            ControllerHelp.setAutoWriteObj(CoolQ.class,CQ);
-//            groupController = ControllerHelp.init(GroupController.class);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+
 
 
         return 0;
     }
 
-    /**
-     * 酷Q退出 (Type=1002)<br>
-     * 本方法会在酷Q【主线程】中被调用。<br>
-     * 无论本应用是否被启用，本函数都会在酷Q退出前执行一次，请在这里执行插件关闭代码。
-     *
-     * @return 请固定返回0，返回后酷Q将很快关闭，请不要再通过线程等方式执行其他代码。
-     */
     public int exit() {
         return 0;
     }
 
-    /**
-     * 应用已被启用 (Type=1003)<br>
-     * 当应用被启用后，将收到此事件。<br>
-     * 如果酷Q载入时应用已被启用，则在 {@link #startup startup}(Type=1001,酷Q启动) 被调用后，本函数也将被调用一次。<br>
-     * 如非必要，不建议在这里加载窗口。
-     *
-     * @return 请固定返回0。
-     */
     public int enable() {
         enable = true;
         return 0;
     }
 
-    /**
-     * 应用将被停用 (Type=1004)<br>
-     * 当应用被停用前，将收到此事件。<br>
-     * 如果酷Q载入时应用已被停用，则本函数【不会】被调用。<br>
-     * 无论本应用是否被启用，酷Q关闭前本函数都【不会】被调用。
-     *
-     * @return 请固定返回0。
-     */
     public int disable() {
         enable = false;
         return 0;
     }
 
-    /**
-     * 私聊消息 (Type=21)<br>
-     * 本方法会在酷Q【线程】中被调用。<br>
-     *
-     * @param subType 子类型，11/来自好友 1/来自在线状态 2/来自群 3/来自讨论组
-     * @param msgId   消息ID
-     * @param fromQQ  来源QQ
-     * @param msg     消息内容
-     * @param font    字体
-     * @return 返回值*不能*直接返回文本 如果要回复消息，请调用api发送<br>
-     * 这里 返回  {@link IMsg#MSG_INTERCEPT MSG_INTERCEPT} - 截断本条消息，不再继续处理<br>
-     * 注意：应用优先级设置为"最高"(10000)时，不得使用本返回值<br>
-     * 如果不回复消息，交由之后的应用/过滤器处理，这里 返回  {@link IMsg#MSG_IGNORE MSG_IGNORE} - 忽略本条消息
-     */
     public int privateMsg(int subType, int msgId, long fromQQ, String msg, int font) {
         // 这里处理消息
 //        CQ.sendPrivateMsg(fromQQ, "你发送了这样的消息：" + msg + "\n来自Java插件");
@@ -141,19 +74,6 @@ public abstract class YuCoolQ extends JcqAppAbstract implements ICQVer, IMsg, IR
         return 0;
     }
 
-    /**
-     * 群消息 (Type=2)<br>
-     * 本方法会在酷Q【线程】中被调用。<br>
-     *
-     * @param subType       子类型，目前固定为1
-     * @param msgId         消息ID
-     * @param fromGroup     来源群号
-     * @param fromQQ        来源QQ号
-     * @param fromAnonymous 来源匿名者
-     * @param msg           消息内容
-     * @param font          字体
-     * @return 关于返回值说明, 见 {@link #privateMsg 私聊消息} 的方法
-     */
     public int groupMsg(int subType, int msgId, long fromGroup, long fromQQ, String fromAnonymous, String msg, int font) {
         // 如果消息来自匿名者
         Anonymous noName = null;
@@ -222,7 +142,7 @@ public abstract class YuCoolQ extends JcqAppAbstract implements ICQVer, IMsg, IR
     public int groupAdmin(int subtype, int sendTime, long fromGroup, long beingOperateQQ) {
         // 这里处理消息
 
-        return MSG_IGNORE;
+        return app.groupAdmin(subtype,sendTime,fromGroup,beingOperateQQ);
     }
 
     /**

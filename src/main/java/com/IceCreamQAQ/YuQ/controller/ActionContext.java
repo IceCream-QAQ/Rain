@@ -40,7 +40,7 @@ public class ActionContext {
         contextInject.putInjectObj(message.getClass().toString(), "", message);
 
         contextInject.putInjectObj("java.lang.Long", "qq", message.getQq());
-        contextInject.putInjectObj("java.lang.Long", "group", message.getGroup());
+        if (message.getGroup() != null) contextInject.putInjectObj("java.lang.Long", "group", message.getGroup());
         if (message.getNoName() != null)
             contextInject.putInjectObj(message.getNoName().getClass().getName(), "", message.getNoName());
         contextInject.putInjectObj(message.getTexts().getClass().getName(), "", message.getTexts());

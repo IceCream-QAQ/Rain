@@ -10,8 +10,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class YuQConfig {
 
     public Map<String,String> init() throws IOException {
+        val in =getClass().getClassLoader().getResourceAsStream("YuQ.properties");
+
+        if (in==null);
+
         val prop=new Properties();
-        prop.load(getClass().getClassLoader().getResourceAsStream("YuQ.properties"));
+        prop.load(in);
 
         val map=new ConcurrentHashMap<String,String>();
         for (Object o : prop.keySet()) {

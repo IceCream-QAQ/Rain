@@ -6,7 +6,7 @@
     <groupId>com.IceCreamQAQ.YuQ</groupId>
     <artifactId>YuQFramework</artifactId>
     <packaging>jar</packaging>
-    <version>0.0.1.3</version>
+    <version>0.0.1.4-SNAPSHOT</version>
 
     <modelVersion>4.0.0</modelVersion>
 

@@ -4,6 +4,7 @@ import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.annotation.PathVar;
 import lombok.Data;
 import lombok.val;
+import lombok.var;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -114,6 +115,12 @@ public class MethodInvoker {
 
             val paraNodes = (List<LocalVariableNode>) methodNode.localVariables;
 
+            var thisIndex = 1;
+            for (val paraNode : paraNodes) {
+                if (paraNode.name.equals("this"))break;
+                thisIndex++;
+            }
+
             for (int i = 0; i < paras.length; i++) {
                 val para = paras[i];
                 val mp = new MethodPara();
@@ -123,7 +130,7 @@ public class MethodInvoker {
 
                 if (inject == null && pathVar == null) {
                     mp.type = 0;
-                    mp.inject = paraNodes.get(i + 1).name;
+                    mp.inject = paraNodes.get(i + thisIndex).name;
                 }
 
                 if (inject != null) {

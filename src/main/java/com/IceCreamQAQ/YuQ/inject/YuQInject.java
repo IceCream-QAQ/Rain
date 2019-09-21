@@ -8,10 +8,11 @@ import lombok.var;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class YuQInject extends YuQInjectBase{
+public class YuQInject extends YuQInjectBase {
 
     private Map<String, String> configs;
 
@@ -56,7 +57,7 @@ public class YuQInject extends YuQInjectBase{
     }
 
     public void injectObject(Object obj) throws ClassNotFoundException, IllegalAccessException {
-        val clazz =obj.getClass();
+        val clazz = obj.getClass();
 
         val fields = clazz.getDeclaredFields();
 
@@ -67,12 +68,17 @@ public class YuQInject extends YuQInjectBase{
 
                 if (injectType.equals("com.IceCreamQAQ.YuQ.annotation.Inject") || injectType.equals("com.icecreamqaq.yuq.annotation.Inject"))
                     injectType = field.getType().getName();
-                val list = injectObjects.get(injectType);
+                var list = injectObjects.get(injectType);
                 if (list == null) {
-                    if (injectType.contains("com.IceCreamQAQ.YuQ") || injectType.contains("com.icecreamqaq.yuq"))
-                        spawnAndPut(Class.forName(injectType), "");
+                    if (injectType.contains("com.IceCreamQAQ.YuQ") || injectType.contains("com.icecreamqaq.yuq")) {
+                        val paraType = Class.forName(injectType);
+                        if (!paraType.isInterface()&& !Modifier.isAbstract(paraType.getModifiers())){
+                            spawnAndPut(paraType, "");
+                            list = injectObjects.get(injectType);
+                        }
+                    }
                 }
-                if (list==null){
+                if (list == null) {
                     continue;
                 }
                 val instance = list.get(inject.name());
@@ -91,7 +97,7 @@ public class YuQInject extends YuQInjectBase{
                 if (value == null) {
                     field.setAccessible(true);
                     field.set(obj, config.defaultValue());
-                }else {
+                } else {
                     field.setAccessible(true);
                     field.set(obj, value);
                 }

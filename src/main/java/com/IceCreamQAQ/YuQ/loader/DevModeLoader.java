@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.YuQ;
+package com.IceCreamQAQ.YuQ.loader;
 
 import java.net.URL;
 import java.net.URLClassLoader;

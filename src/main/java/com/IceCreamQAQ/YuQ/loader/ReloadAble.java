@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.YuQ;
+package com.IceCreamQAQ.YuQ.loader;
 
 public interface ReloadAble {
 

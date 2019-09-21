@@ -32,12 +32,7 @@ public class ActionInvoker {
             if (reObj instanceof Message) return (Message) reObj;
             return new Message.Builder(reObj.toString()).build();
 
-        } catch (InvocationTargetException e){
-            val ee = e.getCause();
-            if (ee instanceof Message) return (Message) ee;
-            ee.printStackTrace();
-            return null;
-        } catch (Exception e) {
+        }  catch (Exception e) {
             throw e;
         }
     }
