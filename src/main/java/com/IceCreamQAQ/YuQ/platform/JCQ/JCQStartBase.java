@@ -4,7 +4,6 @@ import com.IceCreamQAQ.YuQ.App;
 import com.IceCreamQAQ.YuQ.loader.ReloadAble;
 import org.meowy.cqp.jcq.entity.*;
 import org.meowy.cqp.jcq.event.JcqApp;
-import org.meowy.cqp.jcq.event.JcqAppAbstract;
 
 import javax.swing.*;
 

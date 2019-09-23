@@ -10,17 +10,17 @@ import lombok.var;
 public class YuQ {
 
     @Inject
-    private YuQOperater cq;
+    private YuQOperater operater;
 
-    public void sendMessage(@Inject Message message) {
+    public void sendMessage(Message message) {
         val group = message.getGroup();
         val qq = message.getQq();
 
         val msg = message.getMsg();
         if (group == null) {
-            cq.sendPrivateMsg(qq, msg);
+            operater.sendPrivateMsg(qq, msg);
         } else {
-            cq.sendGroupMsg(group, msg);
+            operater.sendGroupMsg(group, msg);
         }
     }
 
@@ -35,9 +35,9 @@ public class YuQ {
 
         val msg = reMessage.getMsg();
         if (group == null) {
-            cq.sendPrivateMsg(qq, msg);
+            operater.sendPrivateMsg(qq, msg);
         } else {
-            cq.sendGroupMsg(group, msg);
+            operater.sendGroupMsg(group, msg);
         }
     }
 }
