@@ -1,6 +1,7 @@
 package com.IceCreamQAQ.YuQ.loader;
 
 import com.IceCreamQAQ.YuQ.YuQ;
+import com.IceCreamQAQ.YuQ.YuQLogger;
 import com.IceCreamQAQ.YuQ.annotation.*;
 import com.IceCreamQAQ.YuQ.inject.YuQInject;
 import com.sobte.cqp.jcq.entity.CoolQ;
@@ -35,7 +36,7 @@ public class YuQLoader {
     @Inject
     private YuQInject inject;
     @Inject
-    private CoolQ cq;
+    private YuQLogger cq;
     @Inject
     private ReloadAble reloadAble;
 

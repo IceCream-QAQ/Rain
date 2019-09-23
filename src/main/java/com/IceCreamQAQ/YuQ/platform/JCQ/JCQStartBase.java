@@ -1,12 +1,13 @@
-package com.IceCreamQAQ.YuQ;
+package com.IceCreamQAQ.YuQ.platform.JCQ;
 
+import com.IceCreamQAQ.YuQ.App;
 import com.IceCreamQAQ.YuQ.loader.ReloadAble;
 import com.sobte.cqp.jcq.entity.*;
 import com.sobte.cqp.jcq.event.JcqAppAbstract;
 
 import javax.swing.*;
 
-public abstract class YuCoolQ extends JcqAppAbstract implements ICQVer, IMsg, IRequest , ReloadAble {
+public abstract class JCQStartBase extends JcqAppAbstract implements ICQVer, IMsg, IRequest , ReloadAble {
 
 
 
@@ -14,7 +15,7 @@ public abstract class YuCoolQ extends JcqAppAbstract implements ICQVer, IMsg, IR
 
     public void reload(){
         try {
-            app= new App(this,CQ);
+            app= new JCQApp(this,CQ);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -37,7 +38,7 @@ public abstract class YuCoolQ extends JcqAppAbstract implements ICQVer, IMsg, IR
      */
     public int startup() {
         try {
-            app = new App(this,CQ);
+            app = new JCQApp(this,CQ);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -141,8 +142,10 @@ public abstract class YuCoolQ extends JcqAppAbstract implements ICQVer, IMsg, IR
      */
     public int groupAdmin(int subtype, int sendTime, long fromGroup, long beingOperateQQ) {
         // 这里处理消息
-
-        return app.groupAdmin(subtype,sendTime,fromGroup,beingOperateQQ);
+        if (subtype == 1){
+            return app.groupAdminDel(subtype,sendTime,fromGroup,beingOperateQQ);
+        }
+        return app.groupAdminAdd(subtype,sendTime,fromGroup,beingOperateQQ);
     }
 
     /**
@@ -207,7 +210,6 @@ public abstract class YuCoolQ extends JcqAppAbstract implements ICQVer, IMsg, IR
      */
     public int requestAddFriend(int subtype, int sendTime, long fromQQ, String msg, String responseFlag) {
         // 这里处理消息
-
         /**
          * REQUEST_ADOPT 通过
          * REQUEST_REFUSE 拒绝

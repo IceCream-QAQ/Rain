@@ -3,7 +3,7 @@ package com.IceCreamQAQ.YuQ.controller;
 import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.entity.DoNone;
 import com.IceCreamQAQ.YuQ.entity.Message;
-import com.IceCreamQAQ.YuQ.route.RouteInvoker;
+import com.IceCreamQAQ.YuQ.controller.route.RouteInvoker;
 import com.sobte.cqp.jcq.entity.CoolQ;
 import lombok.val;
 

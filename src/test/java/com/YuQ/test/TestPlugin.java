@@ -1,10 +1,10 @@
 package com.YuQ.test;
 
-import com.IceCreamQAQ.YuQ.YuCoolQ;
+import com.IceCreamQAQ.YuQ.platform.JCQ.JCQStartBase;
 import com.sobte.cqp.jcq.entity.CQDebug;
 import lombok.val;
 
-public class TestPlugin extends YuCoolQ {
+public class TestPlugin extends JCQStartBase {
 
     public static void main(String[] args) {
 // CQ此变量为特殊变量，在JCQ启动时实例化赋值给每个插件，而在测试中可以用CQDebug类来代替他

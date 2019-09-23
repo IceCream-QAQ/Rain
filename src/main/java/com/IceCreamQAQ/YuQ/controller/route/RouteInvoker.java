@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.YuQ.route;
+package com.IceCreamQAQ.YuQ.controller.route;
 
 import com.IceCreamQAQ.YuQ.controller.ActionContext;
 

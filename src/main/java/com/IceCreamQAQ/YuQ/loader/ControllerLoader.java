@@ -1,40 +1,24 @@
 package com.IceCreamQAQ.YuQ.loader;
 
+import com.IceCreamQAQ.YuQ.YuQLogger;
 import com.IceCreamQAQ.YuQ.controller.ActionInvoker;
 import com.IceCreamQAQ.YuQ.controller.ControllerInvoker;
 import com.IceCreamQAQ.YuQ.controller.MethodInvoker;
-import com.IceCreamQAQ.YuQ.loader.DevModeLoader;
-import com.IceCreamQAQ.YuQ.loader.ReloadAble;
 import com.IceCreamQAQ.YuQ.annotation.*;
 import com.IceCreamQAQ.YuQ.inject.YuQInject;
-import com.IceCreamQAQ.YuQ.route.Router;
-import com.sobte.cqp.jcq.entity.CoolQ;
+import com.IceCreamQAQ.YuQ.controller.route.RouteInvoker;
+import com.IceCreamQAQ.YuQ.controller.route.Router;
 import lombok.val;
 import lombok.var;
-import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.io.filefilter.HiddenFileFilter;
-import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
-import org.apache.commons.io.monitor.FileAlterationMonitor;
-import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.JarURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 public class ControllerLoader {
 
@@ -51,7 +35,7 @@ public class ControllerLoader {
     private ReloadAble reloadAble;
 
     @Inject
-    private CoolQ cq;
+    private YuQLogger cq;
 
     @Inject
     private ClassLoader classLoader;
@@ -79,8 +63,8 @@ public class ControllerLoader {
             }
         }
 
-        inject.putInjectObj(Router.class.getName(),"group",groupRootRouter);
-        inject.putInjectObj(Router.class.getName(),"priv",privateRootRouter);
+        inject.putInjectObj(RouteInvoker.class.getName(),"group",groupRootRouter);
+        inject.putInjectObj(RouteInvoker.class.getName(),"priv",privateRootRouter);
     }
 
     public void controllerToRouter(Class controller, Router rootRouter) throws IllegalAccessException, ClassNotFoundException, InstantiationException, IOException {

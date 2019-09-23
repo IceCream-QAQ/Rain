@@ -6,42 +6,44 @@ import com.IceCreamQAQ.YuQ.entity.Message;
 import com.IceCreamQAQ.YuQ.event.EventBus;
 import com.IceCreamQAQ.YuQ.event.events.GroupAdminAddEvent;
 import com.IceCreamQAQ.YuQ.event.events.GroupAdminDelEvent;
-import com.IceCreamQAQ.YuQ.event.events.GroupAdminEvent;
 import com.IceCreamQAQ.YuQ.inject.YuQInject;
 import com.IceCreamQAQ.YuQ.loader.ReloadAble;
 import com.IceCreamQAQ.YuQ.loader.YuQLoader;
-import com.IceCreamQAQ.YuQ.route.Router;
+import com.IceCreamQAQ.YuQ.platform.YuQOperater;
+import com.IceCreamQAQ.YuQ.controller.route.RouteInvoker;
 import com.sobte.cqp.jcq.entity.Anonymous;
-import com.sobte.cqp.jcq.entity.CoolQ;
 import lombok.val;
 
-public class App {
+public abstract class App {
 
     public YuQInject inject;
 
     @Inject
     private YuQ yuq;
     @Inject(name = "group")
-    private Router groupRouter;
+    private RouteInvoker groupRouter;
     @Inject(name = "priv")
-    private Router privateRouter;
+    private RouteInvoker privateRouter;
     @Inject
-    public EventBus eventBus;
+    private EventBus eventBus;
+    @Inject
+    private YuQLoader loader;
 
 
-    public App(ReloadAble reloadAble, CoolQ cq) throws Exception {
+    public App(ReloadAble reloadAble, YuQOperater operater) throws Exception {
         inject = new YuQInject();
         inject.putInjectObj(inject.getClass().getName(), null, inject);
 
-        inject.putInjectObj(CoolQ.class.getName(), "", cq);
+        inject.putInjectObj(YuQOperater.class.getName(), "", operater);
         inject.spawnAndPut(YuQ.class, "");
 
         if (reloadAble != null) inject.putInjectObj(ReloadAble.class.getName(), "", reloadAble);
 
-        val loader = inject.spawnInstance(YuQLoader.class);
+        inject.injectObject(this);
+    }
+
+    public void start() throws IllegalAccessException, ClassNotFoundException {
         loader.load();
-
-
         inject.injectObject(this);
     }
 
@@ -78,13 +80,19 @@ public class App {
         return context.getIntercept();
     }
 
-    public int groupAdmin(int subtype, int time, long group, long qq) {
-        GroupAdminEvent event;
-        if (subtype==1){
-            event=new GroupAdminDelEvent();
-        }else {
-            event=new GroupAdminAddEvent();
-        }
+    public int groupAdminAdd(int subtype, int time, long group, long qq) {
+        val event=new GroupAdminAddEvent();
+        event.setGroup(group);
+        event.setTime(time);
+        event.setQq(qq);
+
+        eventBus.post(event);
+
+        return 0;
+    }
+
+    public int groupAdminDel(int subtype, int time, long group, long qq) {
+        val event=new GroupAdminDelEvent();
         event.setGroup(group);
         event.setTime(time);
         event.setQq(qq);
