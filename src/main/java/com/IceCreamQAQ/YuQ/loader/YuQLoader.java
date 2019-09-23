@@ -1,10 +1,8 @@
 package com.IceCreamQAQ.YuQ.loader;
 
-import com.IceCreamQAQ.YuQ.YuQ;
 import com.IceCreamQAQ.YuQ.YuQLogger;
 import com.IceCreamQAQ.YuQ.annotation.*;
 import com.IceCreamQAQ.YuQ.inject.YuQInject;
-import com.sobte.cqp.jcq.entity.CoolQ;
 import lombok.val;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.HiddenFileFilter;
@@ -209,7 +207,7 @@ public class YuQLoader {
         private ReloadAble reloadAble;
 
         @Inject
-        private CoolQ cq;
+        private YuQLogger logger;
 
         @Override
         public void onDirectoryCreate(File directory) {
@@ -244,7 +242,7 @@ public class YuQLoader {
         public void reload() {
             try {
                 f.stop();
-                cq.logError("YuQ Framework", "准备重载。");
+                logger.logError("YuQ Framework", "准备重载。");
                 reloadAble.reload();
             } catch (Exception ignored) {
             }

@@ -11,8 +11,8 @@ import com.IceCreamQAQ.YuQ.loader.ReloadAble;
 import com.IceCreamQAQ.YuQ.loader.YuQLoader;
 import com.IceCreamQAQ.YuQ.platform.YuQOperater;
 import com.IceCreamQAQ.YuQ.controller.route.RouteInvoker;
-import com.sobte.cqp.jcq.entity.Anonymous;
 import lombok.val;
+import org.meowy.cqp.jcq.entity.Anonymous;
 
 public abstract class App {
 

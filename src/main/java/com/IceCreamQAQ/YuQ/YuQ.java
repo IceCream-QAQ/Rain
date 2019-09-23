@@ -4,7 +4,6 @@ import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.controller.ActionContext;
 import com.IceCreamQAQ.YuQ.entity.Message;
 import com.IceCreamQAQ.YuQ.platform.YuQOperater;
-import com.sobte.cqp.jcq.entity.CoolQ;
 import lombok.val;
 import lombok.var;
 

@@ -2,16 +2,19 @@ package com.IceCreamQAQ.YuQ.platform.JCQ;
 
 import com.IceCreamQAQ.YuQ.App;
 import com.IceCreamQAQ.YuQ.loader.ReloadAble;
-import com.sobte.cqp.jcq.entity.*;
-import com.sobte.cqp.jcq.event.JcqAppAbstract;
+import org.meowy.cqp.jcq.entity.*;
+import org.meowy.cqp.jcq.event.JcqApp;
+import org.meowy.cqp.jcq.event.JcqAppAbstract;
 
 import javax.swing.*;
 
-public abstract class JCQStartBase extends JcqAppAbstract implements ICQVer, IMsg, IRequest , ReloadAble {
-
-
+public abstract class JCQStartBase extends JcqApp implements ICQVer, IMsg, IRequest, ReloadAble {
 
     App app;
+
+    public JCQStartBase(CoolQ CQ) {
+        super(CQ);
+    }
 
     public void reload(){
         try {
@@ -55,12 +58,10 @@ public abstract class JCQStartBase extends JcqAppAbstract implements ICQVer, IMs
     }
 
     public int enable() {
-        enable = true;
         return 0;
     }
 
     public int disable() {
-        enable = false;
         return 0;
     }
 

@@ -1,7 +1,7 @@
 package com.IceCreamQAQ.YuQ.platform.JCQ;
 
 import com.IceCreamQAQ.YuQ.platform.YuQOperater;
-import com.sobte.cqp.jcq.entity.CoolQ;
+import org.meowy.cqp.jcq.entity.CoolQ;
 
 public class JCQOperater implements YuQOperater {
 

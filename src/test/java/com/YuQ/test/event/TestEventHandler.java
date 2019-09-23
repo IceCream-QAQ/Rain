@@ -5,7 +5,7 @@ import com.IceCreamQAQ.YuQ.annotation.EventHandler;
 import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.event.events.GroupAdminAddEvent;
 import com.IceCreamQAQ.YuQ.event.events.GroupAdminEvent;
-import com.sobte.cqp.jcq.entity.CoolQ;
+import org.meowy.cqp.jcq.entity.CoolQ;
 
 @EventHandler
 public class TestEventHandler {

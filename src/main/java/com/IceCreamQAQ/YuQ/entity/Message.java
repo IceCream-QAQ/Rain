@@ -1,8 +1,8 @@
 package com.IceCreamQAQ.YuQ.entity;
 
-import com.sobte.cqp.jcq.entity.Anonymous;
 import lombok.Getter;
 import lombok.val;
+import org.meowy.cqp.jcq.entity.Anonymous;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,17 +1,22 @@
 package com.YuQ.test;
 
 import com.IceCreamQAQ.YuQ.platform.JCQ.JCQStartBase;
-import com.sobte.cqp.jcq.entity.CQDebug;
 import lombok.val;
+import org.meowy.cqp.jcq.entity.CQDebug;
+import org.meowy.cqp.jcq.entity.CoolQ;
 
 public class TestPlugin extends JCQStartBase {
 
+    public TestPlugin(CoolQ CQ) {
+        super(CQ);
+    }
+
     public static void main(String[] args) {
 // CQ此变量为特殊变量，在JCQ启动时实例化赋值给每个插件，而在测试中可以用CQDebug类来代替他
-        CQ = new CQDebug();//new CQDebug("应用目录","应用名称") 可以用此构造器初始化应用的目录
-        CQ.logInfo("[JCQ] TEST Yu", "测试启动");// 现在就可以用CQ变量来执行任何想要的操作了
+        CoolQ cq = new CQDebug();//new CQDebug("应用目录","应用名称") 可以用此构造器初始化应用的目录
+        cq.logInfo("[JCQ] TEST Yu", "测试启动");// 现在就可以用CQ变量来执行任何想要的操作了
         // 要测试主类就先实例化一个主类对象
-        val test = new TestPlugin();
+        val test = new TestPlugin(cq);
         // 下面对主类进行各方法测试,按照JCQ运行过程，模拟实际情况
         test.startup();// 程序运行开始 调用应用初始化方法
         test.enable();// 程序初始化完成后，启用应用，让应用正常工作

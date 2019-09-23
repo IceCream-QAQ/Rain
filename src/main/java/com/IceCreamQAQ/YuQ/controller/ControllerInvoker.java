@@ -1,10 +1,10 @@
 package com.IceCreamQAQ.YuQ.controller;
 
+import com.IceCreamQAQ.YuQ.YuQLogger;
 import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.entity.DoNone;
 import com.IceCreamQAQ.YuQ.entity.Message;
 import com.IceCreamQAQ.YuQ.controller.route.RouteInvoker;
-import com.sobte.cqp.jcq.entity.CoolQ;
 import lombok.val;
 
 import java.lang.reflect.InvocationTargetException;
@@ -16,7 +16,7 @@ public class ControllerInvoker implements RouteInvoker {
     public Map<String, ActionInvoker> actions;
 
     @Inject
-    private CoolQ cq;
+    private YuQLogger logger;
 
     @Override
     public void invoke(String path, ActionContext context) {
@@ -40,14 +40,14 @@ public class ControllerInvoker implements RouteInvoker {
             if (cause instanceof Message) return (Message) cause;
             if (cause instanceof DoNone) return null;
             cause.printStackTrace();
-            cq.logInfo("aaa","bbb");
+            logger.logInfo("aaa","bbb");
             val errorMessage= new StringBuilder("程序运行时时异常！\n异常信息：");
             errorMessage.append(cause.getClass().getName()).append(" : ").append(cause.getMessage()).append("\n异常栈：");
             for (val item : cause.getStackTrace()) {
                 errorMessage.append("\n").append(item.toString());
             }
             
-            cq.logError("YuQ Runtime",  errorMessage.toString());
+            logger.logError("YuQ Runtime",  errorMessage.toString());
             return null;
         } catch (Exception e) {
             e.printStackTrace();
