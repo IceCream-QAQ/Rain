@@ -9,6 +9,8 @@ import lombok.var;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -57,9 +59,16 @@ public class YuQInject extends YuQInjectBase {
     }
 
     public void injectObject(Object obj) throws ClassNotFoundException, IllegalAccessException {
-        val clazz = obj.getClass();
+        Class clazz = obj.getClass();
 
-        val fields = clazz.getDeclaredFields();
+        val fields = new ArrayList<Field>();
+//        fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+//
+//        Class superClass= clazz.getSuperclass();
+        while (clazz!=null){
+            fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+            clazz = clazz.getSuperclass();
+        }
 
         for (Field field : fields) {
             val inject = field.getAnnotation(Inject.class);
@@ -101,7 +110,6 @@ public class YuQInject extends YuQInjectBase {
                     field.setAccessible(true);
                     field.set(obj, value);
                 }
-//                continue;
             }
         }
     }
