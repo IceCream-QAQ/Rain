@@ -4,8 +4,7 @@ import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.controller.ActionContext;
 import com.IceCreamQAQ.YuQ.entity.Message;
 import com.IceCreamQAQ.YuQ.event.EventBus;
-import com.IceCreamQAQ.YuQ.event.events.GroupAdminAddEvent;
-import com.IceCreamQAQ.YuQ.event.events.GroupAdminDelEvent;
+import com.IceCreamQAQ.YuQ.event.events.*;
 import com.IceCreamQAQ.YuQ.inject.YuQInject;
 import com.IceCreamQAQ.YuQ.loader.ReloadAble;
 import com.IceCreamQAQ.YuQ.loader.YuQLoader;
@@ -57,6 +56,10 @@ public abstract class App {
         val context = new ActionContext(message);
         inject.injectObject(context);
 
+        val onGroupMessageEvent = new OnGroupMessageEvent();
+        onGroupMessageEvent.setContext(context);
+        if (eventBus.post(onGroupMessageEvent))return 1;
+
         groupRouter.invoke(texts[0], context);
 
         val reMsg = context.getReMessage();
@@ -71,6 +74,10 @@ public abstract class App {
 
         val context = new ActionContext(message);
         inject.injectObject(context);
+
+        val onPrivateMessageEvent = new OnPrivateMessageEvent();
+        onPrivateMessageEvent.setContext(context);
+        if (eventBus.post(onPrivateMessageEvent))return 1;
 
         privateRouter.invoke(texts[0], context);
 
