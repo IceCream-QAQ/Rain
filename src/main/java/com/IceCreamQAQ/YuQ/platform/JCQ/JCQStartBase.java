@@ -2,6 +2,7 @@ package com.IceCreamQAQ.YuQ.platform.JCQ;
 
 import com.IceCreamQAQ.YuQ.App;
 import com.IceCreamQAQ.YuQ.loader.ReloadAble;
+import lombok.val;
 import org.meowy.cqp.jcq.entity.*;
 import org.meowy.cqp.jcq.event.JcqApp;
 
@@ -17,7 +18,9 @@ public abstract class JCQStartBase extends JcqApp implements ICQVer, IMsg, IRequ
 
     public void reload(){
         try {
-            app= new JCQApp(this,CQ);
+            val app= new JCQApp(this,CQ);
+            app.enable();
+            this.app=app;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -53,14 +56,17 @@ public abstract class JCQStartBase extends JcqApp implements ICQVer, IMsg, IRequ
     }
 
     public int exit() {
+        app.stop();
         return 0;
     }
 
     public int enable() {
+        app.enable();
         return 0;
     }
 
     public int disable() {
+        app.disable();
         return 0;
     }
 

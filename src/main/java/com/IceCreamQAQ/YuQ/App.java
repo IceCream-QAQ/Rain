@@ -28,6 +28,7 @@ public abstract class App {
     @Inject
     private YuQLoader loader;
 
+    private boolean enable;
 
     public App(ReloadAble reloadAble, YuQOperater operater) throws Exception {
         inject = new YuQInject();
@@ -44,6 +45,21 @@ public abstract class App {
     public void start() throws IllegalAccessException, ClassNotFoundException {
         loader.load();
         inject.injectObject(this);
+
+        eventBus.post(new AppStartEvent());
+    }
+
+    public void stop(){
+        eventBus.post(new AppStopEvent());
+    }
+
+    public void enable(){
+        eventBus.post(new AppEnableEvent());
+        this.enable=true;
+    }
+    public void disable(){
+        eventBus.post(new AppDisableEvent());
+        this.enable=false;
     }
 
 
@@ -93,8 +109,7 @@ public abstract class App {
         event.setTime(time);
         event.setQq(qq);
 
-        eventBus.post(event);
-
+        if (eventBus.post(event))return 1;
         return 0;
     }
 
@@ -104,8 +119,7 @@ public abstract class App {
         event.setTime(time);
         event.setQq(qq);
 
-        eventBus.post(event);
-
+        if (eventBus.post(event))return 1;
         return 0;
     }
 
