@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class GroupInviteMemberEvent extends GroupMemberAddEvent {
 
-    private Long operateQQ;
+    private Long operater;
 
 }

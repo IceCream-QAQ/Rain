@@ -1,6 +1,7 @@
 package com.IceCreamQAQ.YuQ.loader;
 
-import com.IceCreamQAQ.YuQ.YuQLogger;
+
+import com.IceCreamQAQ.YuQ.AppLogger;
 import com.IceCreamQAQ.YuQ.annotation.*;
 import com.IceCreamQAQ.YuQ.inject.YuQInject;
 import lombok.val;
@@ -34,7 +35,7 @@ public class YuQLoader {
     @Inject
     private YuQInject inject;
     @Inject
-    private YuQLogger cq;
+    private AppLogger logger;
     @Inject
     private ReloadAble reloadAble;
 
@@ -42,7 +43,7 @@ public class YuQLoader {
         try {
             ClassLoader classLoader;
             if (!projectLocation.equals("") && reloadAble != null) {
-                cq.logInfo("YuQFramework Loader", "Dev Mode Load.");
+                logger.logInfo("YuQFramework Loader", "Dev Mode Load.");
                 val location = new File(projectLocation);
                 val url = location.toURI().toURL();
                 classLoader = new DevModeLoader(new URL[]{url}, this.getClass().getClassLoader());
@@ -67,7 +68,7 @@ public class YuQLoader {
 
 
             } else {
-                cq.logInfo("YuQFramework Loader", "Pro Mode Load.");
+                logger.logInfo("YuQFramework Loader", "Pro Mode Load.");
                 classLoader = this.getClass().getClassLoader();
             }
             this.classLoader = classLoader;
@@ -207,7 +208,7 @@ public class YuQLoader {
         private ReloadAble reloadAble;
 
         @Inject
-        private YuQLogger logger;
+        private AppLogger logger;
 
         @Override
         public void onDirectoryCreate(File directory) {

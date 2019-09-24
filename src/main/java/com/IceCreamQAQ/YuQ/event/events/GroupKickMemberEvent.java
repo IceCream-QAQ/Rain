@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class GroupKickMemberEvent extends GroupMemberDecreaseEvent {
 
-    private Long operateQQ;
+    private Long operater;
 
 }

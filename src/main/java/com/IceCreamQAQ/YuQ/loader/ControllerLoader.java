@@ -1,6 +1,7 @@
 package com.IceCreamQAQ.YuQ.loader;
 
-import com.IceCreamQAQ.YuQ.YuQLogger;
+
+import com.IceCreamQAQ.YuQ.AppLogger;
 import com.IceCreamQAQ.YuQ.controller.ActionInvoker;
 import com.IceCreamQAQ.YuQ.controller.ControllerInvoker;
 import com.IceCreamQAQ.YuQ.controller.MethodInvoker;
@@ -35,7 +36,7 @@ public class ControllerLoader {
     private ReloadAble reloadAble;
 
     @Inject
-    private YuQLogger cq;
+    private AppLogger logger;
 
     @Inject
     private ClassLoader classLoader;
@@ -50,16 +51,16 @@ public class ControllerLoader {
         for (val clazz : classes) {
             val group = clazz.getAnnotation(GroupController.class);
             if (group != null) {
-                cq.logInfo("YuQ Loader", "Group Controller " + clazz.getName() + " 正在载入。");
+                logger.logInfo("YuQ Loader", "Group Controller " + clazz.getName() + " 正在载入。");
                 controllerToRouter(clazz, groupRootRouter);
-                cq.logInfo("YuQ Loader", "Group Controller " + clazz.getName() + " 载入完成。");
+                logger.logInfo("YuQ Loader", "Group Controller " + clazz.getName() + " 载入完成。");
             }
 
             val priv = clazz.getAnnotation(PrivateController.class);
             if (priv != null) {
-                cq.logInfo("YuQ Loader", "Private Controller " + clazz.getName() + " 正在载入。");
+                logger.logInfo("YuQ Loader", "Private Controller " + clazz.getName() + " 正在载入。");
                 controllerToRouter(clazz, privateRootRouter);
-                cq.logInfo("YuQ Loader", "Private Controller " + clazz.getName() + " 载入完成。");
+                logger.logInfo("YuQ Loader", "Private Controller " + clazz.getName() + " 载入完成。");
             }
         }
 
@@ -105,7 +106,7 @@ public class ControllerLoader {
         for (val method : methods) {
             val before = method.getAnnotation(Before.class);
             if (before != null) {
-                cq.logInfo("YuQ Loader", "Before " + method.getName() + " 正在载入。");
+                logger.logInfo("YuQ Loader", "Before " + method.getName() + " 正在载入。");
 
                 val beforeInvoker = new MethodInvoker(instance, method, methodMap.get(method.getName()));
                 befores.add(beforeInvoker);
@@ -114,7 +115,7 @@ public class ControllerLoader {
 
             val action = method.getAnnotation(Action.class);
             if (action != null) {
-                cq.logInfo("YuQ Loader", "Action " + method.getName() + " 正在载入。");
+                logger.logInfo("YuQ Loader", "Action " + method.getName() + " 正在载入。");
 
                 var path = action.value();
 
@@ -151,8 +152,8 @@ public class ControllerLoader {
             }
         }
 
-        cq.logInfo("YuQ Loader", "共有 " + befores.size() + " 个 Before 被载入。");
-        cq.logInfo("YuQ Loader", "共有 " + actions.size() + " 个 Action 被载入。");
+        logger.logInfo("YuQ Loader", "共有 " + befores.size() + " 个 Before 被载入。");
+        logger.logInfo("YuQ Loader", "共有 " + actions.size() + " 个 Action 被载入。");
 
         controllerInvoker.befores = befores.toArray(new MethodInvoker[befores.size()]);
         controllerInvoker.actions = actions;

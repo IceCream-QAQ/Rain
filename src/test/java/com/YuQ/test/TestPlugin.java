@@ -11,7 +11,7 @@ public class TestPlugin extends JCQStartBase {
         super(CQ);
     }
 
-    public static void main(String[] args) {
+    public static void main(String... args) {
 // CQ此变量为特殊变量，在JCQ启动时实例化赋值给每个插件，而在测试中可以用CQDebug类来代替他
         CoolQ cq = new CQDebug();//new CQDebug("应用目录","应用名称") 可以用此构造器初始化应用的目录
         cq.logInfo("[JCQ] TEST Yu", "测试启动");// 现在就可以用CQ变量来执行任何想要的操作了

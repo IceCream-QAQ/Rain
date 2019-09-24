@@ -3,10 +3,11 @@ package com.IceCreamQAQ.YuQ.event.events;
 import lombok.Data;
 
 @Data
-public class FriendRequestEvent extends Event {
+public class JoinGroupRequestEvent extends Event {
 
     private Integer time;
     private Long qq;
+    private Long group;
     private String msg;
 
     private Boolean accept;

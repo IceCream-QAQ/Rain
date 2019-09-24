@@ -9,7 +9,7 @@ public class JCQApp extends App {
 
 
     public JCQApp(ReloadAble reloadAble, CoolQ cq) throws Exception {
-        super(reloadAble, new JCQOperater(cq));
+        super(reloadAble, new JCYuQ(cq),new JcqLogger(cq));
 
         inject.putInjectObj(CoolQ.class.getName(),"",cq);
 

@@ -16,23 +16,25 @@ public abstract class JCQStartBase extends JcqApp implements ICQVer, IMsg, IRequ
         super(CQ);
     }
 
-    public void reload(){
+    public void reload() {
         try {
-            val app= new JCQApp(this,CQ);
+            val app = new JCQApp(this, CQ);
             app.enable();
-            this.app=app;
+            this.app = app;
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     /**
      * @return 返回应用的ApiVer、Appid
      */
-    public String appInfo(){
+    public String appInfo() {
         return CQAPIVER + "," + appId();
     }
 
     public abstract String appId();
+
     /**
      * 酷Q启动 (Type=1001)<br>
      * 本方法会在酷Q【主线程】中被调用。<br>
@@ -43,15 +45,10 @@ public abstract class JCQStartBase extends JcqApp implements ICQVer, IMsg, IRequ
      */
     public int startup() {
         try {
-            app = new JCQApp(this,CQ);
+            app = new JCQApp(this, CQ);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        CQ.logInfo("YuQ","初始化加载完成！");
-
-
-
         return 0;
     }
 
@@ -148,10 +145,10 @@ public abstract class JCQStartBase extends JcqApp implements ICQVer, IMsg, IRequ
      */
     public int groupAdmin(int subtype, int sendTime, long fromGroup, long beingOperateQQ) {
         // 这里处理消息
-        if (subtype == 1){
-            return app.groupAdminDel(subtype,sendTime,fromGroup,beingOperateQQ);
+        if (subtype == 1) {
+            return app.groupAdminDel(sendTime, fromGroup, beingOperateQQ);
         }
-        return app.groupAdminAdd(subtype,sendTime,fromGroup,beingOperateQQ);
+        return app.groupAdminAdd(sendTime, fromGroup, beingOperateQQ);
     }
 
     /**
@@ -167,8 +164,10 @@ public abstract class JCQStartBase extends JcqApp implements ICQVer, IMsg, IRequ
      */
     public int groupMemberDecrease(int subtype, int sendTime, long fromGroup, long fromQQ, long beingOperateQQ) {
         // 这里处理消息
-
-        return MSG_IGNORE;
+        if (subtype == 1) {
+            return app.groupMemberDecrease(sendTime, fromGroup, fromQQ);
+        }
+        return app.groupKickMemberEvent(sendTime, fromGroup, fromQQ, beingOperateQQ);
     }
 
     /**
@@ -184,8 +183,10 @@ public abstract class JCQStartBase extends JcqApp implements ICQVer, IMsg, IRequ
      */
     public int groupMemberIncrease(int subtype, int sendTime, long fromGroup, long fromQQ, long beingOperateQQ) {
         // 这里处理消息
-
-        return MSG_IGNORE;
+        if (subtype == 1) {
+            return app.groupMemberAddEvent(sendTime, fromGroup, fromQQ);
+        }
+        return app.groupInviteMemberEvent(sendTime, fromGroup, fromQQ, beingOperateQQ);
     }
 
     /**
@@ -200,7 +201,7 @@ public abstract class JCQStartBase extends JcqApp implements ICQVer, IMsg, IRequ
     public int friendAdd(int subtype, int sendTime, long fromQQ) {
         // 这里处理消息
 
-        return MSG_IGNORE;
+        return app.friendAdd(sendTime, fromQQ);
     }
 
     /**
@@ -221,8 +222,8 @@ public abstract class JCQStartBase extends JcqApp implements ICQVer, IMsg, IRequ
          * REQUEST_REFUSE 拒绝
          */
 
-        // CQ.setFriendAddRequest(responseFlag, REQUEST_ADOPT, null); // 同意好友添加请求
-        return MSG_IGNORE;
+
+        return app.friendRequest(sendTime, fromQQ, msg, responseFlag);
     }
 
     /**
@@ -237,8 +238,7 @@ public abstract class JCQStartBase extends JcqApp implements ICQVer, IMsg, IRequ
      * @param responseFlag 反馈标识(处理请求用)
      * @return 关于返回值说明, 见 {@link #privateMsg 私聊消息} 的方法
      */
-    public int requestAddGroup(int subtype, int sendTime, long fromGroup, long fromQQ, String msg,
-                               String responseFlag) {
+    public int requestAddGroup(int subtype, int sendTime, long fromGroup, long fromQQ, String msg, String responseFlag) {
         // 这里处理消息
 
         /**
@@ -247,34 +247,18 @@ public abstract class JCQStartBase extends JcqApp implements ICQVer, IMsg, IRequ
          * REQUEST_GROUP_ADD 群添加
          * REQUEST_GROUP_INVITE 群邀请
          */
-		/*if(subtype == 1){ // 本号为群管理，判断是否为他人申请入群
-			CQ.setGroupAddRequest(responseFlag, REQUEST_GROUP_ADD, REQUEST_ADOPT, null);// 同意入群
-		}
-		if(subtype == 2){
-			CQ.setGroupAddRequest(responseFlag, REQUEST_GROUP_INVITE, REQUEST_ADOPT, null);// 同意进受邀群
-		}*/
+//		if(subtype == 1){ // 本号为群管理，判断是否为他人申请入群
+//			CQ.setGroupAddRequest(responseFlag, REQUEST_GROUP_ADD, REQUEST_ADOPT, null);// 同意入群
+//		}
+//		if(subtype == 2){
+//			CQ.setGroupAddRequest(responseFlag, REQUEST_GROUP_INVITE, REQUEST_ADOPT, null);// 同意进受邀群
+//		}
 
-        return MSG_IGNORE;
-    }
-
-    /**
-     * 本函数会在JCQ【线程】中被调用。
-     *
-     * @return 固定返回0
-     */
-    public int menuA() {
-        JOptionPane.showMessageDialog(null, "这是测试菜单A，可以在这里加载窗口");
-        return 0;
-    }
-
-    /**
-     * 本函数会在酷Q【线程】中被调用。
-     *
-     * @return 固定返回0
-     */
-    public int menuB() {
-        JOptionPane.showMessageDialog(null, "这是测试菜单B，可以在这里加载窗口");
-        return 0;
+        if (subtype == 1) {
+            return app.joinGroupRequest(sendTime, fromGroup, fromQQ, msg, responseFlag);
+        }else {
+            return app.groupRequest(sendTime, fromGroup, fromQQ, msg, responseFlag);
+        }
     }
 
 }

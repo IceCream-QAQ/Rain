@@ -3,41 +3,24 @@ package com.IceCreamQAQ.YuQ;
 import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.controller.ActionContext;
 import com.IceCreamQAQ.YuQ.entity.Message;
-import com.IceCreamQAQ.YuQ.platform.YuQOperater;
 import lombok.val;
 import lombok.var;
 
-public class YuQ {
+public interface YuQ {
 
-    @Inject
-    private YuQOperater operater;
+    int sendMessage(Message message) ;
 
-    public void sendMessage(Message message) {
-        val group = message.getGroup();
-        val qq = message.getQq();
+    int sendMessage(ActionContext context) ;
 
-        val msg = message.getMsg();
-        if (group == null) {
-            operater.sendPrivateMsg(qq, msg);
-        } else {
-            operater.sendGroupMsg(group, msg);
-        }
-    }
+    int acceptFriendRequest(String requestId,String remarks);
 
-    void sendMessage(ActionContext context) {
-        val message = context.getMessage();
-        val reMessage = context.getReMessage();
+    int refuseFriendRequest(String requestId);
 
-        var group = reMessage.getGroup();
-        if (group == null) group = message.getGroup();
-        var qq = reMessage.getQq();
-        if (qq == null) qq = message.getQq();
+    int acceptGroupRequest(String requestId);
 
-        val msg = reMessage.getMsg();
-        if (group == null) {
-            operater.sendPrivateMsg(qq, msg);
-        } else {
-            operater.sendGroupMsg(group, msg);
-        }
-    }
+    int refuseGroupRequest(String requestId);
+
+    int acceptJoinGroupRequest(String requestId);
+
+    int refuseJoinGroupRequest(String requestId);
 }

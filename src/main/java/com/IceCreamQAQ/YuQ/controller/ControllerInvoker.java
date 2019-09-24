@@ -1,6 +1,7 @@
 package com.IceCreamQAQ.YuQ.controller;
 
-import com.IceCreamQAQ.YuQ.YuQLogger;
+
+import com.IceCreamQAQ.YuQ.AppLogger;
 import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.entity.DoNone;
 import com.IceCreamQAQ.YuQ.entity.Message;
@@ -16,7 +17,7 @@ public class ControllerInvoker implements RouteInvoker {
     public Map<String, ActionInvoker> actions;
 
     @Inject
-    private YuQLogger logger;
+    private AppLogger logger;
 
     @Override
     public void invoke(String path, ActionContext context) {
