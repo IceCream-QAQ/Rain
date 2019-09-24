@@ -1,6 +1,7 @@
 package com.IceCreamQAQ.YuQ.entity;
 
 import lombok.Getter;
+import lombok.ToString;
 import lombok.val;
 import org.meowy.cqp.jcq.entity.Anonymous;
 
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@ToString
 public class Message extends Exception{
 
     private Integer id;

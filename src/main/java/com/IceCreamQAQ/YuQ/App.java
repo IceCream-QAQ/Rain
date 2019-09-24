@@ -35,6 +35,10 @@ public abstract class App {
         inject.putInjectObj(inject.getClass().getName(), null, inject);
         inject.putInjectObj(YuQ.class.getName(), "", yu);
         inject.putInjectObj(AppLogger.class.getName(), "", logger);
+
+        inject.injectObject(yu);
+        inject.injectObject(logger);
+
         if (reloadAble != null) inject.putInjectObj(ReloadAble.class.getName(), "", reloadAble);
     }
 
