@@ -30,8 +30,8 @@ public class YuQLoader {
     @Config("project.location")
     private String projectLocation;
 
+    @Inject(name = "appClassLoader")
     private ClassLoader classLoader;
-
     @Inject
     private YuQInject inject;
     @Inject
@@ -39,14 +39,14 @@ public class YuQLoader {
     @Inject
     private ReloadAble reloadAble;
 
-    public void load(){
+    public void load() {
         try {
             ClassLoader classLoader;
             if (!projectLocation.equals("") && reloadAble != null) {
-                logger.logInfo("YuQFramework Loader", "Dev Mode Load.");
+                logger.logInfo("YuQ Loader", "Dev Mode Load.");
                 val location = new File(projectLocation);
                 val url = location.toURI().toURL();
-                classLoader = new DevModeLoader(new URL[]{url}, this.getClass().getClassLoader());
+                classLoader = new DevModeLoader(new URL[]{url}, this.classLoader);
 
 
                 val listenerAdaptor = inject.spawnInstance(ListenerAdaptor.class);
@@ -68,32 +68,33 @@ public class YuQLoader {
 
 
             } else {
-                logger.logInfo("YuQFramework Loader", "Pro Mode Load.");
-                classLoader = this.getClass().getClassLoader();
+                logger.logInfo("YuQ Loader", "Pro Mode Load.");
+                classLoader = this.classLoader;
             }
             this.classLoader = classLoader;
 
 
-            inject.putInjectObj(ClassLoader.class.getName(),"",classLoader);
+            inject.putInjectObj(ClassLoader.class.getName(), "", classLoader);
+            val invokerClassLoader=new InvokerClassLoader(this.classLoader);
+            inject.putInjectObj(InvokerClassLoader.class.getName(),"",invokerClassLoader);
 
 
+            val classes = getClasses(projectPackage);
 
-            val classes=getClasses(projectPackage);
+            val controllers = new ArrayList<Class>();
 
-            val controllers=new ArrayList<Class>();
-
-            val eventHandlers=new ArrayList<Class>();
+            val eventHandlers = new ArrayList<Class>();
 
             for (Class<?> clazz : classes.values()) {
 
                 val groupController = clazz.getAnnotation(GroupController.class);
-                if (groupController!=null)controllers.add(clazz);
+                if (groupController != null) controllers.add(clazz);
 
                 val privController = clazz.getAnnotation(PrivateController.class);
-                if (privController!=null)controllers.add(clazz);
+                if (privController != null) controllers.add(clazz);
 
-                val eventHandler=clazz.getAnnotation(EventHandler.class);
-                if (eventHandler!=null)eventHandlers.add(clazz);
+                val eventHandler = clazz.getAnnotation(EventHandler.class);
+                if (eventHandler != null) eventHandlers.add(clazz);
 
             }
 
@@ -109,8 +110,8 @@ public class YuQLoader {
     }
 
 
-    public Map<String,Class> getClasses(String packageName) throws MalformedURLException {
-        val classes=new HashMap<String,Class>();
+    public Map<String, Class> getClasses(String packageName) throws MalformedURLException {
+        val classes = new HashMap<String, Class>();
 
         val projectLocationUrlString = new File(projectLocation).toURI().toURL().toString();
         //List<Class<?>> classes = new ArrayList<>();
@@ -149,8 +150,8 @@ public class YuQLoader {
                                     if (name.endsWith(".class") && !entry.isDirectory()) {
                                         String className = name.substring(packageName.length() + 1, name.length() - 6);
                                         try {
-                                            val clazz= Class.forName(packageName + '.' + className);
-                                            classes.putIfAbsent(clazz.getName(),clazz);
+                                            val clazz = Class.forName(packageName + '.' + className, true, classLoader);
+                                            classes.putIfAbsent(clazz.getName(), clazz);
                                         } catch (ClassNotFoundException e) {
                                             e.printStackTrace();
                                         }
@@ -169,7 +170,7 @@ public class YuQLoader {
         return classes;
     }
 
-    public void findAndAddClassesInPackageByFile(String packageName, String packagePath, final boolean recursive, Map<String,Class> classes) {
+    public void findAndAddClassesInPackageByFile(String packageName, String packagePath, final boolean recursive, Map<String, Class> classes) {
         File dir = new File(packagePath);
         if (!dir.exists() || !dir.isDirectory()) {
             return;
@@ -182,11 +183,11 @@ public class YuQLoader {
                 String className = file.getName().substring(0, file.getName().length() - 6);
                 try {
                     if (projectLocation.equals("")) {
-                        val clazz =Class.forName(packageName + '.' + className);
-                        classes.putIfAbsent(clazz.getName(),clazz);
+                        val clazz = Class.forName(packageName + '.' + className);
+                        classes.putIfAbsent(clazz.getName(), clazz);
                     } else {
                         val name = packageName + '.' + className;
-                        if (classes.get(name)==null){
+                        if (classes.get(name) == null) {
                             val clazz = ((DevModeLoader) classLoader).findClass(name);
                             if (clazz.getClassLoader().equals(classLoader))
                                 classes.put(clazz.getName(), clazz);

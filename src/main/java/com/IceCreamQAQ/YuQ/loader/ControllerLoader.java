@@ -12,6 +12,7 @@ import com.IceCreamQAQ.YuQ.controller.route.Router;
 import lombok.val;
 import lombok.var;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -64,8 +65,8 @@ public class ControllerLoader {
             }
         }
 
-        inject.putInjectObj(RouteInvoker.class.getName(),"group",groupRootRouter);
-        inject.putInjectObj(RouteInvoker.class.getName(),"priv",privateRootRouter);
+        inject.putInjectObj(RouteInvoker.class.getName(), "group", groupRootRouter);
+        inject.putInjectObj(RouteInvoker.class.getName(), "priv", privateRootRouter);
     }
 
     public void controllerToRouter(Class controller, Router rootRouter) throws IllegalAccessException, ClassNotFoundException, InstantiationException, IOException {
@@ -80,6 +81,8 @@ public class ControllerLoader {
         val methodMap = new HashMap<String, MethodNode>();
 
         val cvMethods = (List<MethodNode>) node.methods;
+
+
         for (val method : cvMethods) {
             methodMap.put(method.name, method);
         }
@@ -182,9 +185,6 @@ public class ControllerLoader {
         }
         return finishRouter;
     }
-
-
-
 
 
 }

@@ -13,7 +13,7 @@ public class TestController {
 
     }
 
-    @Action("菜单")
+    @Action(value = "菜单",intercept = true)
     public String menu(){
 //        throw new RuntimeException();
         return "Group OK!";

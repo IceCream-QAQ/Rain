@@ -22,6 +22,10 @@ public class YuQInject extends YuQInjectBase {
         configs = new YuQConfig().init();
     }
 
+    public YuQInject(ClassLoader appClassLoader) throws IOException {
+        configs = new YuQConfig(appClassLoader).init();
+    }
+
     public void putInjectObj(String clazz, String name, Object instance) {
         if (name == null) name = "";
 

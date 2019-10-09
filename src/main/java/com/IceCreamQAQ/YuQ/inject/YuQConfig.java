@@ -9,8 +9,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class YuQConfig {
 
+    private ClassLoader appClassLoader;
+
+    public YuQConfig(){
+        appClassLoader=this.getClass().getClassLoader();
+    }
+
+    public YuQConfig(ClassLoader appClassLoader){
+        this.appClassLoader=appClassLoader;
+    }
+
+
     public Map<String,String> init() throws IOException {
-        val in =getClass().getClassLoader().getResourceAsStream("YuQ.properties");
+        val in =appClassLoader.getResourceAsStream("YuQ.properties");
 
         if (in==null);
 

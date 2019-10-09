@@ -42,6 +42,19 @@ public abstract class App {
         if (reloadAble != null) inject.putInjectObj(ReloadAble.class.getName(), "", reloadAble);
     }
 
+    public App(ReloadAble reloadAble, YuQ yu, AppLogger logger,ClassLoader appClassLoader) throws Exception {
+        inject = new YuQInject(appClassLoader);
+        inject.putInjectObj(inject.getClass().getName(), null, inject);
+        inject.putInjectObj(YuQ.class.getName(), "", yu);
+        inject.putInjectObj(AppLogger.class.getName(), "", logger);
+        inject.putInjectObj(ClassLoader.class.getName(),"appClassLoader",appClassLoader);
+
+        inject.injectObject(yu);
+        inject.injectObject(logger);
+
+        if (reloadAble != null) inject.putInjectObj(ReloadAble.class.getName(), "", reloadAble);
+    }
+
     public void start() throws IllegalAccessException, ClassNotFoundException, InstantiationException {
         loader = inject.spawnInstance(YuQLoader.class);
         loader.load();

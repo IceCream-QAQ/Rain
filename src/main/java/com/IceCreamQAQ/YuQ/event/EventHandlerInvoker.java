@@ -1,6 +1,8 @@
 package com.IceCreamQAQ.YuQ.event;
 
+import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.event.events.Event;
+import com.IceCreamQAQ.YuQ.loader.InvokerClassLoader;
 import lombok.val;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -20,14 +22,16 @@ public class EventHandlerInvoker {
 
     private static final String listererClassName = Type.getInternalName(EventInvoker.class);
     private static final String HANDLER_FUNC_DESC = Type.getMethodDescriptor(EventInvoker.class.getDeclaredMethods()[0]);
-    private static final HandlerInvokerClassloader LOADER = new HandlerInvokerClassloader();
     private static int index;
 
     private List<EventInvoker> height;
     private List<EventInvoker> normal;
     private List<EventInvoker> low;
 
-    public EventHandlerInvoker(Object o) {
+    @Inject
+    private InvokerClassLoader classLoader;
+
+    public void register(Object o){
         try {
             registerEventListener(o);
         } catch (Exception e) {
@@ -70,9 +74,9 @@ public class EventHandlerInvoker {
             Class<? extends Event> eventType = (Class<? extends Event>) method.getParameterTypes()[0];
             EventInvoker handler;
             if (Modifier.isStatic(method.getModifiers()))
-                handler = (EventInvoker) createEventHandlerClass(method).newInstance();
+                handler = (EventInvoker) createEventHandlerInvokerClass(method).newInstance();
             else
-                handler = (EventInvoker) createEventHandlerClass(method).getConstructor(Object.class).newInstance(object);
+                handler = (EventInvoker) createEventHandlerInvokerClass(method).getConstructor(Object.class).newInstance(object);
 
             switch (e.weight()) {
                 case low:
@@ -93,7 +97,7 @@ public class EventHandlerInvoker {
         }
     }
 
-    private Class<?> createEventHandlerClass(Method method) {
+    private Class<?> createEventHandlerInvokerClass(Method method) {
         ClassWriter cw = new ClassWriter(0);
         MethodVisitor mv;
 
@@ -152,20 +156,11 @@ public class EventHandlerInvoker {
             mv.visitEnd();
         }
         cw.visitEnd();
-        Class<?> ret = LOADER.define(name, cw.toByteArray());
+        System.out.println(classLoader);
+        Class<?> ret = classLoader.define(name, cw.toByteArray());
         return ret;
     }
 
-
-    private static class HandlerInvokerClassloader extends ClassLoader {
-        private HandlerInvokerClassloader() {
-            super(HandlerInvokerClassloader.class.getClassLoader());
-        }
-
-        public Class<?> define(String name, byte[] data) {
-            return defineClass(name, data, 0, data.length);
-        }
-    }
 
     private String getUniqueName(Method callback) {
         return String.format("YuQ_EventHandlerClass_%d_%s_%s_%s_IceCreamQAQ_OpenSource_YuQFramework",

@@ -1,11 +1,16 @@
 package com.IceCreamQAQ.YuQ.event;
 
+import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.event.events.Event;
+import com.IceCreamQAQ.YuQ.inject.YuQInject;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EventBus {
+
+    @Inject
+    private YuQInject inject;
 
     private Map<Object, EventHandlerInvoker>  handlers = new ConcurrentHashMap<>();;
 
@@ -19,10 +24,11 @@ public class EventBus {
         return false;
     }
 
-    public void register(Object object) {
+    public void register(Object object) throws IllegalAccessException, ClassNotFoundException, InstantiationException {
         EventHandlerInvoker handler = handlers.get(object);
         if (handler == null){
-            handler=new EventHandlerInvoker(object);
+            handler=inject.spawnInstance(EventHandlerInvoker.class);
+            handler.register(object);
             handlers.put(object,handler);
         }
     }
