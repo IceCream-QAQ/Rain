@@ -12,13 +12,20 @@ public class EventBus {
     @Inject
     private YuQInject inject;
 
-    private Map<Object, EventHandlerInvoker>  handlers = new ConcurrentHashMap<>();;
+    private Integer num = 0;
+
+    Integer getNum() {
+        return num++;
+    }
+
+    private Map<Object, EventHandlerInvoker> handlers = new ConcurrentHashMap<>();
+
 
     public boolean post(Event event) {
         for (int i = 0; i < 3; i++) {
             for (EventHandlerInvoker value : handlers.values()) {
-                value.invoke(event,i);
-                if (event.cancelAble() && event.cancel)return true;
+                value.invoke(event, i);
+                if (event.cancelAble() && event.cancel) return true;
             }
         }
         return false;
@@ -26,10 +33,10 @@ public class EventBus {
 
     public void register(Object object) throws IllegalAccessException, ClassNotFoundException, InstantiationException {
         EventHandlerInvoker handler = handlers.get(object);
-        if (handler == null){
-            handler=inject.spawnInstance(EventHandlerInvoker.class);
+        if (handler == null) {
+            handler = inject.spawnInstance(EventHandlerInvoker.class);
             handler.register(object);
-            handlers.put(object,handler);
+            handlers.put(object, handler);
         }
     }
 

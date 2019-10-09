@@ -22,7 +22,10 @@ public class EventHandlerInvoker {
 
     private static final String listererClassName = Type.getInternalName(EventInvoker.class);
     private static final String HANDLER_FUNC_DESC = Type.getMethodDescriptor(EventInvoker.class.getDeclaredMethods()[0]);
-    private static int index;
+
+
+    @Inject
+    private EventBus eventBus;
 
     private List<EventInvoker> height;
     private List<EventInvoker> normal;
@@ -31,16 +34,15 @@ public class EventHandlerInvoker {
     @Inject
     private InvokerClassLoader classLoader;
 
-    public void register(Object o){
+    void register(Object o){
         try {
             registerEventListener(o);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        index++;
     }
 
-    public void invoke(Event event, Integer level) {
+    void invoke(Event event, Integer level) {
         List<EventInvoker> listeners;
         switch (level) {
             case 0:
@@ -164,7 +166,7 @@ public class EventHandlerInvoker {
 
     private String getUniqueName(Method callback) {
         return String.format("YuQ_EventHandlerClass_%d_%s_%s_%s_IceCreamQAQ_OpenSource_YuQFramework",
-                index,
+                eventBus.getNum(),
                 callback.getDeclaringClass().getSimpleName(),
                 callback.getName(),
                 callback.getParameterTypes()[0].getSimpleName());

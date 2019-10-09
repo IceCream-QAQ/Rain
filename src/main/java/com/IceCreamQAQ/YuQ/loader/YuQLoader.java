@@ -75,9 +75,8 @@ public class YuQLoader {
 
 
             inject.putInjectObj(ClassLoader.class.getName(), "", classLoader);
-            val invokerClassLoader=new InvokerClassLoader(this.classLoader);
-            inject.putInjectObj(InvokerClassLoader.class.getName(),"",invokerClassLoader);
-
+//            val invokerClassLoader=new InvokerClassLoader(this.classLoader);
+//            inject.putInjectObj(InvokerClassLoader.class.getName(),"",invokerClassLoader);
 
             val classes = getClasses(projectPackage);
 
