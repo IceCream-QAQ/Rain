@@ -8,7 +8,9 @@ import lombok.var;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -54,12 +56,37 @@ public class YuQInject extends YuQInjectBase {
         }
     }
 
-    public <T> T spawnInstance(Class<T> clazz) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
-        val obj = clazz.newInstance();
+    public <T> T spawnInstance(Class<T> clazz) {
+        try {
+            val obj = createInstance(clazz);
 
-        injectObject(obj);
+            injectObject(obj);
 
-        return obj;
+            return obj;
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private <T> T createInstance(Class<T> clazz) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+        val constructor = clazz.getConstructors()[0];
+
+        val paras = constructor.getParameters();
+
+        if (paras.length==0){
+            return clazz.newInstance();
+        }
+
+        val objs=new Object[paras.length];
+        for (int i = 0; i < paras.length; i++) {
+            val para = paras[i];
+            val inject = para.getAnnotation(Inject.class);
+
+            objs[i]=getObj(inject,para.getType());
+        }
+
+        return (T) constructor.newInstance(objs);
     }
 
     public void injectObject(Object obj) throws ClassNotFoundException, IllegalAccessException {
@@ -69,7 +96,7 @@ public class YuQInject extends YuQInjectBase {
 //        fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
 //
 //        Class superClass= clazz.getSuperclass();
-        while (clazz!=null){
+        while (clazz != null) {
             fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
             clazz = clazz.getSuperclass();
         }
@@ -85,7 +112,7 @@ public class YuQInject extends YuQInjectBase {
                 if (list == null) {
                     if (injectType.contains("com.IceCreamQAQ.YuQ") || injectType.contains("com.icecreamqaq.yuq")) {
                         val paraType = Class.forName(injectType);
-                        if (!paraType.isInterface()&& !Modifier.isAbstract(paraType.getModifiers())){
+                        if (!paraType.isInterface() && !Modifier.isAbstract(paraType.getModifiers())) {
                             spawnAndPut(paraType, "");
                             list = injectObjects.get(injectType);
                         }
@@ -121,9 +148,11 @@ public class YuQInject extends YuQInjectBase {
     public <T> T spawnAndPut(Class<T> clazz, String name) {
         try {
             if (name == null) name = "";
-            val obj = spawnInstance(clazz);
-
+            val obj = createInstance(clazz);
             putInjectObj(clazz.getName(), name, obj);
+
+            injectObject(obj);
+
             return obj;
         } catch (Exception e) {
             e.printStackTrace();
