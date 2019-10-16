@@ -26,15 +26,17 @@ public class YuQInjectBase {
     }
 
     public Object getObj(Inject inject, Class clazz) {
-        var injectType = inject.value().getName();
+        return getObj(clazz.getName(),inject.value().getName(),inject.name());
+    }
 
+    public Object getObj(String paraType,String injectType, String name) {
         if (injectType.equals("com.IceCreamQAQ.YuQ.annotation.Inject") || injectType.equals("com.icecreamqaq.yuq.annotation.Inject"))
-            injectType = clazz.getName();
+            injectType = paraType;
         val list = injectObjects.get(injectType);
         if (list == null) {
             return null;
         }
-        return list.get(inject.name());
+        return list.get(name);
     }
 
 }

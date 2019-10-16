@@ -43,7 +43,6 @@ public class YuQInject extends YuQInjectBase {
             val autoBind = type.getAnnotation(AutoBind.class);
             if (autoBind != null) {
                 var bindType = autoBind.value().getName();
-
                 if (bindType.equals("com.IceCreamQAQ.YuQ.annotation.AutoBind") || bindType.equals("com.icecreamqaq.yuq.annotation.AutoBind")) {
                     val listInterface = type.getInterfaces();
                     for (Class<?> aClass : listInterface) {
@@ -63,7 +62,7 @@ public class YuQInject extends YuQInjectBase {
             injectObject(obj);
 
             return obj;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -74,16 +73,16 @@ public class YuQInject extends YuQInjectBase {
 
         val paras = constructor.getParameters();
 
-        if (paras.length==0){
+        if (paras.length == 0) {
             return clazz.newInstance();
         }
 
-        val objs=new Object[paras.length];
+        val objs = new Object[paras.length];
         for (int i = 0; i < paras.length; i++) {
             val para = paras[i];
             val inject = para.getAnnotation(Inject.class);
 
-            objs[i]=getObj(inject,para.getType());
+            objs[i] = getObj(inject, para.getType());
         }
 
         return (T) constructor.newInstance(objs);
@@ -93,9 +92,6 @@ public class YuQInject extends YuQInjectBase {
         Class clazz = obj.getClass();
 
         val fields = new ArrayList<Field>();
-//        fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
-//
-//        Class superClass= clazz.getSuperclass();
         while (clazz != null) {
             fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
             clazz = clazz.getSuperclass();
@@ -105,7 +101,6 @@ public class YuQInject extends YuQInjectBase {
             val inject = field.getAnnotation(Inject.class);
             if (inject != null) {
                 var injectType = inject.value().getName();
-
                 if (injectType.equals("com.IceCreamQAQ.YuQ.annotation.Inject") || injectType.equals("com.icecreamqaq.yuq.annotation.Inject"))
                     injectType = field.getType().getName();
                 var list = injectObjects.get(injectType);
@@ -122,7 +117,6 @@ public class YuQInject extends YuQInjectBase {
                     continue;
                 }
                 val instance = list.get(inject.name());
-
                 field.setAccessible(true);
                 field.set(obj, instance);
 
@@ -132,7 +126,6 @@ public class YuQInject extends YuQInjectBase {
             val config = field.getAnnotation(Config.class);
             if (config != null) {
                 val name = config.value();
-
                 val value = configs.get(name);
                 if (value == null) {
                     field.setAccessible(true);

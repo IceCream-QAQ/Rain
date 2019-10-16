@@ -1,11 +1,13 @@
 package com.IceCreamQAQ.YuQ.controller;
 
 import com.IceCreamQAQ.YuQ.annotation.Inject;
+import com.IceCreamQAQ.YuQ.annotation.PathVar;
 import com.IceCreamQAQ.YuQ.entity.Message;
 import com.IceCreamQAQ.YuQ.inject.ActionContextInject;
 import com.IceCreamQAQ.YuQ.inject.YuQInject;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.val;
 import lombok.var;
 
 public class ActionContext {
@@ -72,6 +74,44 @@ public class ActionContext {
             obj = globalInject.getObj(clazz.getName(), name);
         }
         return (T) obj;
+    }
+
+    public <T> T injectInject(Class<T> paraType, Class<?> injectType, String name) {
+        var obj = this.contextInject.getObj(paraType.getName(), injectType.getName(), name);
+        if (obj == null) {
+            obj = globalInject.getObj(paraType.getName(), injectType.getName(), name);
+        }
+        return (T) obj;
+    }
+
+    public <T> T injectPathVar(Class<T> clazz, Integer key, PathVar.Type type) {
+        Object para;
+
+        val message = getMessage();
+        val texts = message.getTexts();
+
+        switch (type) {
+            case string:
+                para = texts[key];
+                break;
+            case qq:
+                para = Long.parseLong(texts[key]);
+                break;
+            case flag:
+                val text = texts[key];
+                para = text.contains("开") || text.contains("启");
+                break;
+            case group:
+                para = Long.parseLong(texts[key]);
+                break;
+            case number:
+                para = Integer.parseInt(texts[key]);
+                break;
+            default:
+                para = null;
+        }
+
+        return (T) para;
     }
 
 }

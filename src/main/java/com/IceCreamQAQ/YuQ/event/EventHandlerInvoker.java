@@ -158,7 +158,6 @@ public class EventHandlerInvoker {
             mv.visitEnd();
         }
         cw.visitEnd();
-        System.out.println(classLoader);
         Class<?> ret = classLoader.define(name, cw.toByteArray());
         return ret;
     }

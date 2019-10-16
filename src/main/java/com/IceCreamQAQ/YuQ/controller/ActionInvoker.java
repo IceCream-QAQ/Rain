@@ -1,11 +1,8 @@
 package com.IceCreamQAQ.YuQ.controller;
 
 import com.IceCreamQAQ.YuQ.entity.Message;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.val;
-
-import java.lang.reflect.InvocationTargetException;
 
 @Data
 public class ActionInvoker {
@@ -17,14 +14,14 @@ public class ActionInvoker {
     private Boolean intercept;
 
 
-    public Message invoker(ActionContext context) throws Exception {
+    public Message invoke(ActionContext context) throws Exception {
         try {
             context.setAt(at);
             context.setRe(re);
             if (intercept)context.setIntercept(1);
             else context.setIntercept(0);
 
-            val reObj = invoker.invoker(context);
+            val reObj = invoker.invoke(context);
 
             if (reObj == null) return null;
 

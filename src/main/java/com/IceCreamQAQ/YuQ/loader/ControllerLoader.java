@@ -2,9 +2,7 @@ package com.IceCreamQAQ.YuQ.loader;
 
 
 import com.IceCreamQAQ.YuQ.AppLogger;
-import com.IceCreamQAQ.YuQ.controller.ActionInvoker;
-import com.IceCreamQAQ.YuQ.controller.ControllerInvoker;
-import com.IceCreamQAQ.YuQ.controller.MethodInvoker;
+import com.IceCreamQAQ.YuQ.controller.*;
 import com.IceCreamQAQ.YuQ.annotation.*;
 import com.IceCreamQAQ.YuQ.inject.YuQInject;
 import com.IceCreamQAQ.YuQ.controller.route.RouteInvoker;
@@ -12,11 +10,11 @@ import com.IceCreamQAQ.YuQ.controller.route.Router;
 import lombok.val;
 import lombok.var;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +39,9 @@ public class ControllerLoader {
 
     @Inject
     private ClassLoader classLoader;
+
+    @Inject
+    private MethodInvokerCreator creator;
 
     private Router groupRootRouter;
     private Router privateRootRouter;
@@ -69,7 +70,7 @@ public class ControllerLoader {
         inject.putInjectObj(RouteInvoker.class.getName(), "priv", privateRootRouter);
     }
 
-    public void controllerToRouter(Class controller, Router rootRouter) throws IllegalAccessException, ClassNotFoundException, InstantiationException, IOException {
+    public void controllerToRouter(Class controller, Router rootRouter) throws IllegalAccessException, ClassNotFoundException, InstantiationException, IOException, NoSuchMethodException, InvocationTargetException {
         val instance = inject.spawnAndPut(controller, null);
 
         val fileName = controller.getName().replace(".", "/") + ".class";
@@ -111,7 +112,8 @@ public class ControllerLoader {
             if (before != null) {
                 logger.logInfo("YuQ Loader", "Before " + method.getName() + " 正在载入。");
 
-                val beforeInvoker = new MethodInvoker(instance, method, methodMap.get(method.getName()));
+//                val beforeInvoker = new ReflectMethodInvoker(instance, method, methodMap.get(method.getName()));
+                val beforeInvoker = creator.getInvoker(instance, method, methodMap.get(method.getName()));
                 befores.add(beforeInvoker);
                 continue;
             }
@@ -141,7 +143,8 @@ public class ControllerLoader {
                 val level = action.level();
                 val intercept = action.intercept();
 
-                val methodInvoker = new MethodInvoker(instance, method, methodMap.get(method.getName()));
+//                val methodInvoker = new ReflectMethodInvoker(instance, method, methodMap.get(method.getName()));
+                val methodInvoker = creator.getInvoker(instance, method, methodMap.get(method.getName()));
 
                 val actionInvoker = new ActionInvoker();
                 actionInvoker.setInvoker(methodInvoker);

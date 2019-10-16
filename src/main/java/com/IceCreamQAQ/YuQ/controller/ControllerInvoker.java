@@ -30,12 +30,12 @@ public class ControllerInvoker implements RouteInvoker {
 
     public Message invokeAction(ActionContext context, ActionInvoker action) {
         try {
-            for (MethodInvoker before : befores) {
-                val reObj = before.invoker(context);
+            for (val before : befores) {
+                val reObj = before.invoke(context);
                 if (reObj != null) context.saveObj(reObj);
             }
 
-            return action.invoker(context);
+            return action.invoke(context);
         } catch (InvocationTargetException e) {
             val cause = (Exception)e.getCause();
             if (cause instanceof Message) return (Message) cause;
