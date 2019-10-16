@@ -125,17 +125,8 @@ public class MethodInvokerCreator {
             mv.visitEnd();
         }
         cw.visitEnd();
+        val ret = classLoader.define(getUniqueName(method), cw.toByteArray());
 
-        val bytes = cw.toByteArray();
-
-        try {
-            val out = new FileOutputStream(new File("d:\\1.class"));
-            out.write(bytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        val ret = classLoader.define(getUniqueName(method), bytes);
         return (Class<? extends MethodInvoker>) ret;
     }
 
