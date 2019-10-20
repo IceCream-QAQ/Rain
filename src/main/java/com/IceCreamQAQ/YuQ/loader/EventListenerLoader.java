@@ -8,7 +8,7 @@ import lombok.val;
 
 import java.util.List;
 
-public class EventHandlerLoader {
+public class EventListenerLoader {
 
     @Inject
     private YuQInject inject;

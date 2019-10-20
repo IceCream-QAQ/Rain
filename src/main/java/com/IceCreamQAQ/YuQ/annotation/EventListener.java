@@ -5,13 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Event {
-
-    Weight weight() default Weight.normal;
-
-    public static enum Weight{
-        low,normal,@Deprecated height,high
-    }
+public @interface EventListener {
 }

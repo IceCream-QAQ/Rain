@@ -18,85 +18,93 @@ import java.util.List;
 import static org.objectweb.asm.Opcodes.*;
 
 
-public class EventHandlerInvoker {
+public class EventInvokerCreator {
 
     private static final String listererClassName = Type.getInternalName(EventInvoker.class);
     private static final String HANDLER_FUNC_DESC = Type.getMethodDescriptor(EventInvoker.class.getDeclaredMethods()[0]);
 
+    private Integer num = 0;
 
     @Inject
     private EventBus eventBus;
 
-    private List<EventInvoker> height;
-    private List<EventInvoker> normal;
-    private List<EventInvoker> low;
+
 
     @Inject
     private InvokerClassLoader classLoader;
 
-    void register(Object o){
+    List<EventInvoker>[] register(Object o){
         try {
-            registerEventListener(o);
+            return registerEventListener(o);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
 
-    void invoke(Event event, Integer level) {
-        List<EventInvoker> listeners;
-        switch (level) {
-            case 0:
-                listeners = height;
-                break;
-            case 1:
-                listeners = normal;
-                break;
-            case 2:
-                listeners = low;
-                break;
-            default:
-                listeners = null;
-        }
-        if (listeners==null)return;
-        for (EventInvoker listener : listeners) {
-            listener.invoke(event);
-            if (event.cancelAble() && event.cancel)return;
-        }
-    }
+//    void invoke(Event event, Integer level) {
+//        List<EventInvoker> listeners;
+//        switch (level) {
+//            case 0:
+//                listeners = height;
+//                break;
+//            case 1:
+//                listeners = normal;
+//                break;
+//            case 2:
+//                listeners = low;
+//                break;
+//            default:
+//                listeners = null;
+//        }
+//        if (listeners==null)return;
+//        for (EventInvoker listener : listeners) {
+//            listener.invoke(event);
+//            if (event.cancelAble() && event.cancel)return;
+//        }
+//    }
 
 
-    private void registerEventListener(Object object) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    private List<EventInvoker>[] registerEventListener(Object object) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         Class<?> pluginEventClass = object.getClass();
         List<Method> listenerMethods = new ArrayList<>();
+
+        List<EventInvoker> height = new ArrayList<>();
+        List<EventInvoker> normal = new ArrayList<>();
+        List<EventInvoker> low = new ArrayList<>();
+
+        List<EventInvoker>[] eventInvokers = new List[]{height,normal,low};
         for (Method method : pluginEventClass.getMethods()) {
             val e = method.getAnnotation(com.IceCreamQAQ.YuQ.annotation.Event.class);
             if (e == null) continue;
             int methodParaCount = method.getParameterCount();
             if (methodParaCount != 1) continue;
             Class<? extends Event> eventType = (Class<? extends Event>) method.getParameterTypes()[0];
-            EventInvoker handler;
+            EventInvoker invoker;
             if (Modifier.isStatic(method.getModifiers()))
-                handler = (EventInvoker) createEventHandlerInvokerClass(method).newInstance();
+                invoker = (EventInvoker) createEventHandlerInvokerClass(method).newInstance();
             else
-                handler = (EventInvoker) createEventHandlerInvokerClass(method).getConstructor(Object.class).newInstance(object);
+                invoker = (EventInvoker) createEventHandlerInvokerClass(method).getConstructor(Object.class).newInstance(object);
 
             switch (e.weight()) {
                 case low:
                     if (low == null) low = new ArrayList<>();
-                    low.add(handler);
+                    low.add(invoker);
                     break;
                 case normal:
                     if (normal == null) normal = new ArrayList<>();
-                    normal.add(handler);
+                    normal.add(invoker);
                     break;
                 case height:
+                case high:
                     if (height == null) height = new ArrayList<>();
-                    height.add(handler);
+                    height.add(invoker);
                     break;
                 default:
                     break;
             }
         }
+        return eventInvokers;
     }
 
     private Class<?> createEventHandlerInvokerClass(Method method) {
@@ -165,7 +173,7 @@ public class EventHandlerInvoker {
 
     private String getUniqueName(Method callback) {
         return String.format("YuQ_EventHandlerClass_%d_%s_%s_%s_IceCreamQAQ_OpenSource_YuQFramework",
-                eventBus.getNum(),
+                num,
                 callback.getDeclaringClass().getSimpleName(),
                 callback.getName(),
                 callback.getParameterTypes()[0].getSimpleName());

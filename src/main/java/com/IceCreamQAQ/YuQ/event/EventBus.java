@@ -3,7 +3,10 @@ package com.IceCreamQAQ.YuQ.event;
 import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.event.events.Event;
 import com.IceCreamQAQ.YuQ.inject.YuQInject;
+import lombok.val;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,31 +15,37 @@ public class EventBus {
     @Inject
     private YuQInject inject;
 
-    private Integer num = 0;
+    @Inject
+    private EventInvokerCreator creator;
 
-    Integer getNum() {
-        return num++;
+    private List<EventInvoker>[] eventInvokersLists;
+    public EventBus(){
+        eventInvokersLists =new List[3];
+        for (int i = 0; i < 3; i++) {
+            eventInvokersLists[i]=new ArrayList<EventInvoker>();
+        }
     }
 
-    private Map<Object, EventHandlerInvoker> handlers = new ConcurrentHashMap<>();
-
-
     public boolean post(Event event) {
-        for (int i = 0; i < 3; i++) {
-            for (EventHandlerInvoker value : handlers.values()) {
-                value.invoke(event, i);
-                if (event.cancelAble() && event.cancel) return true;
+        for (val list : eventInvokersLists) {
+            for (val eventInvoker : list) {
+                eventInvoker.invoke(event);
+                if (event.cancelAble() && event.cancel)return true;
             }
         }
         return false;
     }
 
     public void register(Object object) throws IllegalAccessException, ClassNotFoundException, InstantiationException {
-        EventHandlerInvoker handler = handlers.get(object);
-        if (handler == null) {
-            handler = inject.spawnInstance(EventHandlerInvoker.class);
-            handler.register(object);
-            handlers.put(object, handler);
+//        EventInvokerCreator handler = handlers.get(object);
+//        if (handler == null) {
+//            handler = inject.spawnInstance(EventInvokerCreator.class);
+//
+//            handlers.put(object, handler);
+//        }
+        val eventInvokersLists= creator.register(object);
+        for (int i = 0; i < 3; i++) {
+            this.eventInvokersLists[i].addAll(eventInvokersLists[i]);
         }
     }
 

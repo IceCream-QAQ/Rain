@@ -82,7 +82,7 @@ public class YuQLoader {
 
             val controllers = new ArrayList<Class>();
 
-            val eventHandlers = new ArrayList<Class>();
+            val eventListeners = new ArrayList<Class>();
 
             for (Class<?> clazz : classes.values()) {
 
@@ -93,15 +93,18 @@ public class YuQLoader {
                 if (privController != null) controllers.add(clazz);
 
                 val eventHandler = clazz.getAnnotation(EventHandler.class);
-                if (eventHandler != null) eventHandlers.add(clazz);
+                if (eventHandler != null) eventListeners.add(clazz);
+
+                val eventListener = clazz.getAnnotation(com.IceCreamQAQ.YuQ.annotation.EventListener.class);
+                if (eventListener != null) eventListeners.add(clazz);
 
             }
 
             val controllerLoader = inject.spawnInstance(ControllerLoader.class);
             controllerLoader.load(controllers);
 
-            val eventHandlerLoader = inject.spawnInstance(EventHandlerLoader.class);
-            eventHandlerLoader.load(eventHandlers);
+            val eventHandlerLoader = inject.spawnInstance(EventListenerLoader.class);
+            eventHandlerLoader.load(eventListeners);
 
         } catch (Exception e) {
             e.printStackTrace();
