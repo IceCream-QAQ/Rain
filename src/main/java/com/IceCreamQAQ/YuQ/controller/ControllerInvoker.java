@@ -50,6 +50,10 @@ public class ControllerInvoker implements RouteInvoker {
             
             logger.logError("YuQ Runtime",  errorMessage.toString());
             return null;
+        }catch (DoNone ignored){
+            return null;
+        }catch (Message message){
+            return message;
         } catch (Exception e) {
             e.printStackTrace();
             return null;

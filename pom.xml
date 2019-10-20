@@ -7,6 +7,7 @@
     <packaging>jar</packaging>
 
     <modelVersion>4.0.0</modelVersion>
+    <version>0.1.0.1-SNAPSHOT</version>
 
     <parent>
         <artifactId>YuQ-parent</artifactId>

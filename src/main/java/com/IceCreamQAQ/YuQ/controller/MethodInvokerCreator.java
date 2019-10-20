@@ -44,7 +44,7 @@ public class MethodInvokerCreator {
         String name = getUniqueName(method);
         String desc = name.replace('.', '/');
 
-        cw.visit(V1_8, ACC_PUBLIC | ACC_SUPER, desc, null, "java/lang/Object", new String[]{invokerClassName});
+        cw.visit(V1_6, ACC_PUBLIC | ACC_SUPER, desc, null, "java/lang/Object", new String[]{invokerClassName});
 
         cw.visitSource(".dynamic", null);
         {
