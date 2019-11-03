@@ -45,7 +45,7 @@ public class TestPlugin extends JCQStartBase {
 //
         test.privateMsg(1,10006,2667497585L,"菜单",0);
 
-        test.groupMsg(1,10006, 101471173, 2667497585L, null, "菜单", 0);
+        test.groupMsg(1,10006, 101471173, 2667497585L, null, "菜单 开", 0);
         test.groupMsg(1,10006, 101471173, 2667497585L, null, "a b c 菜单2", 0);
 
         test.groupAdmin(1,10006,101471173,2667497585L);

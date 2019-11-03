@@ -42,6 +42,8 @@ public abstract class App {
         if (reloadAble != null) inject.putInjectObj(ReloadAble.class.getName(), "", reloadAble);
     }
 
+    public abstract void platformLoad();
+
     public App(ReloadAble reloadAble, YuQ yu, AppLogger logger, ClassLoader appClassLoader) throws Exception {
         inject = new YuQInject(appClassLoader);
         inject.putInjectObj(inject.getClass().getName(), null, inject);
