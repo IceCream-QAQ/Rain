@@ -6,6 +6,7 @@ import com.IceCreamQAQ.YuQ.annotation.Inject;
 import lombok.val;
 import lombok.var;
 
+import javax.inject.Named;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -104,22 +105,9 @@ public class YuQInject extends YuQInjectBase {
                 var injectType = inject.value().getName();
                 if (injectType.equals("com.IceCreamQAQ.YuQ.annotation.Inject") || injectType.equals("com.icecreamqaq.yuq.annotation.Inject"))
                     injectType = field.getType().getName();
-                var list = injectObjects.get(injectType);
-                if (list == null) {
-                    if (injectType.contains("com.IceCreamQAQ.YuQ") || injectType.contains("com.icecreamqaq.yuq")) {
-                        val paraType = Class.forName(injectType);
-                        if (!paraType.isInterface() && !Modifier.isAbstract(paraType.getModifiers())) {
-                            spawnAndPut(paraType, "");
-                            list = injectObjects.get(injectType);
-                        }
-                    }
-                }
-                if (list == null) {
-                    continue;
-                }
-                val instance = list.get(inject.name());
+
                 field.setAccessible(true);
-                field.set(obj, instance);
+                field.set(obj, getObjByName(injectType, inject.name()));
 
                 continue;
             }
@@ -135,8 +123,37 @@ public class YuQInject extends YuQInjectBase {
                     field.setAccessible(true);
                     field.set(obj, value);
                 }
+
+                continue;
+            }
+
+            val injectJsr = field.getAnnotation(javax.inject.Inject.class);
+            if (injectJsr != null) {
+                var name = "";
+                val named = field.getAnnotation(Named.class);
+                if (named != null) name = named.value();
+
+                field.setAccessible(true);
+                field.set(obj, getObjByName(field.getType().getName(), name));
             }
         }
+    }
+
+    public Object getObjByName(String injectType, String name) throws ClassNotFoundException {
+        var list = injectObjects.get(injectType);
+        if (list == null) {
+            if (injectType.contains("com.IceCreamQAQ.YuQ") || injectType.contains("com.icecreamqaq.yuq")) {
+                val paraType = Class.forName(injectType);
+                if (!paraType.isInterface() && !Modifier.isAbstract(paraType.getModifiers())) {
+                    spawnAndPut(paraType);
+                    list = injectObjects.get(injectType);
+                }
+            }
+        }
+        if (list == null) {
+            return null;
+        }
+        return list.get(name);
     }
 
     public <T> T spawnAndPut(Class<T> clazz, String name) {
@@ -156,7 +173,9 @@ public class YuQInject extends YuQInjectBase {
 
     public <T> T spawnAndPut(Class<T> clazz) {
         try {
+            val named = clazz.getAnnotation(Named.class);
             var name = "";
+            if (named != null) name = named.value();
 
             val obj = createInstance(clazz);
             if (obj == null) return null;

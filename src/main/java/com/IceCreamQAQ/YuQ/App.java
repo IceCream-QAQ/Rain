@@ -1,6 +1,5 @@
 package com.IceCreamQAQ.YuQ;
 
-import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.controller.ActionContext;
 import com.IceCreamQAQ.YuQ.entity.Message;
 import com.IceCreamQAQ.YuQ.event.EventBus;
@@ -13,15 +12,21 @@ import lombok.val;
 import lombok.var;
 import org.meowy.cqp.jcq.entity.Anonymous;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 public abstract class App {
 
     public YuQInject inject;
 
     @Inject
     private YuQ yuq;
-    @Inject(name = "group")
+
+    @Inject
+    @Named("group")
     private RouteInvoker groupRouter;
-    @Inject(name = "priv")
+    @Inject
+    @Named("priv")
     private RouteInvoker privateRouter;
     @Inject
     private EventBus eventBus;

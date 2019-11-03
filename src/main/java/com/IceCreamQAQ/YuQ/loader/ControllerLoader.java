@@ -2,8 +2,8 @@ package com.IceCreamQAQ.YuQ.loader;
 
 
 import com.IceCreamQAQ.YuQ.AppLogger;
-import com.IceCreamQAQ.YuQ.controller.*;
 import com.IceCreamQAQ.YuQ.annotation.*;
+import com.IceCreamQAQ.YuQ.controller.*;
 import com.IceCreamQAQ.YuQ.inject.YuQInject;
 import com.IceCreamQAQ.YuQ.controller.route.RouteInvoker;
 import com.IceCreamQAQ.YuQ.controller.route.Router;
@@ -13,6 +13,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
