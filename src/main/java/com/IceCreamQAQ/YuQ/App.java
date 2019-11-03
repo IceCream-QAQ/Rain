@@ -1,5 +1,6 @@
 package com.IceCreamQAQ.YuQ;
 
+import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.controller.ActionContext;
 import com.IceCreamQAQ.YuQ.entity.Message;
 import com.IceCreamQAQ.YuQ.event.EventBus;
@@ -12,21 +13,15 @@ import lombok.val;
 import lombok.var;
 import org.meowy.cqp.jcq.entity.Anonymous;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 public abstract class App {
 
     public YuQInject inject;
 
     @Inject
     private YuQ yuq;
-
-    @Inject
-    @Named("group")
+    @Inject(name = "group")
     private RouteInvoker groupRouter;
-    @Inject
-    @Named("priv")
+    @Inject(name = "priv")
     private RouteInvoker privateRouter;
     @Inject
     private EventBus eventBus;
@@ -41,28 +36,24 @@ public abstract class App {
         inject.putInjectObj(YuQ.class.getName(), "", yu);
         inject.putInjectObj(AppLogger.class.getName(), "", logger);
 
-        platformLoad();
-
         inject.injectObject(yu);
         inject.injectObject(logger);
 
         if (reloadAble != null) inject.putInjectObj(ReloadAble.class.getName(), "", reloadAble);
     }
 
-    public App(ReloadAble reloadAble, YuQ yu, AppLogger logger,ClassLoader appClassLoader) throws Exception {
+    public App(ReloadAble reloadAble, YuQ yu, AppLogger logger, ClassLoader appClassLoader) throws Exception {
         inject = new YuQInject(appClassLoader);
         inject.putInjectObj(inject.getClass().getName(), null, inject);
         inject.putInjectObj(YuQ.class.getName(), "", yu);
         inject.putInjectObj(AppLogger.class.getName(), "", logger);
-        inject.putInjectObj(ClassLoader.class.getName(),"appClassLoader",appClassLoader);
+        inject.putInjectObj(ClassLoader.class.getName(), "appClassLoader", appClassLoader);
 
         inject.injectObject(yu);
         inject.injectObject(logger);
 
         if (reloadAble != null) inject.putInjectObj(ReloadAble.class.getName(), "", reloadAble);
     }
-
-    public abstract void platformLoad();
 
     public void start() throws IllegalAccessException, ClassNotFoundException, InstantiationException {
         loader = inject.spawnInstance(AppLoader.class);
