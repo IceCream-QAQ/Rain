@@ -5,6 +5,7 @@ import com.IceCreamQAQ.YuQ.AppLogger;
 import com.IceCreamQAQ.YuQ.annotation.*;
 import com.IceCreamQAQ.YuQ.inject.YuQInject;
 import lombok.val;
+import lombok.var;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.HiddenFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-public class YuQLoader {
+public class AppLoader {
 
     @Config("project.package")
     private String projectPackage;
@@ -80,31 +81,62 @@ public class YuQLoader {
 
             val classes = getClasses(projectPackage);
 
-            val controllers = new ArrayList<Class>();
+            val loadItemsMap = new HashMap<Class<? extends Loader>,List<LoadItem>>();
 
-            val eventListeners = new ArrayList<Class>();
+//            val controllers = new ArrayList<Class>();
+//
+//            val eventListeners = new ArrayList<Class>();
+//
+//            for (Class<?> clazz : classes.values()) {
+//
+//                val groupController = clazz.getAnnotation(GroupController.class);
+//                if (groupController != null) controllers.add(clazz);
+//
+//                val privController = clazz.getAnnotation(PrivateController.class);
+//                if (privController != null) controllers.add(clazz);
+//
+//                val eventHandler = clazz.getAnnotation(EventHandler.class);
+//                if (eventHandler != null) eventListeners.add(clazz);
+//
+//                val eventListener = clazz.getAnnotation(com.IceCreamQAQ.YuQ.annotation.EventListener.class);
+//                if (eventListener != null) eventListeners.add(clazz);
+//
+//            }
 
-            for (Class<?> clazz : classes.values()) {
+            for (val clazz : classes.values()) {
+                val annotationInstances = clazz.getAnnotations();
 
-                val groupController = clazz.getAnnotation(GroupController.class);
-                if (groupController != null) controllers.add(clazz);
+                val instance = inject.spawnAndPut(clazz);
 
-                val privController = clazz.getAnnotation(PrivateController.class);
-                if (privController != null) controllers.add(clazz);
-
-                val eventHandler = clazz.getAnnotation(EventHandler.class);
-                if (eventHandler != null) eventListeners.add(clazz);
-
-                val eventListener = clazz.getAnnotation(com.IceCreamQAQ.YuQ.annotation.EventListener.class);
-                if (eventListener != null) eventListeners.add(clazz);
-
+                for (val annotationInstance : annotationInstances) {
+                    val annotationClass = annotationInstance.getClass().getInterfaces()[0];
+                    val loadBy = annotationClass.getAnnotation(LoadBy.class);
+                    if (loadBy != null){
+                        val loader = loadBy.value();
+                        var loadItems = loadItemsMap.get(loader);
+                        if (loadItems==null){
+                            loadItems = new ArrayList<LoadItem>();
+                            loadItemsMap.put(loader,loadItems);
+                        }
+                        val loadItem = new LoadItem();
+                        loadItem.setAnnotation(annotationInstance);
+                        loadItem.setType(clazz);
+                        loadItem.setInstance(instance);
+                        loadItems.add(loadItem);
+                    }
+                }
             }
 
-            val controllerLoader = inject.spawnInstance(ControllerLoader.class);
-            controllerLoader.load(controllers);
+            for (val loader : loadItemsMap.keySet()) {
+                val loaderInstance = inject.spawnInstance(loader);
+                loaderInstance.load(loadItemsMap.get(loader));
+            }
 
-            val eventHandlerLoader = inject.spawnInstance(EventListenerLoader.class);
-            eventHandlerLoader.load(eventListeners);
+//            val controllerLoader = inject.spawnInstance(ControllerLoader.class);
+//            controllerLoader.load_old(controllers);
+//
+//            val eventHandlerLoader = inject.spawnInstance(EventListenerLoader.class);
+//            eventHandlerLoader.load(eventListeners);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -81,6 +81,7 @@ public class YuQInject extends YuQInjectBase {
         for (int i = 0; i < paras.length; i++) {
             val para = paras[i];
             val inject = para.getAnnotation(Inject.class);
+            if (inject == null) return null;
 
             objs[i] = getObj(inject, para.getType());
         }
@@ -142,6 +143,23 @@ public class YuQInject extends YuQInjectBase {
         try {
             if (name == null) name = "";
             val obj = createInstance(clazz);
+            putInjectObj(clazz.getName(), name, obj);
+
+            injectObject(obj);
+
+            return obj;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public <T> T spawnAndPut(Class<T> clazz) {
+        try {
+            var name = "";
+
+            val obj = createInstance(clazz);
+            if (obj == null) return null;
             putInjectObj(clazz.getName(), name, obj);
 
             injectObject(obj);

@@ -1,6 +1,6 @@
 package com.IceCreamQAQ.YuQ.annotation;
 
-import com.IceCreamQAQ.YuQ.loader.ControllerLoader;
+import com.IceCreamQAQ.YuQ.loader.Loader;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,7 +9,8 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@LoadBy(ControllerLoader.class)
-public @interface GroupController {
-    String value() default "";
+public @interface LoadBy {
+
+    Class<? extends Loader> value();
+
 }

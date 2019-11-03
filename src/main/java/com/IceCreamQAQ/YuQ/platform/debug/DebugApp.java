@@ -12,4 +12,9 @@ public class DebugApp extends App {
 
         start();
     }
+
+    @Override
+    public void platformLoad() {
+
+    }
 }

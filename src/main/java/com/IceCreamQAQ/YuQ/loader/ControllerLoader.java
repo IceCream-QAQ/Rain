@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ControllerLoader {
+public class ControllerLoader implements Loader {
 
     @Config("project.package.controller")
     public String packageName;
@@ -46,9 +46,32 @@ public class ControllerLoader {
     private Router groupRootRouter;
     private Router privateRootRouter;
 
-    public void load(List<Class> classes) throws Exception {
+    @Override
+    public void load(List<LoadItem> items) throws Exception{
         groupRootRouter = new Router(0);
         privateRootRouter = new Router(0);
+
+        for (LoadItem item : items) {
+            val ann = item.getAnnotation();
+
+            if (ann instanceof GroupController) {
+                logger.logInfo("YuQ Loader", "Group Controller " + item.getType().getName() + " 正在载入。");
+                controllerToRouter(item.getInstance(), groupRootRouter);
+                logger.logInfo("YuQ Loader", "Group Controller " + item.getType().getName() + " 载入完成。");
+            }
+
+            if (ann instanceof PrivateController) {
+                logger.logInfo("YuQ Loader", "Private Controller " + item.getType().getName() + " 正在载入。");
+                controllerToRouter(item.getInstance(), privateRootRouter);
+                logger.logInfo("YuQ Loader", "Private Controller " + item.getType().getName() + " 载入完成。");
+            }
+        }
+
+        inject.putInjectObj(RouteInvoker.class.getName(), "group", groupRootRouter);
+        inject.putInjectObj(RouteInvoker.class.getName(), "priv", privateRootRouter);
+    }
+
+    public void load_old(List<Class> classes) throws Exception {
 
         for (val clazz : classes) {
             val group = clazz.getAnnotation(GroupController.class);
@@ -70,8 +93,13 @@ public class ControllerLoader {
         inject.putInjectObj(RouteInvoker.class.getName(), "priv", privateRootRouter);
     }
 
-    public void controllerToRouter(Class controller, Router rootRouter) throws IllegalAccessException, ClassNotFoundException, InstantiationException, IOException, NoSuchMethodException, InvocationTargetException {
+    public void controllerToRouter(Class controller, Router rootRouter) throws IllegalAccessException, InstantiationException, IOException, NoSuchMethodException, InvocationTargetException {
         val instance = inject.spawnAndPut(controller, null);
+        controllerToRouter(instance, rootRouter);
+    }
+
+    public void controllerToRouter(Object instance, Router rootRouter) throws IllegalAccessException, InstantiationException, IOException, NoSuchMethodException, InvocationTargetException {
+        val controller = instance.getClass();
 
         val fileName = controller.getName().replace(".", "/") + ".class";
         val in = controller.getClassLoader().getResourceAsStream(fileName);

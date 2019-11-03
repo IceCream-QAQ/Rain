@@ -7,7 +7,7 @@ import com.IceCreamQAQ.YuQ.event.EventBus;
 import com.IceCreamQAQ.YuQ.event.events.*;
 import com.IceCreamQAQ.YuQ.inject.YuQInject;
 import com.IceCreamQAQ.YuQ.loader.ReloadAble;
-import com.IceCreamQAQ.YuQ.loader.YuQLoader;
+import com.IceCreamQAQ.YuQ.loader.AppLoader;
 import com.IceCreamQAQ.YuQ.controller.route.RouteInvoker;
 import lombok.val;
 import lombok.var;
@@ -26,7 +26,7 @@ public abstract class App {
     @Inject
     private EventBus eventBus;
 
-    private YuQLoader loader;
+    private AppLoader loader;
 
     private boolean enable;
 
@@ -35,6 +35,8 @@ public abstract class App {
         inject.putInjectObj(inject.getClass().getName(), null, inject);
         inject.putInjectObj(YuQ.class.getName(), "", yu);
         inject.putInjectObj(AppLogger.class.getName(), "", logger);
+
+        platformLoad();
 
         inject.injectObject(yu);
         inject.injectObject(logger);
@@ -55,8 +57,10 @@ public abstract class App {
         if (reloadAble != null) inject.putInjectObj(ReloadAble.class.getName(), "", reloadAble);
     }
 
+    public abstract void platformLoad();
+
     public void start() throws IllegalAccessException, ClassNotFoundException, InstantiationException {
-        loader = inject.spawnInstance(YuQLoader.class);
+        loader = inject.spawnInstance(AppLoader.class);
         loader.load();
         inject.injectObject(this);
 

@@ -15,4 +15,9 @@ public class JCQApp extends App {
 
         start();
     }
+
+    @Override
+    public void platformLoad() {
+
+    }
 }
