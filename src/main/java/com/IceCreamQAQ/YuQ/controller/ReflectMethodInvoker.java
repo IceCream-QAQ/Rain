@@ -156,7 +156,7 @@ public class ReflectMethodInvoker implements MethodInvoker {
         this.method = method;
     }
 
-    public Object invoke(ActionContext context) throws Exception {
+    public Object invoke(MessageActionContext context) throws Exception {
         if (mps == null) {
             if (returnFlag) {
                 return method.invoke(instance);

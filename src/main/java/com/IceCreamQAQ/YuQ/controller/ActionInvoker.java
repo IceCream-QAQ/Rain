@@ -14,7 +14,7 @@ public class ActionInvoker {
     private Boolean intercept;
 
 
-    public Message invoke(ActionContext context) throws Exception {
+    public Message invoke(MessageActionContext context) throws Exception {
         try {
             context.setAt(at);
             context.setRe(re);
@@ -25,9 +25,9 @@ public class ActionInvoker {
 
             if (reObj == null) return null;
 
-            if (reObj instanceof String) return new Message.Builder((String) reObj).setQQ(context.getMessage().getQq()).setGroup(context.getMessage().getGroup()).build();
+            if (reObj instanceof String) return context.buildMessage((String) reObj);
             if (reObj instanceof Message) return (Message) reObj;
-            return new Message.Builder(reObj.toString()).build();
+            return context.buildMessage(reObj.toString());
 
         }  catch (Exception e) {
             throw e;

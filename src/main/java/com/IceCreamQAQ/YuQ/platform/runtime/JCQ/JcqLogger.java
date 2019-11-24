@@ -1,7 +1,6 @@
-package com.IceCreamQAQ.YuQ.platform.JCQ;
+package com.IceCreamQAQ.YuQ.platform.runtime.JCQ;
 
 import com.IceCreamQAQ.YuQ.AppLogger;
-import com.IceCreamQAQ.YuQ.annotation.Inject;
 import org.meowy.cqp.jcq.entity.CoolQ;
 
 public class JcqLogger implements AppLogger {

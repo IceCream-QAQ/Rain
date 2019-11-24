@@ -1,7 +1,7 @@
 package com.IceCreamQAQ.YuQ;
 
 import com.IceCreamQAQ.YuQ.annotation.Inject;
-import com.IceCreamQAQ.YuQ.controller.ActionContext;
+import com.IceCreamQAQ.YuQ.controller.MessageActionContext;
 import com.IceCreamQAQ.YuQ.entity.Message;
 import com.IceCreamQAQ.YuQ.event.EventBus;
 import com.IceCreamQAQ.YuQ.event.events.*;
@@ -13,40 +13,135 @@ import lombok.val;
 import lombok.var;
 import org.meowy.cqp.jcq.entity.Anonymous;
 
+import java.util.List;
+import java.util.Map;
+
 public abstract class App {
 
     public YuQInject inject;
 
+
     @Inject
-    private YuQ yuq;
-    @Inject(name = "group")
-    private RouteInvoker groupRouter;
-    @Inject(name = "priv")
-    private RouteInvoker privateRouter;
-    @Inject
-    private EventBus eventBus;
+    protected EventBus eventBus;
 
     private AppLoader loader;
 
-    private boolean enable;
+    protected boolean enable;
 
     public App(ReloadAble reloadAble, YuQ yu, AppLogger logger) throws Exception {
-        inject = new YuQInject();
-        inject.putInjectObj(inject.getClass().getName(), null, inject);
-        inject.putInjectObj(YuQ.class.getName(), "", yu);
-        inject.putInjectObj(AppLogger.class.getName(), "", logger);
-
-        inject.injectObject(yu);
-        inject.injectObject(logger);
-
-        if (reloadAble != null) inject.putInjectObj(ReloadAble.class.getName(), "", reloadAble);
+        this(reloadAble, yu, logger, App.class.getClassLoader());
     }
 
     public abstract void platformLoad();
 
     public App(ReloadAble reloadAble, YuQ yu, AppLogger logger, ClassLoader appClassLoader) throws Exception {
+        init(reloadAble, yu, logger, appClassLoader);
+
+        start();
+    }
+
+    public App(ReloadAble reloadAble, YuQ yu, AppLogger logger, ClassLoader appClassLoader, Map<String, Object> paras) throws Exception {
+        init(reloadAble, yu, logger, appClassLoader);
+
+        platformLoad(paras);
+
+        start();
+    }
+
+    public App(ReloadAble reloadAble, YuQ yu, AppLogger logger, ClassLoader appClassLoader, List<Object> list) throws Exception {
+        init(reloadAble, yu, logger, appClassLoader);
+
+        for (Object o : list) {
+            inject.putInjectObj(o.getClass().getName(), "", o);
+        }
+
+        start();
+    }
+
+    public App(ReloadAble reloadAble, YuQ yu, AppLogger logger, ClassLoader appClassLoader, Object[] objects) throws Exception {
+        init(reloadAble, yu, logger, appClassLoader);
+
+        for (Object o : objects) {
+            inject.putInjectObj(o.getClass().getName(), "", o);
+        }
+
+        start();
+    }
+
+    public App(ReloadAble reloadAble, YuQ yu, AppLogger logger, ClassLoader appClassLoader, Object object) throws Exception {
+        init(reloadAble, yu, logger, appClassLoader);
+
+        inject.putInjectObj(object.getClass().getName(), "", object);
+
+        start();
+    }
+
+    public App(ReloadAble reloadAble, YuQ yu, AppLogger logger, ClassLoader appClassLoader, List<Object> list, Map<String, Object> paras) throws Exception {
+        init(reloadAble, yu, logger, appClassLoader);
+
+        for (Object o : list) {
+            inject.putInjectObj(o.getClass().getName(), "", o);
+        }
+        platformLoad(paras);
+
+        start();
+    }
+
+    public App(ReloadAble reloadAble, YuQ yu, AppLogger logger, ClassLoader appClassLoader, Object[] objects, Map<String, Object> paras) throws Exception {
+        init(reloadAble, yu, logger, appClassLoader);
+
+        for (Object o : objects) {
+            inject.putInjectObj(o.getClass().getName(), "", o);
+        }
+        platformLoad(paras);
+
+        start();
+    }
+
+    public App(ReloadAble reloadAble, YuQ yu, AppLogger logger, ClassLoader appClassLoader, Object object, Map<String, Object> paras) throws Exception {
+        init(reloadAble, yu, logger, appClassLoader);
+
+        inject.putInjectObj(object.getClass().getName(), "", object);
+        platformLoad(paras);
+
+        start();
+    }
+
+    public App(ReloadAble reloadAble, YuQ yu, AppLogger logger, ClassLoader appClassLoader, Map<String, Object> paras, List<Object> list) throws Exception {
+        init(reloadAble, yu, logger, appClassLoader);
+
+        for (Object o : list) {
+            inject.putInjectObj(o.getClass().getName(), "", o);
+        }
+        platformLoad(paras);
+
+        start();
+    }
+
+    public App(ReloadAble reloadAble, YuQ yu, AppLogger logger, ClassLoader appClassLoader, Map<String, Object> paras, Object[] objects) throws Exception {
+        init(reloadAble, yu, logger, appClassLoader);
+
+        for (Object o : objects) {
+            inject.putInjectObj(o.getClass().getName(), "", o);
+        }
+        platformLoad(paras);
+
+        start();
+    }
+
+    public App(ReloadAble reloadAble, YuQ yu, AppLogger logger, ClassLoader appClassLoader, Map<String, Object> paras, Object object) throws Exception {
+        init(reloadAble, yu, logger, appClassLoader);
+
+        inject.putInjectObj(object.getClass().getName(), "", object);
+        platformLoad(paras);
+
+        start();
+    }
+
+    public void init(ReloadAble reloadAble, YuQ yu, AppLogger logger, ClassLoader appClassLoader) throws Exception {
         inject = new YuQInject(appClassLoader);
-        inject.putInjectObj(inject.getClass().getName(), null, inject);
+
+        inject.putInjectObj(YuQInject.class.getName(), "", inject);
         inject.putInjectObj(YuQ.class.getName(), "", yu);
         inject.putInjectObj(AppLogger.class.getName(), "", logger);
         inject.putInjectObj(ClassLoader.class.getName(), "appClassLoader", appClassLoader);
@@ -60,6 +155,7 @@ public abstract class App {
     public void start() throws IllegalAccessException, ClassNotFoundException, InstantiationException {
         loader = inject.spawnInstance(AppLoader.class);
         loader.load();
+
         inject.injectObject(this);
 
         eventBus.post(new AppStartEvent());
@@ -79,180 +175,8 @@ public abstract class App {
         this.enable = false;
     }
 
+    public void platformLoad(Map<String, Object> paras){
 
-    public int onGroupMessage(int id, long group, long qq, Anonymous noName, String text, int font) throws Exception {
-        val texts = text.split(" ");
-        val message = Message.buildMessage(id, qq, group, noName, texts, text);
-
-        val context = new ActionContext(message);
-        inject.injectObject(context);
-
-        val onGroupMessageEvent = new OnGroupMessageEvent();
-        onGroupMessageEvent.setContext(context);
-        if (eventBus.post(onGroupMessageEvent)) return 1;
-
-        groupRouter.invoke(texts[0], context);
-
-        val reMsg = context.getReMessage();
-        if (reMsg != null) yuq.sendMessage(context);
-
-        return context.getIntercept();
-    }
-
-    public int onPrivateMessage(int id, long qq, String text, int font) throws Exception {
-        val texts = text.split(" ");
-        val message = Message.buildMessage(id, qq, null, null, texts, text);
-
-        val context = new ActionContext(message);
-        inject.injectObject(context);
-
-        val onPrivateMessageEvent = new OnPrivateMessageEvent();
-        onPrivateMessageEvent.setContext(context);
-        if (eventBus.post(onPrivateMessageEvent)) return 1;
-
-        privateRouter.invoke(texts[0], context);
-
-        val reMsg = context.getReMessage();
-        if (reMsg != null) yuq.sendMessage(context);
-
-        return context.getIntercept();
-    }
-
-    public int groupAdminAdd(int time, long group, long qq) {
-        val event = new GroupAdminAddEvent();
-        event.setGroup(group);
-        event.setTime(time);
-        event.setQq(qq);
-
-        if (eventBus.post(event)) return 1;
-        return 0;
-    }
-
-    public int groupAdminDel(int time, long group, long qq) {
-        val event = new GroupAdminDelEvent();
-        event.setGroup(group);
-        event.setTime(time);
-        event.setQq(qq);
-
-        if (eventBus.post(event)) return 1;
-        return 0;
-    }
-
-    public int groupMemberDecrease(int time, Long group, Long qq) {
-        val event = new GroupMemberDecreaseEvent();
-        event.setGroup(group);
-        event.setTime(time);
-        event.setQq(qq);
-
-        if (eventBus.post(event)) return 1;
-        return 0;
-    }
-
-    public int groupKickMemberEvent(int time, Long group, Long qq, Long operater) {
-        val event = new GroupKickMemberEvent();
-        event.setGroup(group);
-        event.setTime(time);
-        event.setQq(qq);
-        event.setOperater(operater);
-
-        if (eventBus.post(event)) return 1;
-        return 0;
-    }
-
-    public int groupMemberAddEvent(int time, Long group, Long qq) {
-        val event = new GroupMemberAddEvent();
-        event.setGroup(group);
-        event.setTime(time);
-        event.setQq(qq);
-
-        if (eventBus.post(event)) return 1;
-        return 0;
-    }
-
-    public int groupInviteMemberEvent(int time, Long group, Long qq, Long operater) {
-        val event = new GroupInviteMemberEvent();
-        event.setGroup(group);
-        event.setTime(time);
-        event.setQq(qq);
-        event.setOperater(operater);
-
-        if (eventBus.post(event)) return 1;
-        return 0;
-    }
-
-    public int friendAdd(int time, long qq) {
-        val event = new FriendAddEvent();
-        event.setTime(time);
-        event.setQq(qq);
-
-        if (eventBus.post(event)) return 1;
-        return 0;
-    }
-
-    public int friendRequest(int time, long qq, String msg, String requestId) {
-        val event = new FriendRequestEvent();
-        event.setTime(time);
-        event.setQq(qq);
-        event.setMsg(msg);
-
-        var flag = 0;
-        if (eventBus.post(event)) flag = 1;
-
-        if (event.cancel) {
-            if (event.getAccept() != null)
-                if (event.getAccept()) {
-                    yuq.acceptFriendRequest(requestId, null);
-                } else {
-                    yuq.refuseFriendRequest(requestId);
-                }
-        }
-
-        return flag;
-    }
-
-    public int joinGroupRequest(int time, long group, long qq, String msg, String requestId) {
-        val event = new JoinGroupRequestEvent();
-        event.setTime(time);
-        event.setQq(qq);
-        event.setGroup(group);
-        event.setMsg(msg);
-
-        var flag = 0;
-        if (eventBus.post(event)) flag = 1;
-
-        if (event.cancel) {
-            if (event.getAccept() != null)
-                if (event.getAccept()) {
-                    yuq.acceptJoinGroupRequest(requestId);
-                } else {
-                    yuq.acceptJoinGroupRequest(requestId);
-                }
-        }
-
-        return flag;
-    }
-
-    public int groupRequest(int time, long group, long qq, String msg, String requestId) {
-        val event = new GroupRequestEvent();
-        event.setTime(time);
-        event.setQq(qq);
-        event.setGroup(group);
-        event.setMsg(msg);
-
-        var flag = 0;
-        if (eventBus.post(event)) flag = 1;
-
-        if (event.cancel) {
-            if (event.getAccept() != null)
-                if (event.getAccept()) {
-                    yuq.acceptGroupRequest(requestId);
-                } else {
-                    yuq.acceptGroupRequest(requestId);
-                }
-
-        }
-
-        return flag;
     }
 
 }

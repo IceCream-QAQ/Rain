@@ -20,7 +20,7 @@ public class ControllerInvoker implements RouteInvoker {
     private AppLogger logger;
 
     @Override
-    public void invoke(String path, ActionContext context) {
+    public void invoke(String path, MessageActionContext context) {
 
         val actionInvoker = actions.get(path);
         val reMessage = invokeAction(context, actionInvoker);
@@ -28,7 +28,7 @@ public class ControllerInvoker implements RouteInvoker {
         context.setReMessage(reMessage);
     }
 
-    public Message invokeAction(ActionContext context, ActionInvoker action) {
+    public Message invokeAction(MessageActionContext context, ActionInvoker action) {
         try {
             for (val before : befores) {
                 val reObj = before.invoke(context);

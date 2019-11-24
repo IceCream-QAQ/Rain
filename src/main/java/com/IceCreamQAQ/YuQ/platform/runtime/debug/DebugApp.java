@@ -1,9 +1,6 @@
-package com.IceCreamQAQ.YuQ.platform.debug;
+package com.IceCreamQAQ.YuQ.platform.runtime.debug;
 
 import com.IceCreamQAQ.YuQ.App;
-import com.IceCreamQAQ.YuQ.AppLogger;
-import com.IceCreamQAQ.YuQ.YuQ;
-import com.IceCreamQAQ.YuQ.loader.ReloadAble;
 
 public class DebugApp extends App {
 
@@ -13,7 +10,6 @@ public class DebugApp extends App {
         start();
     }
 
-    @Override
     public void platformLoad() {
 
     }

@@ -1,6 +1,6 @@
 package com.IceCreamQAQ.YuQ.entity;
 
-public class DoNone extends Exception {
+public class DoNone extends YuQThrowable {
 
     private String message;
 

@@ -1,20 +1,25 @@
-package com.IceCreamQAQ.YuQ.platform.debug;
+package com.IceCreamQAQ.YuQ.platform.runtime.debug;
 
 import com.IceCreamQAQ.YuQ.AppLogger;
 import com.IceCreamQAQ.YuQ.YuQ;
 import com.IceCreamQAQ.YuQ.annotation.Inject;
-import com.IceCreamQAQ.YuQ.controller.ActionContext;
+import com.IceCreamQAQ.YuQ.controller.MessageActionContext;
+import com.IceCreamQAQ.YuQ.entity.ActionContext;
 import com.IceCreamQAQ.YuQ.entity.Message;
+import com.IceCreamQAQ.YuQ.platform.software.QQ.QQMessage;
+import com.IceCreamQAQ.YuQ.platform.software.QQ.QQMessageActionContext;
+import com.IceCreamQAQ.YuQ.platform.software.QQ.YuQQ;
 import lombok.val;
 import lombok.var;
 
-public class DebugYuQ implements YuQ {
+public class DebugYuQ implements YuQQ {
 
     @Inject
     private AppLogger logger;
 
     @Override
-    public int sendMessage(Message message) {
+    public int sendMessage(Message m) {
+        val message = (QQMessage) m;
         val group = message.getGroup();
         val qq = message.getQq();
 
@@ -29,9 +34,10 @@ public class DebugYuQ implements YuQ {
     }
 
     @Override
-    public int sendMessage(ActionContext context) {
-        val message = context.getMessage();
-        val reMessage = context.getReMessage();
+    public int sendMessage(MessageActionContext actionContext) {
+        val context = (QQMessageActionContext) actionContext;
+        val message = (QQMessage)context.getMessage();
+        val reMessage = (QQMessage)context.getReMessage();
 
         var group = reMessage.getGroup();
         if (group == null) group = message.getGroup();

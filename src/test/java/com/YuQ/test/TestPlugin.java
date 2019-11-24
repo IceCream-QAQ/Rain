@@ -1,7 +1,6 @@
 package com.YuQ.test;
 
-import com.IceCreamQAQ.YuQ.platform.JCQ.JCQStartBase;
-import com.IceCreamQAQ.YuQ.platform.debug.DebugApp;
+import com.IceCreamQAQ.YuQ.platform.runtime.JCQ.JCQStartBase;
 import lombok.val;
 import org.meowy.cqp.jcq.entity.CQDebug;
 import org.meowy.cqp.jcq.entity.CoolQ;

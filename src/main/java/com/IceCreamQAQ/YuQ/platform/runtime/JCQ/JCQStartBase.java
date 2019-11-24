@@ -8,7 +8,7 @@ import org.meowy.cqp.jcq.event.JcqApp;
 
 public abstract class JCQStartBase extends JcqApp implements ICQVer, IMsg, IRequest, ReloadAble {
 
-    App app;
+    JCQApp app;
 
     public JCQStartBase(CoolQ CQ) {
         super(CQ);

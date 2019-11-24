@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.YuQ.platform.debug;
+package com.IceCreamQAQ.YuQ.platform.runtime.debug;
 
 import com.IceCreamQAQ.YuQ.AppLogger;
 import com.IceCreamQAQ.YuQ.annotation.Inject;

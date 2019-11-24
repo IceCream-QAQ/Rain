@@ -1,12 +1,11 @@
 package com.IceCreamQAQ.YuQ.event.events;
 
-import com.IceCreamQAQ.YuQ.controller.ActionContext;
-import com.IceCreamQAQ.YuQ.entity.Message;
+import com.IceCreamQAQ.YuQ.controller.MessageActionContext;
 import lombok.Data;
 
 @Data
 public class OnMessageEvent extends Event implements CancelEvent {
 
-    private ActionContext context;
+    private MessageActionContext context;
 
 }

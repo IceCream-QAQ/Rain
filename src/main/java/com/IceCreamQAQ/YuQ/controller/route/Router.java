@@ -1,6 +1,6 @@
 package com.IceCreamQAQ.YuQ.controller.route;
 
-import com.IceCreamQAQ.YuQ.controller.ActionContext;
+import com.IceCreamQAQ.YuQ.controller.MessageActionContext;
 import lombok.Getter;
 import lombok.val;
 
@@ -19,7 +19,7 @@ public class Router implements RouteInvoker {
     }
 
     @Override
-    public void invoke(String path, ActionContext context) throws Exception {
+    public void invoke(String path, MessageActionContext context) throws Exception {
         val message = context.getMessage();
         val nextPath = message.getTexts()[level];
         val invoker = routers.get(nextPath);
