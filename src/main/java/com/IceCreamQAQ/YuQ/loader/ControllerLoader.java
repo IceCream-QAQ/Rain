@@ -16,12 +16,13 @@ import org.objectweb.asm.tree.MethodNode;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ControllerLoader implements Loader {
+public abstract class ControllerLoader implements Loader {
 
     @Config("project.package.controller")
     public String packageName;
@@ -30,76 +31,44 @@ public class ControllerLoader implements Loader {
     private String projectLocation;
 
     @Inject
-    private YuQInject inject;
-
-    @Inject
-    private ReloadAble reloadAble;
-
-    @Inject
     private AppLogger logger;
 
     @Inject
     private ClassLoader classLoader;
 
-    @Inject
-    private MethodInvokerCreator creator;
-
     private Router groupRootRouter;
     private Router privateRootRouter;
 
-    @Override
-    public void load(List<LoadItem> items) throws Exception{
-        groupRootRouter = new Router(0);
-        privateRootRouter = new Router(0);
 
-        for (LoadItem item : items) {
-            val ann = item.getAnnotation();
 
-            if (ann instanceof GroupController) {
-                logger.logInfo("YuQ Loader", "Group Controller " + item.getType().getName() + " 正在载入。");
-                controllerToRouter(item.getInstance(), groupRootRouter);
-                logger.logInfo("YuQ Loader", "Group Controller " + item.getType().getName() + " 载入完成。");
-            }
+//    public void load_old(List<Class> classes) throws Exception {
+//
+//        for (val clazz : classes) {
+//            val group = clazz.getAnnotation(GroupController.class);
+//            if (group != null) {
+//                logger.logInfo("YuQ Loader", "Group Controller " + clazz.getName() + " 正在载入。");
+//                controllerToRouter(clazz, groupRootRouter);
+//                logger.logInfo("YuQ Loader", "Group Controller " + clazz.getName() + " 载入完成。");
+//            }
+//
+//            val priv = clazz.getAnnotation(PrivateController.class);
+//            if (priv != null) {
+//                logger.logInfo("YuQ Loader", "Private Controller " + clazz.getName() + " 正在载入。");
+//                controllerToRouter(clazz, privateRootRouter);
+//                logger.logInfo("YuQ Loader", "Private Controller " + clazz.getName() + " 载入完成。");
+//            }
+//        }
+//
+//        inject.putInjectObj(RouteInvoker.class.getName(), "group", groupRootRouter);
+//        inject.putInjectObj(RouteInvoker.class.getName(), "priv", privateRootRouter);
+//    }
 
-            if (ann instanceof PrivateController) {
-                logger.logInfo("YuQ Loader", "Private Controller " + item.getType().getName() + " 正在载入。");
-                controllerToRouter(item.getInstance(), privateRootRouter);
-                logger.logInfo("YuQ Loader", "Private Controller " + item.getType().getName() + " 载入完成。");
-            }
-        }
+//    public void controllerToRouter(Class controller, Router rootRouter) throws IllegalAccessException, InstantiationException, IOException, NoSuchMethodException, InvocationTargetException {
+//        val instance = inject.spawnAndPut(controller, null);
+//        controllerToRouter(instance, rootRouter);
+//    }
 
-        inject.putInjectObj(RouteInvoker.class.getName(), "group", groupRootRouter);
-        inject.putInjectObj(RouteInvoker.class.getName(), "priv", privateRootRouter);
-    }
-
-    public void load_old(List<Class> classes) throws Exception {
-
-        for (val clazz : classes) {
-            val group = clazz.getAnnotation(GroupController.class);
-            if (group != null) {
-                logger.logInfo("YuQ Loader", "Group Controller " + clazz.getName() + " 正在载入。");
-                controllerToRouter(clazz, groupRootRouter);
-                logger.logInfo("YuQ Loader", "Group Controller " + clazz.getName() + " 载入完成。");
-            }
-
-            val priv = clazz.getAnnotation(PrivateController.class);
-            if (priv != null) {
-                logger.logInfo("YuQ Loader", "Private Controller " + clazz.getName() + " 正在载入。");
-                controllerToRouter(clazz, privateRootRouter);
-                logger.logInfo("YuQ Loader", "Private Controller " + clazz.getName() + " 载入完成。");
-            }
-        }
-
-        inject.putInjectObj(RouteInvoker.class.getName(), "group", groupRootRouter);
-        inject.putInjectObj(RouteInvoker.class.getName(), "priv", privateRootRouter);
-    }
-
-    public void controllerToRouter(Class controller, Router rootRouter) throws IllegalAccessException, InstantiationException, IOException, NoSuchMethodException, InvocationTargetException {
-        val instance = inject.spawnAndPut(controller, null);
-        controllerToRouter(instance, rootRouter);
-    }
-
-    public void controllerToRouter(Object instance, Router rootRouter) throws IllegalAccessException, InstantiationException, IOException, NoSuchMethodException, InvocationTargetException {
+    public void controllerToRouter(Object instance, Router rootRouter) throws Exception {
         val controller = instance.getClass();
 
         val fileName = controller.getName().replace(".", "/") + ".class";
@@ -117,7 +86,7 @@ public class ControllerLoader implements Loader {
             methodMap.put(method.name, method);
         }
 
-        val paths = (Path[]) controller.getAnnotationsByType(Path.class);
+        val paths = controller.getAnnotationsByType(Path.class);
         Router controllerRouter;
         if (paths.length == 0)
             controllerRouter = rootRouter;
@@ -131,22 +100,25 @@ public class ControllerLoader implements Loader {
             }
         }
 
-        val controllerInvoker = inject.spawnInstance(ControllerInvoker.class);
+//        val controllerInvoker = inject.spawnInstance(ControllerInvoker.class);
         val methods = controller.getMethods();
 
         val befores = new ArrayList<MethodInvoker>();
-        val actions = new ConcurrentHashMap<String, ActionInvoker>();
+//        val actions = new ConcurrentHashMap<String, ActionInvoker>();
         for (val method : methods) {
             val before = method.getAnnotation(Before.class);
             if (before != null) {
                 logger.logInfo("YuQ Loader", "Before " + method.getName() + " 正在载入。");
 
 //                val beforeInvoker = new ReflectMethodInvoker(instance, method, methodMap.get(method.getName()));
-                val beforeInvoker = creator.getInvoker(instance, method, methodMap.get(method.getName()));
+                val beforeInvoker = createMethodInvoker(instance, method, methodMap.get(method.getName()));
                 befores.add(beforeInvoker);
-                continue;
             }
+        }
 
+        val before = befores.toArray(new MethodInvoker[befores.size()]);;
+
+        for (Method method : methods) {
             val action = method.getAnnotation(Action.class);
             if (action != null) {
                 logger.logInfo("YuQ Loader", "Action " + method.getName() + " 正在载入。");
@@ -166,33 +138,28 @@ public class ControllerLoader implements Loader {
                     actionRootRouter = controllerRouter;
                 }
 
-
-                val at = action.at();
-                val re = action.re();
-                val level = action.level();
-                val intercept = action.intercept();
-
 //                val methodInvoker = new ReflectMethodInvoker(instance, method, methodMap.get(method.getName()));
-                val methodInvoker = creator.getInvoker(instance, method, methodMap.get(method.getName()));
+                val methodInvoker = createMethodInvoker(instance, method, methodMap.get(method.getName()));
 
-                val actionInvoker = new ActionInvoker();
+                val actionInvoker = createActionInvoker(method);
                 actionInvoker.setInvoker(methodInvoker);
-                actionInvoker.setAt(at);
-                actionInvoker.setRe(re);
-                actionInvoker.setIntercept(intercept);
+                actionInvoker.setBefores(before);
 
 
-                actionRootRouter.getRouters().put(path, controllerInvoker);
-                actions.put(path, actionInvoker);
+                actionRootRouter.getRouters().put(path, actionInvoker);
+//                actions.put(path, actionInvoker);
             }
         }
 
         logger.logInfo("YuQ Loader", "共有 " + befores.size() + " 个 Before 被载入。");
-        logger.logInfo("YuQ Loader", "共有 " + actions.size() + " 个 Action 被载入。");
+//        logger.logInfo("YuQ Loader", "共有 " + actions.size() + " 个 Action 被载入。");
 
-        controllerInvoker.befores = befores.toArray(new MethodInvoker[befores.size()]);
-        controllerInvoker.actions = actions;
+//        controllerInvoker.befores = befores.toArray(new MethodInvoker[befores.size()]);
+//        controllerInvoker.actions = actions;
     }
+
+    protected abstract MethodInvoker createMethodInvoker(Object object, Method method, MethodNode methodNode) throws Exception;
+    protected abstract ActionInvoker createActionInvoker(Method method);
 
     private Router getRouter(Router router, String name) {
         var nextRouter = router.getRouters().get(name);

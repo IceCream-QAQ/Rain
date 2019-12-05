@@ -63,7 +63,7 @@ public class MethodInvokerCreator {
             mv.visitEnd();
         }
         {
-            mv = cw.visitMethod(ACC_PUBLIC, "invoke", "(Lcom/IceCreamQAQ/YuQ/controller/MessageActionContext;)Ljava/lang/Object;", null, new String[]{"java/lang/Exception"});
+            mv = cw.visitMethod(ACC_PUBLIC, "invoke", "(Lcom/IceCreamQAQ/YuQ/controller/ActionContext;)Ljava/lang/Object;", null, new String[]{"java/lang/Exception"});
             mv.visitCode();
 
             val paras = method.getParameters();
@@ -85,20 +85,20 @@ public class MethodInvokerCreator {
 
                 if (inject == null && pathVar == null) {
                     mv.visitLdcInsn(paraNode.name);
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "com/IceCreamQAQ/YuQ/controller/MessageActionContext", "injectObj", "(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object;", false);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "com/IceCreamQAQ/YuQ/controller/ActionContext", "injectObj", "(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object;", false);
                 }
 
                 if (inject != null) {
                     mv.visitLdcInsn(Type.getType(inject.value()));
                     mv.visitLdcInsn(inject.name());
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "com/IceCreamQAQ/YuQ/controller/MessageActionContext", "injectInject", "(Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object;", false);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "com/IceCreamQAQ/YuQ/controller/ActionContext", "injectInject", "(Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object;", false);
                 }
 
                 if (pathVar != null) {
                     mv.visitIntInsn(SIPUSH, pathVar.value());
                     mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
                     mv.visitFieldInsn(GETSTATIC, "com/IceCreamQAQ/YuQ/annotation/PathVar$Type", pathVar.type().toString(), "Lcom/IceCreamQAQ/YuQ/annotation/PathVar$Type;");
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "com/IceCreamQAQ/YuQ/controller/MessageActionContext", "injectPathVar", "(Ljava/lang/Class;Ljava/lang/Integer;Lcom/IceCreamQAQ/YuQ/annotation/PathVar$Type;)Ljava/lang/Object;", false);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "com/IceCreamQAQ/YuQ/controller/ActionContext", "injectPathVar", "(Ljava/lang/Class;Ljava/lang/Integer;Lcom/IceCreamQAQ/YuQ/annotation/PathVar$Type;)Ljava/lang/Object;", false);
 
                 }
                 mv.visitTypeInsn(CHECKCAST, Type.getInternalName(para.getType()));

@@ -8,7 +8,7 @@ import java.lang.annotation.Annotation;
 public class LoadItem {
 
     private Annotation annotation;
-    private Class type;
+    private Class<?> type;
     private Object instance;
 
 }

@@ -2,6 +2,6 @@ package com.IceCreamQAQ.YuQ.controller;
 
 public interface MethodInvoker {
 
-    Object invoke(MessageActionContext context) throws Exception;
+    Object invoke(ActionContext context) throws Exception;
 
 }

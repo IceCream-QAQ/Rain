@@ -1,17 +1,14 @@
 package com.IceCreamQAQ.YuQ;
 
 import com.IceCreamQAQ.YuQ.annotation.Inject;
-import com.IceCreamQAQ.YuQ.controller.MessageActionContext;
-import com.IceCreamQAQ.YuQ.entity.Message;
 import com.IceCreamQAQ.YuQ.event.EventBus;
-import com.IceCreamQAQ.YuQ.event.events.*;
+import com.IceCreamQAQ.YuQ.event.events.AppDisableEvent;
+import com.IceCreamQAQ.YuQ.event.events.AppEnableEvent;
+import com.IceCreamQAQ.YuQ.event.events.AppStartEvent;
+import com.IceCreamQAQ.YuQ.event.events.AppStopEvent;
 import com.IceCreamQAQ.YuQ.inject.YuQInject;
 import com.IceCreamQAQ.YuQ.loader.ReloadAble;
 import com.IceCreamQAQ.YuQ.loader.AppLoader;
-import com.IceCreamQAQ.YuQ.controller.route.RouteInvoker;
-import lombok.val;
-import lombok.var;
-import org.meowy.cqp.jcq.entity.Anonymous;
 
 import java.util.List;
 import java.util.Map;
@@ -31,8 +28,6 @@ public abstract class App {
     public App(ReloadAble reloadAble, YuQ yu, AppLogger logger) throws Exception {
         this(reloadAble, yu, logger, App.class.getClassLoader());
     }
-
-    public abstract void platformLoad();
 
     public App(ReloadAble reloadAble, YuQ yu, AppLogger logger, ClassLoader appClassLoader) throws Exception {
         init(reloadAble, yu, logger, appClassLoader);

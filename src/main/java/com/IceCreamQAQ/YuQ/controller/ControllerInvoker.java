@@ -6,6 +6,7 @@ import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.entity.DoNone;
 import com.IceCreamQAQ.YuQ.entity.Message;
 import com.IceCreamQAQ.YuQ.controller.route.RouteInvoker;
+import com.IceCreamQAQ.YuQ.entity.Result;
 import lombok.val;
 
 import java.lang.reflect.InvocationTargetException;
@@ -20,22 +21,25 @@ public class ControllerInvoker implements RouteInvoker {
     private AppLogger logger;
 
     @Override
-    public void invoke(String path, MessageActionContext context) {
+    public void invoke(String path, ActionContext actionContext) {
+
+        val context=actionContext;
 
         val actionInvoker = actions.get(path);
         val reMessage = invokeAction(context, actionInvoker);
 
-        context.setReMessage(reMessage);
+        context.setResult(reMessage);
     }
 
-    public Message invokeAction(MessageActionContext context, ActionInvoker action) {
+    public Result invokeAction(ActionContext context, ActionInvoker action) {
         try {
             for (val before : befores) {
                 val reObj = before.invoke(context);
                 if (reObj != null) context.saveObj(reObj);
             }
 
-            return action.invoke(context);
+//            return action.invoke(context);
+            return null;
         } catch (InvocationTargetException e) {
             val cause = (Exception)e.getCause();
             if (cause instanceof Message) return (Message) cause;

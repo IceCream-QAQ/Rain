@@ -1,22 +1,39 @@
-package com.IceCreamQAQ.YuQ.entity;
+package com.IceCreamQAQ.YuQ.controller;
 
 import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.annotation.PathVar;
+import com.IceCreamQAQ.YuQ.entity.Result;
 import com.IceCreamQAQ.YuQ.inject.ActionContextInject;
 import com.IceCreamQAQ.YuQ.inject.YuQInject;
-import lombok.val;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.var;
 
+import javax.validation.constraints.NotNull;
+
 public abstract class ActionContext {
+
+    @Getter
+    private String[] path;
+
+    @Getter
+    @Setter
+    private Result result;
+
+    @Getter
+    @Setter
+    private Boolean success=false;
 
     @Inject
     protected YuQInject globalInject;
 
     protected ActionContextInject contextInject;
 
-    public ActionContext(){
+    public ActionContext(String[] path){
         contextInject=new ActionContextInject();
         contextInject.putInjectObj(ActionContext.class.getName(),"",this);
+
+        this.path=path;
     }
 
     public void saveObj(Object object) {
@@ -52,6 +69,8 @@ public abstract class ActionContext {
         return (T) obj;
     }
 
-    public abstract <T> T injectPathVar(Class<T> clazz, Integer key, PathVar.Type type);
+    public abstract <T> T injectPathVar(@NotNull Class<T> clazz,@NotNull Integer key,@NotNull PathVar.Type type);
 
+    public abstract @NotNull void buildResult(@NotNull String text);
+    public abstract @NotNull void buildResult(@NotNull Object obj);
 }

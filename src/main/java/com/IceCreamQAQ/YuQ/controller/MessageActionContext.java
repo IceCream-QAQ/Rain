@@ -1,24 +1,15 @@
 package com.IceCreamQAQ.YuQ.controller;
 
-import com.IceCreamQAQ.YuQ.annotation.Inject;
 import com.IceCreamQAQ.YuQ.annotation.PathVar;
-import com.IceCreamQAQ.YuQ.entity.ActionContext;
 import com.IceCreamQAQ.YuQ.entity.Message;
-import com.IceCreamQAQ.YuQ.inject.ActionContextInject;
-import com.IceCreamQAQ.YuQ.inject.YuQInject;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
-import lombok.var;
 
 public abstract class MessageActionContext extends ActionContext {
 
     @Getter
     private Message message;
-
-    @Getter
-    @Setter
-    private Message reMessage;
 
     @Getter
     @Setter
@@ -33,7 +24,7 @@ public abstract class MessageActionContext extends ActionContext {
     private Integer intercept = 0;
 
     public MessageActionContext(Message message) {
-        super();
+        super(message.getTexts());
 
         contextInject.putInjectObj(message.getClass().toString(), "", message);
         contextInject.putInjectObj(message.getClass().toString(), "message", message);
@@ -44,6 +35,9 @@ public abstract class MessageActionContext extends ActionContext {
         this.message = message;
     }
 
+    public Message getReMessage(){
+        return (Message) this.getResult();
+    }
 
     @Override
     public <T> T injectPathVar(Class<T> clazz, Integer key, PathVar.Type type) {
@@ -76,5 +70,4 @@ public abstract class MessageActionContext extends ActionContext {
         return (T) para;
     }
 
-    public abstract Message buildMessage(String text);
 }

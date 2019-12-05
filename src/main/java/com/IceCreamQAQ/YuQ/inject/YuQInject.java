@@ -7,6 +7,7 @@ import lombok.val;
 import lombok.var;
 
 import javax.inject.Named;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -15,6 +16,7 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class YuQInject extends YuQInjectBase {
@@ -70,6 +72,8 @@ public class YuQInject extends YuQInjectBase {
     }
 
     private <T> T createInstance(Class<T> clazz) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+        val constructorNum = clazz.getConstructors().length;
+        if (constructorNum < 1) return null;
         val constructor = clazz.getConstructors()[0];
 
         val paras = constructor.getParameters();
@@ -188,6 +192,10 @@ public class YuQInject extends YuQInjectBase {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public String getConfig(@NotNull String key) {
+        return configs.get(key);
     }
 
 }

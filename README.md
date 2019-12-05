@@ -160,7 +160,7 @@ post 方法会返回一个 boolean 值来确定事件是否被取消。<br />
 
 ###内置事件列表###
 
-所有内置事件均位于 com.IceCreamQAQ.YuQ.event.events 包内。<br />
+所有内置事件均位于 com.IceCreamQAQ.YuQ.QQ.events 包内。<br />
 
 PS: 触发条件无代表事件不会直接被触发，但可能被子事件间接触发。<br />
 PS: 父事件无代表直接继承 Event 类。<br />
@@ -218,10 +218,6 @@ GroupRequestEvent|群邀请事件|收到某人邀请进入某群时触发|无|�
         String defaultValue() default "";
     }
 
-支持注入的类型清单（部分）：
-
-    com.IceCreamQAQ.YuQ.YuQ
-    com.sobte.cqp.jcq.entity.CoolQ
 
 ### ActionContext 依赖注入###
 
@@ -250,17 +246,6 @@ ActionContext 依赖注入指在消息处理路径上的所有方法的参数的
         }
     }
 
-支持注入的类型清单（部分）：
-
-类型|名称(""代表默认名称)
----|---
-java.lang.Long|qq
-java.lang.Long|group
-[java.lang.String|""
-java.lang.String|""
-com.sobte.cqp.jcq.entity.Anonymous|""
-com.IceCreamQAQ.YuQ.entity.Message|""
-com.IceCreamQAQ.YuQ.controller.ActionContext|""
 
 
 开发时重载

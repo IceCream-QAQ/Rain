@@ -11,12 +11,4 @@ public @interface Action {
 
     String value();
 
-    boolean re() default false;
-
-    boolean at() default false;
-
-    int level() default 2;
-
-    boolean intercept() default false;
-
 }

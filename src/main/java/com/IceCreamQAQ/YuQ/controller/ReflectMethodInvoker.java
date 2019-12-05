@@ -156,7 +156,7 @@ public class ReflectMethodInvoker implements MethodInvoker {
         this.method = method;
     }
 
-    public Object invoke(MessageActionContext context) throws Exception {
+    public Object invoke(ActionContext context) throws Exception {
         if (mps == null) {
             if (returnFlag) {
                 return method.invoke(instance);
@@ -179,30 +179,9 @@ public class ReflectMethodInvoker implements MethodInvoker {
                     break;
                 case 2:
                     val pathVar = (PathVar) mp.inject;
-                    val message = context.getMessage();
-                    val texts = message.getTexts();
 
                     val key = pathVar.value();
-                    switch (pathVar.type()) {
-                        case string:
-                            para = texts[key];
-                            break;
-                        case qq:
-                            para = Long.parseLong(texts[key]);
-                            break;
-                        case flag:
-                            val text = texts[key];
-                            para = text.contains("开") || text.contains("启");
-                            break;
-                        case group:
-                            para = Long.parseLong(texts[key]);
-                            break;
-                        case number:
-                            para = Integer.parseInt(texts[key]);
-                            break;
-                        default:
-                            para = null;
-                    }
+                    para = context.injectPathVar(mp.clazz,key,pathVar.type());
                     break;
                 default:
                     para = null;
