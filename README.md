@@ -23,14 +23,14 @@ YuQ Framework 让你体验不一样的机器人开发。
 
     <parent>
         <artifactId>YuQ-All</artifactId>
-        <groupId>com.IceCreamQAQ.YuQ</groupId>
+        <groupId>com.IceCreamQAQ.Yu</groupId>
         <version>0.0.1.3</version>
     </parent>
 
 添加项目继承（0.0.1.4版本及以后）
 
     <parent>
-        <groupId>com.IceCreamQAQ.YuQ</groupId>
+        <groupId>com.IceCreamQAQ.Yu</groupId>
         <artifactId>YuQFramework</artifactId>
         <version>0.0.1.5</version>
     </parent>
@@ -111,8 +111,8 @@ Action 注解声明的方法支持无返回值，String ，Message ，以及其�
 
 一个事件监听器是由 EventHandler 声明的，并带有一个或多个事件监听方法的类。<br />
 
-一个标准的事件监听方法，是由 com.IceCreamQAQ.YuQ.annotation.Event 注解声明的方法。<br />
-他应该具有一个 继承自 com.IceCreamQAQ.YuQ.event.events.Event 类的参数。<br />
+一个标准的事件监听方法，是由 com.IceCreamQAQ.Yu.annotation.Event 注解声明的方法。<br />
+他应该具有一个 继承自 com.IceCreamQAQ.Yu.event.events.Event 类的参数。<br />
 
     @Event
     public void onGroupMessage(OnGroupMessageEvent event){
@@ -144,7 +144,7 @@ YuQ 框架标准，所有实现了 CancelEvent 接口（ cancelAble 方法返回
 
 **新增自定义事件**
 
-一个事件的要求是继承自 com.IceCreamQAQ.YuQ.event.events.Event 类。<br />
+一个事件的要求是继承自 com.IceCreamQAQ.Yu.event.events.Event 类。<br />
 
     public class TestEvent extends Event {
     }
@@ -160,7 +160,7 @@ post 方法会返回一个 boolean 值来确定事件是否被取消。<br />
 
 ###内置事件列表###
 
-所有内置事件均位于 com.IceCreamQAQ.YuQ.QQ.events 包内。<br />
+所有内置事件均位于 com.IceCreamQAQ.Yu.QQ.events 包内。<br />
 
 PS: 触发条件无代表事件不会直接被触发，但可能被子事件间接触发。<br />
 PS: 父事件无代表直接继承 Event 类。<br />
