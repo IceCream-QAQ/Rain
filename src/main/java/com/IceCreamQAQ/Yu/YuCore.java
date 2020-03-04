@@ -38,7 +38,7 @@ public class YuCore {
 
     public void start() throws Exception {
         loader = inject.spawnInstance(AppLoader.class);
-        loader.load();
+        loader.load_();
 
         inject.injectObject(this);
 

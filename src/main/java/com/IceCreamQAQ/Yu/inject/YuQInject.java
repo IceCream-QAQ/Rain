@@ -2,6 +2,7 @@ package com.IceCreamQAQ.Yu.inject;
 
 import com.IceCreamQAQ.Yu.annotation.AutoBind;
 import com.IceCreamQAQ.Yu.annotation.Config;
+import com.IceCreamQAQ.Yu.annotation.Default;
 import com.IceCreamQAQ.Yu.annotation.Inject;
 import lombok.val;
 import lombok.var;
@@ -120,8 +121,11 @@ public class YuQInject extends YuQInjectBase {
                 val name = config.value();
                 val value = configs.get(name);
                 if (value == null) {
-                    field.setAccessible(true);
-                    field.set(obj, config.defaultValue());
+                    val defaultValue = field.getAnnotation(Default.class);
+                    if (defaultValue!=null){
+                        field.setAccessible(true);
+                        field.set(obj, defaultValue.value());
+                    }
                 } else {
                     field.setAccessible(true);
                     field.set(obj, value);

@@ -18,13 +18,13 @@ public class TestClassLoader {
 
         YuHook.put(new HookItem("com.IceCreamQAQ.Yu.TestA", "c", HookA.class.getName()));
 
-        val a = new AppClassloader(TestClassLoader.class.getClassLoader());
+        val a = new AppClassloader(TestClassLoader.class.getClassLoader(),null);
         Class t = a.loadClass("com.IceCreamQAQ.Yu.TestA");
         var o = t.newInstance();
 
-        var m = t.getMethod("c");
+        var m = t.getMethod("c",String.class);
 
-        val r = m.invoke(o);
+        val r = m.invoke(o,"123");
 
         System.out.println(r);
 
@@ -35,18 +35,17 @@ public class TestClassLoader {
         @Override
         public boolean preRun(HookMethod method) {
             System.out.println("fun c preRun !");
-//            try {
-//                val c=Class.forName(method.className);
-//                System.out.println(c.getClassLoader().getClass().getName());
-//                for (Method m : c.getMethods()) {
-//                    System.out.println(m.getName());
-//                }
-//            } catch (ClassNotFoundException e) {
-//                e.printStackTrace();
-//            }
-
             System.out.println("Class Name: " + method.className);
             System.out.println("Method Name: " + method.methodName);
+
+            val paras= method.paras;
+            System.out.println("-----------------");
+            for (Object para : paras) {
+                System.out.println(para);
+            }
+            System.out.println("-----------------");
+
+            paras[1]="Yu";
             return false;
         }
 
@@ -54,7 +53,7 @@ public class TestClassLoader {
         public void postRun(HookMethod method) {
             System.out.println("fun c postRun !");
             method.result = "Hello YuHook !";
-            throw new RuntimeException();
+//            throw new RuntimeException();
 //            return false;
         }
 

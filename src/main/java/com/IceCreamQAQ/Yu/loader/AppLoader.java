@@ -44,6 +44,47 @@ public class AppLoader {
     @Inject
     private ReloadAble reloadAble;
 
+    public void load_() {
+        try {
+            inject.putInjectObj(ClassLoader.class.getName(), "", classLoader);
+
+            val classes = getClasses(projectPackage);
+
+            val loadItemsMap = new HashMap<Class<? extends Loader>,List<LoadItem>>();
+
+            for (val clazz : classes.values()) {
+                val annotationInstances = clazz.getAnnotations();
+
+                val instance = inject.spawnAndPut(clazz);
+
+                for (val annotationInstance : annotationInstances) {
+                    val annotationClass = annotationInstance.getClass().getInterfaces()[0];
+                    val loadBy = annotationClass.getAnnotation(LoadBy.class);
+                    if (loadBy != null){
+                        val loader = loadBy.value();
+                        var loadItems = loadItemsMap.get(loader);
+                        if (loadItems==null){
+                            loadItems = new ArrayList<LoadItem>();
+                            loadItemsMap.put(loader,loadItems);
+                        }
+                        val loadItem = new LoadItem();
+                        loadItem.setAnnotation(annotationInstance);
+                        loadItem.setType(clazz);
+                        loadItem.setInstance(instance);
+                        loadItems.add(loadItem);
+                    }
+                }
+            }
+
+            for (val loader : loadItemsMap.keySet()) {
+                val loaderInstance = inject.spawnInstance(loader);
+                loaderInstance.load(loadItemsMap.get(loader));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("程序初始化失败！", e);
+        }
+    }
+
     public void load() {
         try {
             ClassLoader classLoader;
@@ -85,7 +126,7 @@ public class AppLoader {
 
             val classes = getClasses(projectPackage);
 
-            val loadItemsMap = new HashMap<Class<? extends Loader>,List<LoadItem>>();
+            val loadItemsMap = new HashMap<Class<? extends Loader>, List<LoadItem>>();
 
 //            val controllers = new ArrayList<Class>();
 //
@@ -115,12 +156,12 @@ public class AppLoader {
                 for (val annotationInstance : annotationInstances) {
                     val annotationClass = annotationInstance.getClass().getInterfaces()[0];
                     val loadBy = annotationClass.getAnnotation(LoadBy.class);
-                    if (loadBy != null){
+                    if (loadBy != null) {
                         val loader = loadBy.value();
                         var loadItems = loadItemsMap.get(loader);
-                        if (loadItems==null){
+                        if (loadItems == null) {
                             loadItems = new ArrayList<LoadItem>();
-                            loadItemsMap.put(loader,loadItems);
+                            loadItemsMap.put(loader, loadItems);
                         }
                         val loadItem = new LoadItem();
                         loadItem.setAnnotation(annotationInstance);
@@ -132,6 +173,8 @@ public class AppLoader {
             }
 
             for (val loader : loadItemsMap.keySet()) {
+
+
                 val loaderInstance = inject.spawnInstance(loader);
                 loaderInstance.load(loadItemsMap.get(loader));
             }

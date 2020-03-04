@@ -1,13 +1,14 @@
 package com.IceCreamQAQ.Yu.hook;
 
 import com.IceCreamQAQ.Yu.loader.AppClassloader;
-import lombok.val;
+import lombok.*;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +17,7 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class YuHook {
 
-    private static List<HookItem> hooks = new ArrayList<>();
+    private static List<HookItem> hooks = new ArrayList();
 
     public static void put(HookItem item) {
         hooks.add(item);
@@ -95,6 +96,7 @@ public class YuHook {
             Label catchLabel = new Label();
             mv.visitTryCatchBlock(tryStart, tryEnd, catchLabel, "java/lang/Throwable");
 
+
             val maxPara = method.localVariables.size();
             int stack = maxPara - 1;
             int hookMethodStack;
@@ -135,19 +137,27 @@ public class YuHook {
 
                     paraStack = stack;
 
-//                    for (int i = 0; i < maxPara; i++) {
-//                        mv.visitVarInsn(ALOAD, paraStack);
-//                        mv.visitIntInsn(SIPUSH, 0);
-//                        mv.visitVarInsn(ALOAD, 0);
-//                        mv.visitInsn(AASTORE);
-//                    }
+                    for (int i = 0; i < maxPara; i++) {
+                        mv.visitVarInsn(ALOAD, paraStack);
+                        mv.visitIntInsn(SIPUSH, i);
+                        mv.visitVarInsn(ALOAD, i);
+                        mv.visitInsn(AASTORE);
+                    }
 
 
                     val setParasLabel = new Label();
                     mv.visitLabel(setParasLabel);
                     mv.visitVarInsn(ALOAD, hookMethodStack);
+//                    mv.visitIntInsn(SIPUSH, 0);
                     mv.visitVarInsn(ALOAD, paraStack);
                     mv.visitFieldInsn(PUTFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "paras", "[Ljava/lang/Object;");
+
+//                    Label label9 = new Label();
+//                    mv.visitLabel(label9);
+//                    mv.visitLineNumber(23, label9);
+//                    mv.visitVarInsn(ALOAD, 2);
+//                    mv.visitVarInsn(ALOAD, 3);
+//                    mv.visitFieldInsn(PUTFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "paras", "[Ljava/lang/Object;");
                 }
             }
             int hookRunnableStack;
@@ -172,13 +182,31 @@ public class YuHook {
                 mv.visitJumpInsn(IFEQ, tryStart);
                 mv.visitVarInsn(ALOAD, hookMethodStack);
                 mv.visitFieldInsn(GETFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "result", "Ljava/lang/Object;");
-                mv.visitTypeInsn(CHECKCAST, "java/lang/String");
+//                mv.visitTypeInsn(CHECKCAST, "java/lang/String");
                 mv.visitInsn(ARETURN);
             }
             {// try
                 mv.visitLabel(tryStart);
                 mv.visitVarInsn(ALOAD, hookMethodStack);
                 mv.visitVarInsn(ALOAD, 0);
+
+                mv.visitVarInsn(ALOAD, 3);
+                mv.visitInsn(ICONST_1);
+                mv.visitInsn(AALOAD);
+                mv.visitTypeInsn(CHECKCAST, "java/lang/String");
+
+//                mv.visitVarInsn(ALOAD, 5);
+//                mv.visitInsn(ICONST_2);
+//                mv.visitInsn(AALOAD);
+//                mv.visitTypeInsn(CHECKCAST, "java/lang/Integer");
+//                mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I", false);
+//
+//                mv.visitVarInsn(ALOAD, 5);
+//                mv.visitInsn(ICONST_3);
+//                mv.visitInsn(AALOAD);
+//                mv.visitTypeInsn(CHECKCAST, "java/lang/Boolean");
+//                mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false);
+
                 mv.visitMethodInsn(INVOKEVIRTUAL, cName, mn + "_IceCreamQAQ_YuHook", method.desc, false);
                 mv.visitFieldInsn(PUTFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "result", "Ljava/lang/Object;");
 
@@ -202,7 +230,7 @@ public class YuHook {
                 val errorStack = stack;
 
 
-                val setErrorLabel =new Label();
+                val setErrorLabel = new Label();
                 mv.visitLabel(setErrorLabel);
                 mv.visitVarInsn(ALOAD, hookMethodStack);
                 mv.visitVarInsn(ALOAD, errorStack);
@@ -230,11 +258,70 @@ public class YuHook {
                 mv.visitFieldInsn(GETFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "error", "Ljava/lang/Throwable;");
                 mv.visitInsn(ATHROW);
             }
-            mv.visitMaxs(4, 6);
+            mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
 
-        return cw.toByteArray();
+        val bs = cw.toByteArray();
+        try {
+            val o = new FileOutputStream(new File("/Users/icecream/1.class"));
+            o.write(bs);
+            o.flush();
+            o.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return bs;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    static class MethodPara {
+        private String name;
+        private String castType;
+        private String type;
+        private boolean basicType;
+    }
+
+    static List<MethodPara> getMethodPara(MethodNode method) {
+        val desc = method.desc;
+        val localVariables = method.localVariables;
+
+        val paraStr = desc.substring(1).split("\\)")[0];
+        val paraChars = paraStr.toCharArray();
+
+        val paras = new ArrayList<MethodPara>();
+        read(paraChars, 0, paras);
+        return paras;
+    }
+
+    static void read(char[] chars, int i, List<MethodPara> paras) {
+        val c = chars[i];
+        var sz = false;
+        if (c == '[') {
+            i++;
+            sz = true;
+        }
+        readL(chars, i);
+    }
+    static String readNext(char[] chars, int i){
+//        val c = chars[i];
+//        val sz = false;
+//        if (c == '[') {
+//            i++;
+//            sz = true;
+//        }else {
+//            if ()
+//        }
+        val s = readNext(chars,i);
+        return s;
+    }
+
+    static String readL(char[] chars, int i) {
+
+        return "";
     }
 
     static boolean isSysMethod(String name) {
