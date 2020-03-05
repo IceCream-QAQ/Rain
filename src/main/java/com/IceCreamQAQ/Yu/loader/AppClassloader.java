@@ -33,7 +33,7 @@ public class AppClassloader extends ClassLoader {
 
     @SneakyThrows
     protected Class<?> loadClass(String name, boolean resolve) {
-        return loadClass(name, resolve);
+        return loadClass(name, resolve,true);
     }
 
     @SneakyThrows

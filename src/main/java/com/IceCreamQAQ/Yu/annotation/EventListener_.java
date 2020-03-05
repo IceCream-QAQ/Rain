@@ -1,17 +1,14 @@
 package com.IceCreamQAQ.Yu.annotation;
 
+import com.IceCreamQAQ.Yu.event.EventListenerLoader_;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.FIELD,ElementType.PARAMETER})
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Deprecated
-public @interface Inject {
-
-    Class value() default Inject.class;
-
-    String name() default "";
-
+@LoadBy_(EventListenerLoader_.class)
+public @interface EventListener_ {
 }
