@@ -43,7 +43,7 @@ class ConfigManager {
 
             val plugin = File(f, "plugin")
             val plugins = ArrayList<String>()
-            if (ff.isDirectory) for (ff in plugin.listFiles()) {
+            if (plugin.isDirectory) for (ff in plugin.listFiles()) {
                 if (ff.isDirectory) continue
                 val name = ff.name
 

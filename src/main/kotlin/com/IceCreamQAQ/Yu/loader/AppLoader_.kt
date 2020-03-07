@@ -4,7 +4,9 @@ import com.IceCreamQAQ.Yu.AppLogger
 import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.annotation.LoadBy
 import com.IceCreamQAQ.Yu.annotation.LoadBy_
+import com.IceCreamQAQ.Yu.di.BeanFactoryLoader
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.error.BeanCreateError
 import java.io.File
 import java.io.IOException
 import java.net.JarURLConnection
@@ -41,33 +43,61 @@ class AppLoader_ {
             val loadItemsMap = HashMap<Class<out Loader_>, MutableMap<String, LoadItem_>>()
 
             for (clazz in classes.values) {
-                val annotationInstances = clazz.annotations
-//                val instance = context.newBean(clazz, save = true) ?:continue
-                for (annotationInstance in annotationInstances) {
-//                    val annotationClass: Class<Any> = annotationInstance.javaClass.interfaces[0]
-                    val annotationClass = annotationInstance::class.java.interfaces[0]
-                    val loadBy = annotationClass.getAnnotation(LoadBy_::class.java)
-                    if (loadBy != null) {
-                        val loader = loadBy.value.java
-                        val loadItems = loadItemsMap[loader] ?: {
-                            val l = HashMap<String, LoadItem_>()
-                            loadItemsMap[loader] = l
-                            l
-                        }()
-                        val loadItem = LoadItem_()
-                        loadItem.annotation = annotationInstance
-                        loadItem.type = clazz
-//                        loadItem.instance = instance
-                        loadItems[clazz.name] = loadItem
-                    }
-                }
+                searchLoadBy(clazz, clazz,loadItemsMap)
             }
+
+            val beanFactories = loadItemsMap[BeanFactoryLoader::class.java] ?: HashMap()
+            val bfl = context.newBean(BeanFactoryLoader::class.java) ?: throw BeanCreateError("Cant Instanced Loader!")
+            bfl.load(beanFactories)
+            loadItemsMap.remove(BeanFactoryLoader::class.java)
+
             for (loader in loadItemsMap.keys) {
                 val loaderInstance = context.newBean(loader) ?: continue
                 loaderInstance.load(loadItemsMap[loader] ?: continue)
             }
         } catch (e: Exception) {
             throw RuntimeException("程序初始化失败！", e)
+        }
+    }
+
+    fun searchLoadBy(loadClass: Class<*>, searchClass: Class<*>, loadItemsMap: HashMap<Class<out Loader_>, MutableMap<String, LoadItem_>>) {
+
+        val loadBy = searchClass.getAnnotation(LoadBy_::class.java)
+        if (loadBy != null) {
+            val loader = loadBy.value.java
+            val loadItems = loadItemsMap[loader] ?: {
+                val l = HashMap<String, LoadItem_>()
+                loadItemsMap[loader] = l
+                l
+            }()
+            val loadItem = LoadItem_()
+            loadItem.annotation = loadBy
+            loadItem.type = loadClass
+            loadItems[loadClass.name] = loadItem
+        }
+
+        val annotationInstances = searchClass.annotations
+        for (annotationInstance in annotationInstances) {
+            val annotationClass = annotationInstance::class.java.interfaces[0]
+            val loadBy = annotationClass.getAnnotation(LoadBy_::class.java) ?: continue
+            val loader = loadBy.value.java
+            val loadItems = loadItemsMap[loader] ?: {
+                val l = HashMap<String, LoadItem_>()
+                loadItemsMap[loader] = l
+                l
+            }()
+            val loadItem = LoadItem_()
+            loadItem.annotation = loadBy
+            loadItem.type = loadClass
+            loadItems[loadClass.name] = loadItem
+        }
+
+        val superClass = searchClass.superclass
+        if (superClass != null) searchLoadBy(loadClass, superClass, loadItemsMap)
+
+        val interfaces = searchClass.interfaces
+        for (i in interfaces) {
+            searchLoadBy(loadClass, i, loadItemsMap)
         }
     }
 
@@ -148,4 +178,6 @@ class AppLoader_ {
             }
         }
     }
+
+
 }

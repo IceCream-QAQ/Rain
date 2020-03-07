@@ -16,10 +16,13 @@ import javax.inject.Named
 class YuContext(private val configer: ConfigManager, private val logger: AppLogger) {
 
     private val context: MutableMap<String, MutableMap<String, Any>> = ConcurrentHashMap()
+    private var factoryManager: BeanFactoryManager? = null
 
     init {
         putBean(this)
         putBean(logger)
+        factoryManager = newBean(BeanFactoryManager::class.java, save = true)
+                ?: throw RuntimeException("Yu Init Err! Cant new BeanFactoryManager!")
     }
 
     fun <T> getBean(clazz: Class<T>, name: String = ""): T? {
@@ -27,7 +30,7 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
     }
 
     fun getBean(clazz: String, name: String = ""): Any? {
-        return context[clazz]?.get(name)
+        return context[clazz]?.get(name) ?:newBean(Class.forName(clazz),save = true)
     }
 
     fun putBean(obj: Any, name: String = "") {
@@ -36,8 +39,8 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
 
     fun putBean(clazz: Class<*>, name: String, obj: Any) {
         val cn = clazz.name
-        var objs = context[cn] ?:{
-            val objs = ConcurrentHashMap<String,Any>()
+        val objs = context[cn] ?: {
+            val objs = ConcurrentHashMap<String, Any>()
             context[cn] = objs
             objs
         }()
@@ -78,9 +81,9 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
                 val key = config.value
                 val type = field.type
 
-                val value = when{
-                    isList(type) -> configer.getArray(key,(field.genericType as ParameterizedType).actualTypeArguments[0] as Class<*>)
-                    isArray(type) -> configer.getArray(key,type.componentType)?.toTypedArray()
+                val value = when {
+                    isList(type) -> configer.getArray(key, (field.genericType as ParameterizedType).actualTypeArguments[0] as Class<*>)
+                    isArray(type) -> configer.getArray(key, type.componentType)?.toTypedArray()
                     else -> configer.get(key, field.type)
                 }
 
@@ -99,7 +102,7 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
 
             val injectJsr = field.getAnnotation(javax.inject.Inject::class.java)
             if (injectJsr != null) {
-                val name = field.getAnnotation(Named::class.java)?.value ?:""
+                val name = field.getAnnotation(Named::class.java)?.value ?: ""
 
                 field.isAccessible = true
                 field[obj] = getBean(field.type.name, name)
@@ -108,9 +111,9 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
     }
 
     fun <T> newBean(clazz: Class<T>, name: String? = null, save: Boolean = false): T? {
-        val bean = createBeanInstance(clazz)
-        if (save) putBean(bean!!, name ?: clazz.getAnnotation(Named::class.java)?.value ?: "")
-        injectBean(bean!!)
+        val bean = factoryManager?.getFactory(clazz)?.createBean() as T ?: createBeanInstance(clazz)?:return null
+        if (save) putBean(bean, name ?: clazz.getAnnotation(Named::class.java)?.value ?: "")
+        injectBean(bean)
         return bean
     }
 
@@ -136,12 +139,12 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
     }
 
     private fun isList(clazz: Class<*>): Boolean {
-        if (clazz.name == List::class.java.name)return true
+        if (clazz.name == List::class.java.name) return true
         val i = clazz.interfaces
-        for ( inf in i) {
+        for (inf in i) {
             return isList(inf)
         }
-        val s=clazz.superclass?:return false
+        val s = clazz.superclass ?: return false
         return isList(s)
     }
 
