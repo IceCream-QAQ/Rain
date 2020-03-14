@@ -4,13 +4,13 @@ import com.IceCreamQAQ.Yu.AppLogger
 import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.annotation.Default
-import com.IceCreamQAQ.Yu.annotation.Inject
 import com.alibaba.fastjson.JSONObject
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.ParameterizedType
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
 import javax.inject.Named
 
 class YuContext(private val configer: ConfigManager, private val logger: AppLogger) {
@@ -25,12 +25,16 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
                 ?: throw RuntimeException("Yu Init Err! Cant new BeanFactoryManager!")
     }
 
+    operator fun <T> get(clazz: Class<T>): T? {
+        return getBean(clazz)
+    }
+
     fun <T> getBean(clazz: Class<T>, name: String = ""): T? {
         return getBean(clazz.name, name) as? T
     }
 
     fun getBean(clazz: String, name: String = ""): Any? {
-        return context[clazz]?.get(name) ?:newBean(Class.forName(clazz),save = true)
+        return context[clazz]?.get(name) ?: newBean(Class.forName(clazz), save = true)
     }
 
     fun putBean(obj: Any, name: String = "") {
@@ -67,7 +71,7 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
         }
 
         for (field in fields) {
-            val inject = field.getAnnotation(Inject::class.java)
+            val inject = field.getAnnotation(com.IceCreamQAQ.Yu.annotation.Inject::class.java)
             if (inject != null) {
                 var injectType: String = inject.value.java.name
                 if (injectType.toLowerCase() == "com.icecreamqaq.yu.annotation.inject") injectType = field.type.name
@@ -100,7 +104,7 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
                 continue
             }
 
-            val injectJsr = field.getAnnotation(javax.inject.Inject::class.java)
+            val injectJsr = field.getAnnotation(Inject::class.java)
             if (injectJsr != null) {
                 val name = field.getAnnotation(Named::class.java)?.value ?: ""
 
@@ -111,7 +115,7 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
     }
 
     fun <T> newBean(clazz: Class<T>, name: String? = null, save: Boolean = false): T? {
-        val bean = factoryManager?.getFactory(clazz)?.createBean() as T ?: createBeanInstance(clazz)?:return null
+        val bean = factoryManager?.getFactory(clazz)?.createBean() as T ?: createBeanInstance(clazz) ?: return null
         if (save) putBean(bean, name ?: clazz.getAnnotation(Named::class.java)?.value ?: "")
         injectBean(bean)
         return bean
@@ -120,22 +124,32 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
     private fun <T> createBeanInstance(clazz: Class<T>): T? {
         val constructorNum = clazz.constructors.size
         if (constructorNum < 1) return null
-        val constructor: Constructor<*> = clazz.constructors[0]
+        val constructors = clazz.constructors
 
-        val paras = constructor.parameters
+        var inject: Constructor<*>? = null
 
-        if (paras.size == 0) {
-            return clazz.newInstance()
+        for (constructor in constructors) {
+            if (constructor.parameters.isEmpty()) {
+                continue
+            }
+
+            if (constructor.getAnnotation(Inject::class.java) == null) continue
+            inject = constructor
+            break
         }
 
+        if (inject == null) return clazz.newInstance()
+
+        val paras = inject.parameters
         val objs = arrayOfNulls<Any>(paras.size)
+
         for (i in paras.indices) {
             val para = paras[i]
-            val inject = para.getAnnotation(Inject::class.java) ?: return null
-            objs[i] = getBean(para.type)
+            val name = para.getAnnotation(Named::class.java)?.value ?: ""
+            objs[i] = getBean(para.type, name)
         }
 
-        return constructor.newInstance(objs) as? T
+        return inject.newInstance(*objs) as? T
     }
 
     private fun isList(clazz: Class<*>): Boolean {

@@ -6,8 +6,11 @@ interface ActionContext {
 
     fun getPath(): Array<String>
 
-    fun saveSomething(obj: Any, name: String)
+    operator fun get(name:String):Any?
+    operator fun set(name: String,obj: Any)
 
     fun setResult(result: Result)
+
+    fun buildResult(obj:Any):Result
 
 }

@@ -1,6 +1,9 @@
 package com.icecreamqaq.yu.test
 
 import com.IceCreamQAQ.Yu.AppLogger
+import com.IceCreamQAQ.Yu.controller.DefaultActionContext
+import com.IceCreamQAQ.Yu.controller.router.DefaultActionInvoker
+import com.IceCreamQAQ.Yu.controller.router.RouterPlus
 import com.IceCreamQAQ.Yu.di.ConfigManager
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.loader.AppClassloader
@@ -28,12 +31,23 @@ class TestApp {
             val context = YuContext(configer, logger)
 
             context.putBean(ClassLoader::class.java, "appClassLoader", appClassloader)
+            context.putBean(AppClassloader::class.java, "appClassLoader", appClassloader)
 
             val app = context.newBean(TestApp::class.java,save = true)!!
             app.load()
 
             val test = context.getBean(TestUtil::class.java)
             println(test)
+
+            val router = context.getBean(RouterPlus::class.java,"priv") ?: return
+
+            val ac = DefaultActionContext()
+
+            val paths = arrayOf("test","ttt")
+            ac.setPath(paths)
+
+            router.invoke(paths[0],ac)
+//            router.invoke()
         }
 
     }

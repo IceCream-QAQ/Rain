@@ -22,8 +22,6 @@ class BeanFactoryManager {
                 factories[beanClass.name] = factory
             }
         }
-
-
     }
 
     operator fun get(clazz: String):BeanFactory<*>?{

@@ -74,6 +74,7 @@ class AppLoader_ {
             loadItem.annotation = loadBy
             loadItem.type = loadClass
             loadItems[loadClass.name] = loadItem
+//            return
         }
 
         val annotationInstances = searchClass.annotations
@@ -87,9 +88,10 @@ class AppLoader_ {
                 l
             }()
             val loadItem = LoadItem_()
-            loadItem.annotation = loadBy
+            loadItem.annotation = annotationInstance
             loadItem.type = loadClass
             loadItems[loadClass.name] = loadItem
+//            return
         }
 
         val superClass = searchClass.superclass

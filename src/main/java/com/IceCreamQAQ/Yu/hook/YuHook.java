@@ -82,6 +82,9 @@ public class YuHook {
 
 
             val mv = cw.visitMethod(method.access, mn, method.desc, method.signature, new String[]{"java/lang/Throwable"});
+
+
+
 //            mv.visitCode();
 //            mv.visitVarInsn(ALOAD, 0);
 //            mv.visitMethodInsn(INVOKEVIRTUAL, name.replace(".", "/"), mn + "_IceCreamQAQ_YuHook", method.desc, false);
@@ -122,10 +125,6 @@ public class YuHook {
                 mv.visitVarInsn(ALOAD, hookMethodStack);
                 mv.visitLdcInsn(mn);
                 mv.visitFieldInsn(PUTFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "methodName", "Ljava/lang/String;");
-
-//                mv.visitVarInsn(ICONST_0,1);
-//                mv.visitTypeInsn(ANEWARRAY, "java/lang/Object");
-//                mv.visitVarInsn(ASTORE, 3);
 
                 {// Paras
 

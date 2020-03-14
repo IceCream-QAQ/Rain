@@ -13,7 +13,7 @@ public @interface PathVar {
 
     Type type() default Type.string;
 
-    public enum Type{
+    enum Type{
         qq,
         group,
         flag,
