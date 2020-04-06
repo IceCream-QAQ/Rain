@@ -1,7 +1,5 @@
 package com.IceCreamQAQ.Yu.util;
 
-import lombok.var;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -30,7 +28,7 @@ public class DateUtil {
      * @return 时间字符串
      */
     public String formatDate(Date date){
-        var sdf=sdfDate.get();
+        SimpleDateFormat sdf=sdfDate.get();
         if (sdf==null){
             sdf=new SimpleDateFormat("yyyy-MM-dd");
             sdfDate.set(sdf);
@@ -52,7 +50,7 @@ public class DateUtil {
      * @return 时间字符串
      */
     public String formatDateTime(Date date){
-        var sdf=sdfDateTime.get();
+        SimpleDateFormat sdf=sdfDateTime.get();
         if (sdf==null){
             sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             sdfDateTime.set(sdf);
@@ -74,7 +72,7 @@ public class DateUtil {
      * @return 时间字符串
      */
     public String formatDateTimeSSS(Date date){
-        var sdf=sdfDateTimeSSS.get();
+        SimpleDateFormat sdf=sdfDateTimeSSS.get();
         if (sdf==null){
             sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             sdfDateTimeSSS.set(sdf);

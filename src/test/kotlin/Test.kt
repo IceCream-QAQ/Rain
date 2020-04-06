@@ -1,4 +1,4 @@
-import com.IceCreamQAQ.Yu.Td
+
 import java.lang.reflect.ParameterizedType
 
 //fun main(){
@@ -32,9 +32,3 @@ import java.lang.reflect.ParameterizedType
 //    lateinit var bb:Array<Array<String>>
 //    lateinit var cc:List<String>
 //
-//}
-
-fun main() {
-    val array = arrayOf<Any?>("1", "2", "3")
-    Td.`fun`(array)
-}
