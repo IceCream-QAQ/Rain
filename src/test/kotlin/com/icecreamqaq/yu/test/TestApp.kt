@@ -6,7 +6,7 @@ import com.IceCreamQAQ.Yu.controller.router.DefaultActionInvoker
 import com.IceCreamQAQ.Yu.controller.router.RouterPlus
 import com.IceCreamQAQ.Yu.di.ConfigManager
 import com.IceCreamQAQ.Yu.di.YuContext
-import com.IceCreamQAQ.Yu.job.JobManager
+import com.IceCreamQAQ.Yu.job.JobManager_
 import com.IceCreamQAQ.Yu.loader.AppClassloader
 import com.IceCreamQAQ.Yu.loader.AppLoader_
 import com.icecreamqaq.yu.test.util.TestUtil
@@ -18,7 +18,7 @@ class TestApp {
     private lateinit var loader: AppLoader_
 
     @Inject
-    private lateinit var jobManager: JobManager
+    private lateinit var jobManager: JobManager_
 
     fun load(){
         loader.load()

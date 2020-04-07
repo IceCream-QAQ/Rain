@@ -12,7 +12,7 @@ class JobLoader : Loader_ {
     private lateinit var context: YuContext
 
     @Inject
-    private lateinit var jobManager: JobManager
+    private lateinit var jobManager: JobManager_
 
     override fun load(items: Map<String, LoadItem_>) {
         val jobs = ArrayList<Job>()
@@ -21,7 +21,27 @@ class JobLoader : Loader_ {
             val methods = item.type.methods
             for (method in methods) {
                 val cron = method.getAnnotation(Cron::class.java) ?: continue
-                val job = Job(cron.time, cron.async, ReflectCronInvoker(instance, method))
+                val timeStr = cron.value
+                var time = 0L
+                var cTime = ""
+                for (c in timeStr) {
+                    if (Character.isDigit(c)) cTime += c
+                    else {
+                        val cc = cTime.toLong()
+                        time += when {
+                            c == 'd' -> cc * 1000 * 60 * 60 * 24
+                            c == 'h' -> cc * 1000 * 60 * 60
+                            c == 'm' -> cc * 1000 * 60
+                            c == 's' -> cc * 1000
+                            c == 'S' -> cc
+                            else -> 0L
+                        }
+                        cTime = ""
+                    }
+                }
+
+
+                val job = Job(time, cron.async, ReflectCronInvoker(instance, method))
                 jobs.add(job)
             }
         }

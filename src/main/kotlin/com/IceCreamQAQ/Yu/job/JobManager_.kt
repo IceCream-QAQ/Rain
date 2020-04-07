@@ -3,7 +3,7 @@ package com.IceCreamQAQ.Yu.job
 import java.util.*
 import kotlin.collections.ArrayList
 
-class JobManager {
+class JobManager_ {
 
     lateinit var jobs:ArrayList<Job>
 

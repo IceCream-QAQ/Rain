@@ -11,16 +11,14 @@ class TestJob{
     @Inject
     private lateinit var dateUtil: DateUtil
 
-    @Cron(5000)
+    @Cron("1m5s")
     fun c1(){
         println("时间：${dateUtil.formatDateTimeSSS()}，c1 定时任务触发。")
-        Thread.sleep(2000)
     }
 
-    @Cron(5000)
+    @Cron("10s")
     fun c2(){
         println("时间：${dateUtil.formatDateTimeSSS()}，c2 定时任务触发。")
-        Thread.sleep(10000)
     }
 
 }
