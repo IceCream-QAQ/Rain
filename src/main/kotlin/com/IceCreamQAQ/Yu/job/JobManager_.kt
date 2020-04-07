@@ -7,13 +7,20 @@ class JobManager_ {
 
     lateinit var jobs:ArrayList<Job>
 
-    private lateinit var timer: Timer
+    private lateinit var asyncTimer: Timer
+    private lateinit var syncTimers: ArrayList<Timer>
 
     fun start(){
-        timer = Timer()
+        asyncTimer = Timer()
+        syncTimers = ArrayList()
 
         for (job in jobs) {
-            timer.schedule(job,job.time,job.time)
+            if(job.async)asyncTimer.schedule(job,job.time,job.time)
+            else {
+                val syncTimer = Timer()
+                syncTimers.add(syncTimer)
+                syncTimer.schedule(job,job.time,job.time)
+            }
         }
     }
 
