@@ -1,35 +1,30 @@
 package com.IceCreamQAQ.Yu
 
-import com.IceCreamQAQ.Yu.annotation.Inject
 import com.IceCreamQAQ.Yu.di.ConfigManager
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.loader.AppClassloader
 import com.IceCreamQAQ.Yu.loader.AppLoader_
+import javax.inject.Inject
 
 class DefaultApp {
 
     @Inject
     private lateinit var loader: AppLoader_
 
-    fun load(){
-        loader.load()
+    init {
+        val logger = PrintAppLog()
+
+        val appClassloader = DefaultApp::class.java.classLoader
+        val configManager = ConfigManager(appClassloader, logger, null)
+        val context = YuContext(configManager, logger)
+
+        context.putBean(ClassLoader::class.java, "appClassLoader", appClassloader)
+
+        context.injectBean(this)
     }
 
-    companion object{
-
-        fun start(){
-            val logger = PrintAppLog()
-
-            val appClassloader = AppClassloader(DefaultApp::class.java.classLoader, logger)
-            val configer = ConfigManager(appClassloader, logger, null)
-            val context = YuContext(configer, logger)
-
-            context.putBean(ClassLoader::class.java, "appClassLoader", appClassloader)
-
-            val app = context.newBean(DefaultApp::class.java,save = true)!!
-            app.load()
-        }
-
+    fun start(){
+        loader.load()
     }
 
     class PrintAppLog : AppLogger{

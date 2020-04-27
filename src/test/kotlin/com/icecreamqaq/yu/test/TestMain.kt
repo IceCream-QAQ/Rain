@@ -1,7 +1,8 @@
 package com.icecreamqaq.yu.test
 
-fun main(){
-    TestApp.start()
+import com.IceCreamQAQ.Yu.DefaultStarter
 
-//    dd=DefaultPara
+fun main(){
+    DefaultStarter.start()
 }
+

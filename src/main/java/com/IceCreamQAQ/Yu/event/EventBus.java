@@ -1,17 +1,15 @@
 package com.IceCreamQAQ.Yu.event;
 
-import com.IceCreamQAQ.Yu.annotation.Inject;
+import com.IceCreamQAQ.Yu.di.YuContext;
 import com.IceCreamQAQ.Yu.event.events.Event;
 import com.IceCreamQAQ.Yu.inject.YuQInject;
 import lombok.val;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
 public class EventBus {
-
-    @Inject
-    private YuQInject inject;
 
     @Inject
     private EventInvokerCreator creator;

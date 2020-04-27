@@ -23,21 +23,20 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class AppClassloader extends ClassLoader {
 
-    AppLogger logger;
 
-    public AppClassloader(ClassLoader parent, AppLogger logger) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+    public AppClassloader(ClassLoader parent) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         super(parent);
-        this.logger = logger;
         YuHook.init(this);
+        EnchantManager.init(this);
     }
 
     @SneakyThrows
-    protected Class<?> loadClass(String name, boolean resolve) {
+    public Class<?> loadClass(String name, boolean resolve) {
         return loadClass(name, resolve,true);
     }
 
     @SneakyThrows
-    protected Class<?> loadClass(String name, boolean resolve, boolean enhance) {
+    public Class<?> loadClass(String name, boolean resolve, boolean enhance) {
         Class<?> c = findLoadedClass(name);
         if (c != null) {
             return c;
@@ -69,12 +68,14 @@ public class AppClassloader extends ClassLoader {
     public static boolean isBlackListClass(String name) {
         return name.startsWith("java.")
                 || name.startsWith("javax.")
+                || name.startsWith("kotlin.")
                 || name.startsWith("com.google.")
                 || name.startsWith("org.apache.")
                 || name.startsWith("sun.")
+                || name.startsWith("com.alibaba.fastjson")
                 || name.startsWith("com.sun.")
                 || name.startsWith("com.IceCreamQAQ.Yu.hook")
-                || name.startsWith("com.IceCreamQAQ.Yu.loader.enchant")
+                || name.startsWith("com.IceCreamQAQ.Yu.enchant")
                 ;
     }
 }

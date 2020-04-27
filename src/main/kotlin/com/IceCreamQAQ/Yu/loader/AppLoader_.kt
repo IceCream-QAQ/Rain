@@ -61,7 +61,6 @@ class AppLoader_ {
     }
 
     fun searchLoadBy(loadClass: Class<*>, searchClass: Class<*>, loadItemsMap: HashMap<Class<out Loader_>, MutableMap<String, LoadItem_>>) {
-
         val loadBy = searchClass.getAnnotation(LoadBy_::class.java)
         if (loadBy != null) {
             val loader = loadBy.value.java
@@ -140,7 +139,10 @@ class AppLoader_ {
                                     if (name.endsWith(".class") && !entry.isDirectory) {
                                         val className = name.substring(packageName.length + 1, name.length - 6)
                                         try {
-                                            val clazz = Class.forName("$packageName.$className", true, appClassloader)
+
+
+                                            val clazz = appClassloader.loadClass("$packageName.$className")
+
                                             classes.putIfAbsent(clazz.name, clazz)
                                         } catch (e: ClassNotFoundException) {
                                             e.printStackTrace()

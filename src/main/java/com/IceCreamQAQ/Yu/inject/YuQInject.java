@@ -10,6 +10,7 @@ import lombok.var;
 import javax.inject.Named;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;

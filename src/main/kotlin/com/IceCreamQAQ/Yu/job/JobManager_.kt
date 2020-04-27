@@ -5,7 +5,7 @@ import kotlin.collections.ArrayList
 
 class JobManager_ {
 
-    lateinit var jobs:ArrayList<Job>
+    var jobs:ArrayList<Job> = ArrayList()
 
     private lateinit var asyncTimer: Timer
     private lateinit var syncTimers: ArrayList<Timer>

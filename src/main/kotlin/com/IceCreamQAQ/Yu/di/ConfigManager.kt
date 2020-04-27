@@ -5,106 +5,107 @@ import com.IceCreamQAQ.Yu.error.ConfigFormatError
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileReader
+import java.io.*
 import java.lang.Exception
-import java.lang.RuntimeException
 import java.lang.StringBuilder
+import java.net.JarURLConnection
+import java.net.URL
+import java.net.URLDecoder
 import java.util.*
 import kotlin.collections.ArrayList
 
-class ConfigManager {
+class ConfigManager(val classloader: ClassLoader, val logger: AppLogger, runMode: String?) {
 
     private var config: JSONObject = JSONObject()
 
-    constructor(classloader: ClassLoader, logger: AppLogger, runMode: String?) {
-        val classpath = File(classloader.getResource("").toURI())
-        val f = File(classpath, "conf")
+    init {
 
-        if (f.isDirectory) {
+        logger.logDebug("ConfigManager","Init.")
 
-            loadFolder(f)
-
-            val mode = runMode ?: {
-                var m: String? = null
-                for (s in config.keys) {
-                    m = get("yu.config.runMode", String::class.java, config[s] as JSONObject)
-                    if (m != null) break
-                }
-                m ?: "dev"
-            }()
+        loadFolder("conf")
 
 
-            val ff = File(f, mode)
-
-            if (ff.isDirectory) loadFolder(ff)
-
-            val plugin = File(f, "plugin")
-            val plugins = ArrayList<String>()
-            if (plugin.isDirectory) for (ff in plugin.listFiles()) {
-                if (ff.isDirectory) continue
-                val name = ff.name
-
-                when {
-                    name.endsWith(".properties") -> {
-                        plugins.add(name.substring(0, name.length - 11))
-                        loadConfigByProperties(ff)
-                    }
-                    name.endsWith(".json") -> {
-                        plugins.add(name.substring(0, name.length - 5))
-                        loadConfigByJSON(ff)
-                    }
-                    name.endsWith(".yml") -> {
-                        plugins.add(name.substring(0, name.length - 4))
-                        loadConfigByYaml(ff)
-                    }
-                    name.endsWith(".yaml") -> {
-                        plugins.add(name.substring(0, name.length - 5))
-                        loadConfigByYaml(ff)
-                    }
-                }
+        val mode = runMode ?: {
+            var m: String? = null
+            for (v in config.values) {
+                m = get("yu.config.runMode", String::class.java, v as JSONObject)
+                if (m != null) break
             }
+            m ?: "dev"
+        }()
 
+        logger.logDebug("ConfigManager","Config Mode: $mode")
 
-            val c = JSONObject()
-            for (key in config.keys) {
-                appendObj(c, config[key] as JSONObject, true)
-            }
-            config = c
+        val pluginFiles = loadFolder("conf/plugin")
+        loadFolder("conf/$mode")
 
-        } else {
-            throw RuntimeException("ConfigManager Init Err! Conf folder not found! Conf folder should be at classpath!")
+        val c = JSONObject()
+        for (key in config.keys) {
+            appendObj(c, config[key] as JSONObject, true)
         }
+        config = c
+
+        logger.logDebug("ConfigManager","Init Success")
 
     }
 
-    private fun loadFolder(f: File): List<File> {
-        val files = ArrayList<File>()
-        for (s in f.listFiles()) {
-            if (s.isDirectory) continue
-            files.add(f)
-            val name = s.name
 
-            when {
-                name.endsWith(".properties") -> loadConfigByProperties(s)
-                name.endsWith(".json") -> loadConfigByJSON(s)
-                name.endsWith(".yml") || name.endsWith(".yaml") -> loadConfigByYaml(s)
+    private fun loadFolder(folder: String): List<String> {
+
+        val classloader = this.javaClass.classLoader
+        val dirs: Enumeration<URL> = classloader.getResources(folder)!!
+
+        val configFiles = ArrayList<String>();
+
+        for (url in dirs) {
+            val protocol = url.protocol
+            if ("file" == protocol) {
+                val filePath = URLDecoder.decode(url.file, "UTF-8")
+                val dir = File(filePath)
+                if (dir.isDirectory)
+                    for (ss in dir.listFiles()) {
+                        if (ss.isFile) {
+                            val name = ss.name
+                            configFiles.add(name)
+                            loadConfigFile(name, FileInputStream(ss))
+                        }
+                    }
+            } else if ("jar" == protocol) {
+                val prefix = "$folder/"
+                val jar = (url.openConnection() as JarURLConnection).jarFile
+                for (entry in jar.entries()) {
+                    if (entry.isDirectory) continue
+                    val name = entry.name.replace(prefix, "")
+                    if (name.contains("/")) continue
+                    loadConfigFile(name, jar.getInputStream(entry))
+                }
             }
+
         }
-        return files
+
+        return configFiles
     }
 
-    private fun loadConfigByProperties(file: File) {
-        var jo = config[file.name]
-        if (jo == null) {
-            jo = JSONObject()
-            config[file.name] = jo
-        }
+    private fun loadConfigFile(name: String, inputStream: InputStream) {
+        logger.logDebug("ConfigManager","LoadConfig: $name")
 
+        val jo = config[name] as JSONObject? ?: {
+            val jo = JSONObject()
+            config[name] = jo
+            jo
+        }()
+
+        when {
+            name.endsWith(".properties") -> loadConfigByProperties(jo, inputStream)
+            name.endsWith(".json") -> loadConfigByJSON(jo, inputStream)
+            name.endsWith(".yml") || name.endsWith(".yaml") -> loadConfigByYaml(jo, inputStream)
+        }
+    }
+
+
+    private fun loadConfigByProperties(jo: JSONObject, inputStream: InputStream) {
         val prop = Properties()
-        prop.load(FileInputStream(file))
+        prop.load(inputStream)
 
         val o = JSONObject()
         for (oo in prop.keys) {
@@ -173,16 +174,10 @@ class ConfigManager {
         appendObj(jo as JSONObject, o)
     }
 
-    private fun loadConfigByJSON(file: File) {
-        var jo = config[file.name]
-        if (jo == null) {
-            jo = JSONObject()
-            config[file.name] = jo
-        }
-
+    private fun loadConfigByJSON(jo: JSONObject, inputStream: InputStream) {
         val sb = StringBuilder()
 
-        val fr = BufferedReader(FileReader(file))
+        val fr = BufferedReader(InputStreamReader(inputStream))
         var s = fr.readLine()
         while (s != null) {
             sb.append(s)
@@ -191,10 +186,10 @@ class ConfigManager {
 
         val o = JSON.parseObject(sb.toString())
 
-        appendObj(jo as JSONObject, o)
+        appendObj(jo, o)
     }
 
-    private fun loadConfigByYaml(file: File) {
+    private fun loadConfigByYaml(jo: JSONObject, inputStream: InputStream) {
     }
 
     private fun appendObj(o: JSONObject, oo: JSONObject, append: Boolean = false) {

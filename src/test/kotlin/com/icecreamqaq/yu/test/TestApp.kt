@@ -32,7 +32,7 @@ class TestApp {
         fun start(){
             val logger = PrintAppLog()
 
-            val appClassloader = AppClassloader(TestApp::class.java.classLoader, logger)
+            val appClassloader = TestApp::class.java.classLoader!!
             val configer = ConfigManager(appClassloader, logger, null)
             val context = YuContext(configer, logger)
 
