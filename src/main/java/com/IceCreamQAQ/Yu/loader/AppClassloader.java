@@ -1,26 +1,23 @@
 package com.IceCreamQAQ.Yu.loader;
 
-import com.IceCreamQAQ.Yu.AppLogger;
-import com.IceCreamQAQ.Yu.hook.HookItem;
 import com.IceCreamQAQ.Yu.hook.YuHook;
 import com.IceCreamQAQ.Yu.loader.enchant.EnchantManager;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import lombok.var;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
+import sun.misc.Resource;
+import sun.net.www.protocol.jar.JarURLConnection;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.*;
-
+@Slf4j
 public class AppClassloader extends ClassLoader {
 
 
@@ -30,9 +27,15 @@ public class AppClassloader extends ClassLoader {
         EnchantManager.init(this);
     }
 
+    private List<String> blackList = new ArrayList<>();
+
+    public void registerBackList(List<String> packageName) {
+        blackList.addAll(packageName);
+    }
+
     @SneakyThrows
     public Class<?> loadClass(String name, boolean resolve) {
-        return loadClass(name, resolve,true);
+        return loadClass(name, resolve, true);
     }
 
     @SneakyThrows
@@ -55,27 +58,70 @@ public class AppClassloader extends ClassLoader {
     }
 
     private Class<?> loadAppClass(String name) throws IOException {
-        val in = this.getParent().getResourceAsStream(name.replace(".", "/") + ".class");
-        var bytes = new byte[in.available()];
-        in.read(bytes);
+        log.debug("Load Class: %s.", name);
+
+        val path = name.replace(".", "/") + ".class";
+
+        val url = this.getParent().getResource(path);
+        val uc = url.openConnection();
+        val resource = new Resource() {
+            @Override
+            public String getName() {
+                return path;
+            }
+
+            @Override
+            public URL getURL() {
+                return url;
+            }
+
+            @Override
+            public URL getCodeSourceURL() {
+                return url;
+            }
+
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return uc.getInputStream();
+            }
+
+            @Override
+            public int getContentLength() throws IOException {
+                return uc.getContentLength();
+            }
+        };
+        var bytes = resource.getBytes();
+//        if (name.equals("cn/hutool/core/util/ArrayUtil".replace("/", "."))) {
+//            for (int i = 0; i < 48772; i++) {
+//                System.out.println(i + ": " + bytes[i]);
+//            }
+//        }
 
         bytes = EnchantManager.checkClass(bytes);
-        bytes = YuHook.checkClass(name, bytes);
+
+//        bytes = YuHook.checkClass(name, bytes);
 
         return defineClass(name, bytes, 0, bytes.length);
     }
 
-    public static boolean isBlackListClass(String name) {
-        return name.startsWith("java.")
+    public boolean isBlackListClass(String name) {
+        val b = name.startsWith("java.")
                 || name.startsWith("javax.")
-                || name.startsWith("kotlin.")
+                || name.startsWith("kotlin")
                 || name.startsWith("com.google.")
                 || name.startsWith("org.apache.")
-                || name.startsWith("sun.")
-                || name.startsWith("com.alibaba.fastjson")
+//                || name.startsWith("sun.")
+//                || name.startsWith("com.alibaba.fastjson")
                 || name.startsWith("com.sun.")
                 || name.startsWith("com.IceCreamQAQ.Yu.hook")
                 || name.startsWith("com.IceCreamQAQ.Yu.enchant")
+//                || name.startsWith("okhttp3.")
+//                || name.startsWith("redis.");
                 ;
+        if (b) return true;
+        for (String s : blackList) {
+            if (name.startsWith(s)) return true;
+        }
+        return false;
     }
 }

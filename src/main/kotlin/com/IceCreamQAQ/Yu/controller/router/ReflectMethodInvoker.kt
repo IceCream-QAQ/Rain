@@ -37,10 +37,6 @@ class ReflectMethodInvoker(val method: Method, val instance: Any) : MethodInvoke
             val mp = mps[i] ?: continue
             paras[i] = when (mp.type) {
                 0 -> context[mp.data as String]
-//                1 -> {
-//                    val pathVar = mp.data as PathVar
-//
-//                }
                 else -> null
             }
         }

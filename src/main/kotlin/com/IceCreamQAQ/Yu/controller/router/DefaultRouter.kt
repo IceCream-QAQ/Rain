@@ -6,15 +6,15 @@ import com.IceCreamQAQ.Yu.controller.route.RouteInvoker
 import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Pattern
 
-open class DefaultRouter(val level: Int):RouterPlus {
+open class DefaultRouter(val level: Int) : RouterPlus {
     protected var needMatch: MutableMap<String, RouterPlus> = ConcurrentHashMap()
     var routers: MutableMap<String, RouterPlus> = ConcurrentHashMap()
 
     override fun invoke(path: String, context: ActionContext): Boolean {
 
-        if (context.getPath().size == level) return false
-        val nextPath = context.getPath()[level]
-        if (routers[nextPath]?.invoke(nextPath, context) == true)return true
+        if (context.path.size == level) return false
+        val nextPath = context.path[level]
+        if (routers[nextPath]?.invoke(nextPath, context) == true) return true
         else {
             for ((k, v) in needMatch) {
                 if (Pattern.matches(k, path))
@@ -24,7 +24,7 @@ open class DefaultRouter(val level: Int):RouterPlus {
         return false
     }
 
-    fun putInvoker(router:DefaultRouter){
+    fun putInvoker(router: DefaultRouter) {
         this.needMatch.putAll(router.needMatch)
         this.routers.putAll(router.routers)
     }

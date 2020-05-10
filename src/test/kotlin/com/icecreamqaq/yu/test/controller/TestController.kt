@@ -11,12 +11,17 @@ import javax.inject.Named
 class TestController {
 
     @Before
-    fun testBefore():String{
+    fun testBefore(): String {
         return "Test Before"
     }
 
+    @Action("t1")
+    fun t1() = ""
+
     @Action("test")
-    fun testAction(@PathVar(value = 2, type = PathVar.Type.number) aaa: String, bbb: String, @Named("111") ccc: String) {
+    fun testAction(aaa: String,
+                   bbb: String, ccc: String) {
+        val ddd = "123412"
         println("before = $aaa")
         println("Test Action")
     }

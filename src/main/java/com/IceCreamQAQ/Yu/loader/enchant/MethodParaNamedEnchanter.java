@@ -15,21 +15,31 @@ public class MethodParaNamedEnchanter implements Enchanter {
         for (MethodNode method : (List<MethodNode>) cn.methods) {
             if (method.name.equals("<init>")) continue;
 
-            if (method.visibleParameterAnnotations == null) continue;
+            if (method.localVariables.size() < 2) continue;
 
-            var paraIndex = 0;
-            val paraName = new String[method.visibleParameterAnnotations.length];
+            val paraName = new ArrayList<String>();
+
+            LocalVariableNode thisNode = null;
+
+            for (LocalVariableNode localVariable : (List<LocalVariableNode>) method.localVariables) {
+                if (localVariable.name.equals("this")) {
+                    thisNode = localVariable;
+                    break;
+                }
+            }
+
+            if (thisNode == null) return;
 
             for (LocalVariableNode localVariable : (List<LocalVariableNode>) method.localVariables) {
                 if (localVariable.name.equals("this")) continue;
 
-                paraName[paraIndex] = localVariable.name;
-                paraIndex++;
-
-                if (paraIndex > paraName.length) break;
+                if (thisNode.start == localVariable.start && thisNode.end == localVariable.end)
+                    paraName.add(localVariable.name);
             }
 
             List<AnnotationNode>[] pas = method.visibleParameterAnnotations;
+            if (pas == null) pas = new List[paraName.size()];
+            method.visibleParameterAnnotations = pas;
 
             for (int i = 0; i < pas.length; i++) {
                 val ans = pas[i];
@@ -42,7 +52,7 @@ public class MethodParaNamedEnchanter implements Enchanter {
                     val values = new ArrayList<String>();
 
                     values.add("value");
-                    values.add(paraName[i]);
+                    values.add(paraName.get(i));
 
                     an.values = values;
 
@@ -60,7 +70,7 @@ public class MethodParaNamedEnchanter implements Enchanter {
                     val an = new AnnotationNode("Ljavax/inject/Named;");
                     val values = new ArrayList<String>();
                     values.add("value");
-                    values.add(paraName[i]);
+                    values.add(paraName.get(i));
                     an.values = values;
                     ans.add(an);
                 }

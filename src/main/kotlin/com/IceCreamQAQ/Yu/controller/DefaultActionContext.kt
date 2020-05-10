@@ -4,21 +4,17 @@ import com.IceCreamQAQ.Yu.entity.Result
 
 class DefaultActionContext :ActionContext {
 
-    private lateinit var path:Array<String>
+    override lateinit var path: Array<String>
+    override var result: Result? = null
+
+    //    private lateinit var path:Array<String>
     private val saves = HashMap<String,Any>()
-    private var result:Result? = null
+//    private var result:Result? = null
 
     init {
         this["actionContext"] = this
     }
 
-    override fun getPath(): Array<String> {
-        return path
-    }
-
-    fun setPath(path: Array<String>){
-        this.path=path
-    }
 
     override fun get(name: String): Any? {
         return saves[name]
@@ -26,11 +22,6 @@ class DefaultActionContext :ActionContext {
 
     override fun set(name: String, obj: Any) {
         saves[name] = obj
-    }
-
-
-    override fun setResult(result: Result) {
-        this.result=result
     }
 
     override fun buildResult(obj: Any): Result {

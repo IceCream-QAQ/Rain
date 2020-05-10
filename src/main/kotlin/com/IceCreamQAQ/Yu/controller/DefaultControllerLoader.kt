@@ -9,6 +9,7 @@ import com.IceCreamQAQ.Yu.controller.router.DefaultRouter
 import com.IceCreamQAQ.Yu.controller.router.DefaultActionInvoker
 import com.IceCreamQAQ.Yu.controller.router.MethodInvoker
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.loader.LoadItem_
 import com.IceCreamQAQ.Yu.loader.Loader_
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.tree.ClassNode
@@ -16,6 +17,7 @@ import org.objectweb.asm.tree.MethodNode
 import java.lang.reflect.Method
 import java.util.*
 import javax.inject.Inject
+import javax.inject.Named
 
 
 abstract class DefaultControllerLoader : Loader_ {
@@ -23,10 +25,32 @@ abstract class DefaultControllerLoader : Loader_ {
     @Inject
     private lateinit var logger: AppLogger
 
+    @Inject
+    private lateinit var context:YuContext
+
+    override fun load(items: Map<String, LoadItem_>) {
+        val rootRouters = HashMap<String,DefaultRouter>()
+        for (item in items.values) {
+            val clazz = item.type
+            val name = clazz.getAnnotation(Named::class.java)?.value ?: item.annotation::class.java.interfaces[0].getAnnotation(Named::class.java)?.value ?: continue
+            val rootRouter = rootRouters[name] ?:{
+                val r = DefaultRouter(0)
+                rootRouters[name] = r
+                r
+            }()
+
+            controllerToRouter_(context[clazz]?: continue,rootRouter)
+        }
+
+        for ((k, v) in rootRouters) {
+            context.putBean(v,k)
+        }
+    }
+
     @Throws(java.lang.Exception::class)
     protected abstract fun createMethodInvoker_(obj: Any, method: Method): MethodInvoker
 
-    protected abstract fun createActionInvoker_(level: Int): DefaultActionInvoker
+    protected abstract fun createActionInvoker_(level: Int,actionMethod: Method): DefaultActionInvoker
 
     fun controllerToRouter_(instance: Any, rootRouter: DefaultRouter) {
         val controllerClass = instance::class.java
@@ -62,7 +86,7 @@ abstract class DefaultControllerLoader : Loader_ {
                     actionRootRouter = controllerRouter
                 }
                 val methodInvoker = createMethodInvoker_(instance, method)
-                val actionInvoker = createActionInvoker_(actionRootRouter.level + 1)
+                val actionInvoker = createActionInvoker_(actionRootRouter.level + 1, method)
                 actionInvoker.invoker = methodInvoker
                 actionInvoker.befores = before
                 actionRootRouter.routers[path] = actionInvoker

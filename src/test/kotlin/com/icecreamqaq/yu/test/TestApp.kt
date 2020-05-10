@@ -20,43 +20,47 @@ class TestApp {
     @Inject
     private lateinit var jobManager: JobManager_
 
-    fun load(){
+    @Inject
+    private lateinit var context: YuContext
+
+    fun start() {
         loader.load()
 
         jobManager.start()
     }
 
-    companion object{
+    fun test(){
+        val test = context.getBean(TestUtil::class.java)
+        println(test)
 
-        @JvmStatic
-        fun start(){
-            val logger = PrintAppLog()
+        val router = context.getBean(RouterPlus::class.java, "default")!!
 
-            val appClassloader = TestApp::class.java.classLoader!!
-            val configer = ConfigManager(appClassloader, logger, null)
-            val context = YuContext(configer, logger)
+        val ac = DefaultActionContext()
 
-            context.putBean(ClassLoader::class.java, "appClassLoader", appClassloader)
-            context.putBean(AppClassloader::class.java, "appClassLoader", appClassloader)
+        val paths = arrayOf("t1", "ttt")
+        ac.path = paths
 
-            val app = context.newBean(TestApp::class.java,save = true)!!
-            app.load()
-
-            val test = context.getBean(TestUtil::class.java)
-            println(test)
-
-            val router = context.getBean(RouterPlus::class.java,"priv") ?: return
-
-            val ac = DefaultActionContext()
-
-            val paths = arrayOf("test","ttt")
-            ac.setPath(paths)
-
-            router.invoke(paths[0],ac)
-//            router.invoke()
-        }
-
+        router.invoke(paths[0], ac)
     }
+
+    init {
+        val logger = PrintAppLog()
+
+        val appClassloader = TestApp::class.java.classLoader!!
+        val configer = ConfigManager(appClassloader, logger, null)
+        val context = YuContext(configer, logger)
+
+        context.putBean(ClassLoader::class.java, "appClassLoader", appClassloader)
+        context.putBean(AppClassloader::class.java, "appClassLoader", appClassloader)
+
+        context.injectBean(this)
+
+//        app.load()
+
+
+//            router.invoke()
+    }
+
 
     class PrintAppLog : AppLogger {
         override fun logDebug(title: String?, body: String?): Int {

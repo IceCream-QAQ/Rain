@@ -5,7 +5,7 @@ import com.IceCreamQAQ.Yu.entity.DoNone
 import com.IceCreamQAQ.Yu.entity.Result
 import java.lang.Exception
 
-class DefaultActionInvoker(level: Int) : DefaultRouter(level) {
+open class DefaultActionInvoker(level: Int) : DefaultRouter(level) {
 
     lateinit var befores: Array<MethodInvoker>
     lateinit var invoker: MethodInvoker
@@ -15,16 +15,15 @@ class DefaultActionInvoker(level: Int) : DefaultRouter(level) {
         try {
             for (before in befores) {
                 val o = before.invoke(context)
-                if (o != null) context[toLowerCaseFirstOne(o::class.java.simpleName)]=o
+                if (o != null) context[toLowerCaseFirstOne(o::class.java.simpleName)] = o
             }
             val result = invoker.invoke(context) ?: return true
-            if (result is Result) context.setResult(result)
-            else context.setResult(context.buildResult(result))
-        }catch (e:Result){
-            context.setResult(e)
-        }catch (e:DoNone){
-
-        }catch (e:Exception){
+            if (result is Result) context.result = result
+            else context.result = context.buildResult(result)
+        } catch (e: DoNone) {
+        } catch (e: Result) {
+            context.result = e
+        } catch (e: Exception) {
             e.printStackTrace()
         }
         return true
