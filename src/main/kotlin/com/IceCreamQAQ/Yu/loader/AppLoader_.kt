@@ -7,6 +7,7 @@ import com.IceCreamQAQ.Yu.annotation.LoadBy_
 import com.IceCreamQAQ.Yu.di.BeanFactoryLoader
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.error.BeanCreateError
+import com.IceCreamQAQ.Yu.isBean
 import java.io.File
 import java.io.IOException
 import java.net.JarURLConnection
@@ -43,7 +44,7 @@ class AppLoader_ {
             val loadItemsMap = HashMap<Class<out Loader_>, MutableMap<String, LoadItem_>>()
 
             for (clazz in classes.values) {
-                searchLoadBy(clazz, clazz,loadItemsMap)
+                searchLoadBy(clazz, clazz, loadItemsMap)
             }
 
             val beanFactories = loadItemsMap[BeanFactoryLoader::class.java] ?: HashMap()
@@ -55,41 +56,27 @@ class AppLoader_ {
                 val loaderInstance = context.newBean(loader) ?: continue
                 loaderInstance.load(loadItemsMap[loader] ?: continue)
             }
+
+            for (clazz in classes.values) {
+                context[clazz]
+            }
         } catch (e: Exception) {
             throw RuntimeException("程序初始化失败！", e)
         }
     }
 
     fun searchLoadBy(loadClass: Class<*>, searchClass: Class<*>, loadItemsMap: HashMap<Class<out Loader_>, MutableMap<String, LoadItem_>>) {
+        if (!loadClass.isBean()) return
         val loadBy = searchClass.getAnnotation(LoadBy_::class.java)
         if (loadBy != null) {
-            val loader = loadBy.value.java
-            val loadItems = loadItemsMap[loader] ?: {
-                val l = HashMap<String, LoadItem_>()
-                loadItemsMap[loader] = l
-                l
-            }()
-            val loadItem = LoadItem_()
-            loadItem.annotation = loadBy
-            loadItem.type = loadClass
-            loadItems[loadClass.name] = loadItem
-//            return
+            addLoadItem(loadClass, loadBy, loadBy, loadItemsMap)
         }
 
         val annotationInstances = searchClass.annotations
         for (annotationInstance in annotationInstances) {
             val annotationClass = annotationInstance::class.java.interfaces[0]
-            val loadBy = annotationClass.getAnnotation(LoadBy_::class.java) ?: continue
-            val loader = loadBy.value.java
-            val loadItems = loadItemsMap[loader] ?: {
-                val l = HashMap<String, LoadItem_>()
-                loadItemsMap[loader] = l
-                l
-            }()
-            val loadItem = LoadItem_()
-            loadItem.annotation = annotationInstance
-            loadItem.type = loadClass
-            loadItems[loadClass.name] = loadItem
+            addLoadItem(loadClass, annotationInstance, annotationClass.getAnnotation(LoadBy_::class.java)
+                    ?: continue, loadItemsMap)
 //            return
         }
 
@@ -100,6 +87,19 @@ class AppLoader_ {
         for (i in interfaces) {
             searchLoadBy(loadClass, i, loadItemsMap)
         }
+    }
+
+    fun addLoadItem(loadClass: Class<*>, annotationInstance: Annotation, loadBy: LoadBy_, loadItemsMap: HashMap<Class<out Loader_>, MutableMap<String, LoadItem_>>) {
+        val loader = loadBy.value.java
+        val loadItems = loadItemsMap[loader] ?: {
+            val l = HashMap<String, LoadItem_>()
+            loadItemsMap[loader] = l
+            l
+        }()
+        val loadItem = LoadItem_()
+        loadItem.annotation = annotationInstance
+        loadItem.type = loadClass
+        loadItems[loadClass.name] = loadItem
     }
 
     @Throws(MalformedURLException::class)

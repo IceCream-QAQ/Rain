@@ -4,9 +4,11 @@ import com.IceCreamQAQ.Yu.AppLogger
 import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.annotation.Default
+import com.IceCreamQAQ.Yu.isBean
 import com.alibaba.fastjson.JSONObject
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
+import java.lang.reflect.Modifier
 import java.lang.reflect.ParameterizedType
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -122,6 +124,7 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
     }
 
     private fun <T> createBeanInstance(clazz: Class<T>): T? {
+        if (!clazz.isBean())return null;
         val constructorNum = clazz.constructors.size
         if (constructorNum < 1) return null
         val constructors = clazz.constructors
@@ -138,7 +141,13 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
             break
         }
 
-        if (inject == null) return clazz.newInstance()
+        if (inject == null)
+            return try {
+                clazz.getConstructor().newInstance()
+            } catch (e: Exception) {
+                null
+            }
+
 
         val paras = inject.parameters
         val objs = arrayOfNulls<Any>(paras.size)
