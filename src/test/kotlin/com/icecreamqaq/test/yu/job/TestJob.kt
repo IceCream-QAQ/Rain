@@ -1,4 +1,4 @@
-package com.icecreamqaq.yu.test.job
+package com.icecreamqaq.test.yu.job
 
 import com.IceCreamQAQ.Yu.annotation.Cron
 import com.IceCreamQAQ.Yu.annotation.JobCenter

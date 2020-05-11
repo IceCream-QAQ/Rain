@@ -22,6 +22,7 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
 
     init {
         putBean(this)
+        putBean(configer)
         putBean(logger)
         factoryManager = newBean(BeanFactoryManager::class.java, save = true)
                 ?: throw RuntimeException("Yu Init Err! Cant new BeanFactoryManager!")

@@ -1,4 +1,4 @@
-package com.icecreamqaq.yu.test
+package com.icecreamqaq.test.yu
 
 import com.IceCreamQAQ.Yu.loader.AppClassloader
 
@@ -10,7 +10,7 @@ class TestStarter {
         fun start(){
             val appClassLoader = AppClassloader(TestStarter::class.java.classLoader)
 
-            val appClass = appClassLoader.loadClass("com.icecreamqaq.yu.test.TestApp")
+            val appClass = appClassLoader.loadClass("com.icecreamqaq.test.yu.TestApp")
             val startMethod = appClass.getMethod("start")
 
             val app = appClass.newInstance()

@@ -1,4 +1,4 @@
-package com.icecreamqaq.yu.test
+package com.icecreamqaq.test.yu
 
 import java.io.File
 import java.net.JarURLConnection

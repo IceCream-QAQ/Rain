@@ -1,6 +1,7 @@
 package com.IceCreamQAQ.Yu.di
 
 import com.IceCreamQAQ.Yu.AppLogger
+import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.error.ConfigFormatError
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
@@ -36,7 +37,7 @@ class ConfigManager(val classloader: ClassLoader, val logger: AppLogger, runMode
 
         logger.logDebug("ConfigManager","Config Mode: $mode")
 
-        val pluginFiles = loadFolder("conf/plugin")
+        loadFolder("conf/module")
         loadFolder("conf/$mode")
 
         val c = JSONObject()

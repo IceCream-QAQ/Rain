@@ -1,7 +1,7 @@
-package com.icecreamqaq.yu.test.bf
+package com.icecreamqaq.test.yu.bf
 
 import com.IceCreamQAQ.Yu.di.BeanFactory
-import com.icecreamqaq.yu.test.util.TestUtil
+import com.icecreamqaq.test.yu.util.TestUtil
 
 class TestFactory :BeanFactory<TestUtil> {
 

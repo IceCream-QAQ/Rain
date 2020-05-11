@@ -9,6 +9,8 @@ class BeanFactoryLoader :Loader_ {
     @Inject
     lateinit var manager: BeanFactoryManager
 
+    override fun width(): Int = 1
+
     override fun load(items: Map<String, LoadItem_>) {
         for (item in items.values) {
             manager.registerFactory(item.type as Class<BeanFactory<*>>)

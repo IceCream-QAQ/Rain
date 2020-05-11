@@ -1,5 +1,6 @@
 package com.IceCreamQAQ.Yu
 
+import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.alibaba.fastjson.JSON
 import java.lang.reflect.Modifier
 

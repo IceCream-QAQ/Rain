@@ -1,15 +1,21 @@
 package com.IceCreamQAQ.Yu
 
+import com.IceCreamQAQ.Yu.`as`.AsLoader
+import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.di.ConfigManager
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.loader.AppClassloader
 import com.IceCreamQAQ.Yu.loader.AppLoader_
 import javax.inject.Inject
 
-class DefaultApp {
+@NotSearch
+open class DefaultApp {
 
     @Inject
-    private lateinit var loader: AppLoader_
+    lateinit var loader: AppLoader_
+
+    @Inject
+    lateinit var asLoader: AsLoader
 
     init {
         val logger = PrintAppLog()
@@ -25,6 +31,12 @@ class DefaultApp {
 
     fun start(){
         loader.load()
+        asLoader.init()
+        asLoader.start()
+    }
+
+    fun stop(){
+        asLoader.stop()
     }
 
     class PrintAppLog : AppLogger{

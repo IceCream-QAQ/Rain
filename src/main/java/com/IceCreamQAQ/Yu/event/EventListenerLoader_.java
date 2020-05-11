@@ -35,6 +35,6 @@ public class EventListenerLoader_ implements Loader_ {
 
     @Override
     public int width() {
-        return 0;
+        return 10;
     }
 }

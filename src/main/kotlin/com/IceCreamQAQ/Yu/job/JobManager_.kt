@@ -1,16 +1,20 @@
 package com.IceCreamQAQ.Yu.job
 
+import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import java.util.*
 import kotlin.collections.ArrayList
 
-class JobManager_ {
+class JobManager_ : ApplicationService{
 
     var jobs:ArrayList<Job> = ArrayList()
 
     private lateinit var asyncTimer: Timer
     private lateinit var syncTimers: ArrayList<Timer>
+    override fun init() {
 
-    fun start(){
+    }
+
+    override fun start(){
         asyncTimer = Timer()
         syncTimers = ArrayList()
 
@@ -24,7 +28,7 @@ class JobManager_ {
         }
     }
 
-    fun stop(){
+    override fun stop(){
 
     }
 

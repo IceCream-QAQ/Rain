@@ -63,6 +63,7 @@ public class AppClassloader extends ClassLoader {
         val path = name.replace(".", "/") + ".class";
 
         val url = this.getParent().getResource(path);
+        if (url == null) throw new NoClassDefFoundError(name);
         val uc = url.openConnection();
         val resource = new Resource() {
             @Override
@@ -110,13 +111,11 @@ public class AppClassloader extends ClassLoader {
                 || name.startsWith("kotlin")
                 || name.startsWith("com.google.")
                 || name.startsWith("org.apache.")
-//                || name.startsWith("sun.")
-//                || name.startsWith("com.alibaba.fastjson")
+                || name.startsWith("sun.")
                 || name.startsWith("com.sun.")
+                || name.startsWith("com.IceCreamQAQ.Yu.annotation")
                 || name.startsWith("com.IceCreamQAQ.Yu.hook")
                 || name.startsWith("com.IceCreamQAQ.Yu.enchant")
-//                || name.startsWith("okhttp3.")
-//                || name.startsWith("redis.");
                 ;
         if (b) return true;
         for (String s : blackList) {
