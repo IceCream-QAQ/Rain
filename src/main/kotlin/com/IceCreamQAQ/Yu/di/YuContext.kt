@@ -37,7 +37,7 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
     }
 
     fun getBean(clazz: String, name: String = ""): Any? {
-        return context[clazz]?.get(name) ?: newBean(Class.forName(clazz), save = true)
+        return context[clazz]?.get(name) ?: newBean(Class.forName(clazz), name, true)
     }
 
     fun putBean(obj: Any, name: String = "") {
@@ -118,14 +118,15 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
     }
 
     fun <T> newBean(clazz: Class<T>, name: String? = null, save: Boolean = false): T? {
-        val bean = factoryManager?.getFactory(clazz)?.createBean() as T ?: createBeanInstance(clazz) ?: return null
+        val bean = factoryManager?.getFactory(clazz)?.createBean(name ?: "")
+                ?: createBeanInstance(clazz) ?: return null
         if (save) putBean(bean, name ?: clazz.getAnnotation(Named::class.java)?.value ?: "")
         injectBean(bean)
         return bean
     }
 
     private fun <T> createBeanInstance(clazz: Class<T>): T? {
-        if (!clazz.isBean())return null;
+        if (!clazz.isBean()) return null;
         val constructorNum = clazz.constructors.size
         if (constructorNum < 1) return null
         val constructors = clazz.constructors
