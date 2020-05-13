@@ -23,6 +23,7 @@ class ConfigManager(val classloader: ClassLoader, val logger: AppLogger, runMode
 
         logger.logDebug("ConfigManager","Init.")
 
+        loadFolder("conf/module")
         loadFolder("conf")
 
 
@@ -36,8 +37,7 @@ class ConfigManager(val classloader: ClassLoader, val logger: AppLogger, runMode
         }()
 
         logger.logDebug("ConfigManager","Config Mode: $mode")
-
-        loadFolder("conf/module")
+        
         loadFolder("conf/$mode")
 
         val c = JSONObject()
