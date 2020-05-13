@@ -3,14 +3,10 @@ package com.icecreamqaq.test.yu.bf
 import com.IceCreamQAQ.Yu.di.BeanFactory
 import com.icecreamqaq.test.yu.util.TestUtil
 
-class TestFactory :BeanFactory<TestUtil> {
+class TestFactory : BeanFactory<TestUtil> {
 
-    init {
-        println("Created TestFactory")
-    }
-
-    override fun createBean(): TestUtil {
+    override fun createBean(clazz: Class<TestUtil>, name: String): TestUtil {
         println("new TestUtil")
-        return TestUtil("Test")
+        return TestUtil(name)
     }
 }

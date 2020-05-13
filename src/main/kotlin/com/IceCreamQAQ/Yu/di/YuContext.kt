@@ -92,15 +92,9 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
                     isList(type) -> configer.getArray(key, (field.genericType as ParameterizedType).actualTypeArguments[0] as Class<*>)
                     isArray(type) -> configer.getArray(key, type.componentType)?.toTypedArray()
                     else -> configer.get(key, field.type)
-                }
+                } ?: field.getAnnotation(Default::class.java)?.value
 
-                if (value == null) {
-                    val default = field.getAnnotation(Default::class.java)
-                    if (default != null) {
-                        field.isAccessible = true
-                        field[obj] = default.value
-                    }
-                } else {
+                if (value != null) {
                     field.isAccessible = true
                     field[obj] = value
                 }
@@ -118,7 +112,7 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
     }
 
     fun <T> newBean(clazz: Class<T>, name: String? = null, save: Boolean = false): T? {
-        val bean = factoryManager?.getFactory(clazz)?.createBean(name ?: "")
+        val bean = factoryManager?.getFactory(clazz)?.createBean(clazz, name ?: "")
                 ?: createBeanInstance(clazz) ?: return null
         if (save) putBean(bean, name ?: clazz.getAnnotation(Named::class.java)?.value ?: "")
         injectBean(bean)

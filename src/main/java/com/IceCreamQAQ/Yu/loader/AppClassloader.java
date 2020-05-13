@@ -113,6 +113,7 @@ public class AppClassloader extends ClassLoader {
                 || name.startsWith("org.apache.")
                 || name.startsWith("sun.")
                 || name.startsWith("com.sun.")
+                || name.startsWith("net.sf.ehcache")
                 || name.startsWith("com.IceCreamQAQ.Yu.annotation.")
                 || name.startsWith("com.IceCreamQAQ.Yu.hook.")
                 || name.startsWith("com.IceCreamQAQ.Yu.loader.enchant.")

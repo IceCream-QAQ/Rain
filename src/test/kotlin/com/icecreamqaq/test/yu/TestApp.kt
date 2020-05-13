@@ -4,6 +4,7 @@ import com.IceCreamQAQ.Yu.AppLogger
 import com.IceCreamQAQ.Yu.DefaultApp
 import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.controller.DefaultActionContext
+import com.IceCreamQAQ.Yu.controller.TestResult
 import com.IceCreamQAQ.Yu.controller.router.DefaultActionInvoker
 import com.IceCreamQAQ.Yu.controller.router.RouterPlus
 import com.IceCreamQAQ.Yu.di.ConfigManager
@@ -17,23 +18,27 @@ import com.icecreamqaq.test.yu.util.TestUtil
 import javax.inject.Inject
 
 @NotSearch
-class TestApp: DefaultApp() {
+class TestApp : DefaultApp() {
 
     @Inject
     lateinit var context: YuContext
 
-    fun test(){
-        val test = this.context.getBean(TestUtil::class.java)
+    fun test() {
+        val test = this.context.getBean(TestUtil::class.java, "123")
         println(test)
 
         val router = context.getBean(RouterPlus::class.java, "default")!!
 
         val ac = DefaultActionContext()
 
-        val paths = arrayOf("t1", "ttt")
+        val paths = arrayOf("t2", "ttt")
         ac.path = paths
 
         router.invoke(paths[0], ac)
 
+        paths[0] = "t1"
+        router.invoke(paths[0], ac)
+
+        println("result: ${(ac.result as TestResult).obj}")
     }
 }

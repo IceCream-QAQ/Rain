@@ -13,12 +13,12 @@ class BeanFactoryManager {
     private lateinit var context: YuContext
 
     fun registerFactory(clazz:Class<BeanFactory<*>>){
-        val factory = context.newBean(clazz) ?: throw BeanCreateError("Cant Instanced BeanFactory ${clazz.name}")
+        val factory = context[clazz] ?: throw BeanCreateError("Cant Instanced BeanFactory ${clazz.name}")
 
         for (gi in clazz.genericInterfaces) {
-            val pi = gi as ParameterizedType
+            val pi = gi as? ParameterizedType ?:continue
             if (pi.rawType == BeanFactory::class.java){
-                val beanClass = pi.actualTypeArguments[0] as Class<*>
+                val beanClass = pi.actualTypeArguments[0] as? Class<*> ?: (pi.actualTypeArguments[0] as ParameterizedType).rawType as Class<*>
                 factories[beanClass.name] = factory
             }
         }

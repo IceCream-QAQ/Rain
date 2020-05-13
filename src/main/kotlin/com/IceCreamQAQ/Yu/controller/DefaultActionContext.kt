@@ -25,6 +25,8 @@ class DefaultActionContext :ActionContext {
     }
 
     override fun buildResult(obj: Any): Result {
-        return Result()
+        return TestResult(obj)
     }
 }
+
+data class TestResult(val obj:Any):Result()

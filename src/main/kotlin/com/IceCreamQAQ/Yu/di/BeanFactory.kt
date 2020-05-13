@@ -5,6 +5,6 @@ import com.IceCreamQAQ.Yu.annotation.LoadBy_
 @LoadBy_(BeanFactoryLoader::class)
 interface BeanFactory<T> {
 
-    fun createBean(name:String):T
+    fun createBean(clazz: Class<T>,name:String):T
 
 }
