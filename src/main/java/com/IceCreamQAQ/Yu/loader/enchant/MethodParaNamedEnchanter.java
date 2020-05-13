@@ -1,5 +1,6 @@
 package com.IceCreamQAQ.Yu.loader.enchant;
 
+import com.IceCreamQAQ.Yu.annotation.NotSearch;
 import lombok.val;
 import lombok.var;
 import org.objectweb.asm.tree.*;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@NotSearch
 public class MethodParaNamedEnchanter implements Enchanter {
 
     @Override

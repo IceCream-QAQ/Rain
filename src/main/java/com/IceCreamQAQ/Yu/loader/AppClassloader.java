@@ -57,13 +57,13 @@ public class AppClassloader extends ClassLoader {
         }
     }
 
-    private Class<?> loadAppClass(String name) throws IOException {
+    private Class<?> loadAppClass(String name) throws IOException, ClassNotFoundException {
         log.debug("Load Class: %s.", name);
 
         val path = name.replace(".", "/") + ".class";
 
         val url = this.getParent().getResource(path);
-        if (url == null) throw new NoClassDefFoundError(name);
+        if (url == null) throw new ClassNotFoundException(name);
         val uc = url.openConnection();
         val resource = new Resource() {
             @Override
@@ -113,9 +113,9 @@ public class AppClassloader extends ClassLoader {
                 || name.startsWith("org.apache.")
                 || name.startsWith("sun.")
                 || name.startsWith("com.sun.")
-                || name.startsWith("com.IceCreamQAQ.Yu.annotation")
-                || name.startsWith("com.IceCreamQAQ.Yu.hook")
-                || name.startsWith("com.IceCreamQAQ.Yu.enchant")
+                || name.startsWith("com.IceCreamQAQ.Yu.annotation.")
+                || name.startsWith("com.IceCreamQAQ.Yu.hook.")
+                || name.startsWith("com.IceCreamQAQ.Yu.loader.enchant.")
                 ;
         if (b) return true;
         for (String s : blackList) {

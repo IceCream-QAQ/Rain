@@ -4,6 +4,8 @@ import com.IceCreamQAQ.Yu.`as`.AsLoader
 import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.di.ConfigManager
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.event.EventBus
+import com.IceCreamQAQ.Yu.event.events.AppStartEvent
 import com.IceCreamQAQ.Yu.loader.AppClassloader
 import com.IceCreamQAQ.Yu.loader.AppLoader_
 import javax.inject.Inject
@@ -16,6 +18,9 @@ open class DefaultApp {
 
     @Inject
     lateinit var asLoader: AsLoader
+
+    @Inject
+    lateinit var eventBus: EventBus
 
     init {
         val logger = PrintAppLog()
@@ -31,8 +36,9 @@ open class DefaultApp {
 
     fun start(){
         loader.load()
-        asLoader.init()
+//        asLoader.init()
         asLoader.start()
+        eventBus.post(AppStartEvent())
     }
 
     fun stop(){

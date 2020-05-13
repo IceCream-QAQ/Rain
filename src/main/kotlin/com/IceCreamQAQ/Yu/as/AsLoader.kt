@@ -15,23 +15,24 @@ class AsLoader : Loader_ {
     override fun load(items: Map<String, LoadItem_>) {
         val list = ArrayList<ApplicationService>()
         for (item in items.values) {
-            list.add(context[item.type] as? ApplicationService ?: continue)
+            val a = context[item.type] as? ApplicationService ?: continue
+            a.init()
+            list.add(a)
         }
         instances = list
     }
 
-    fun init() {
-        for (instance in instances) instance.init()
-    }
-
     fun start() {
-        for (instance in instances) instance.start()
+        for (instance in instances) {
+            context.injectBean(instance)
+            instance.start()
+        }
     }
 
     fun stop() {
         for (instance in instances) instance.stop()
     }
 
-    override fun width(): Int = 25
+    override fun width(): Int = 2
 
 }
