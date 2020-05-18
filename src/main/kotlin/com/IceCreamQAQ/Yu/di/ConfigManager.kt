@@ -21,7 +21,7 @@ class ConfigManager(val classloader: ClassLoader, val logger: AppLogger, runMode
 
     init {
 
-        logger.logDebug("ConfigManager","Init.")
+        logger.logDebug("ConfigManager", "Init.")
 
         loadFolder("conf/module")
         loadFolder("conf")
@@ -36,9 +36,14 @@ class ConfigManager(val classloader: ClassLoader, val logger: AppLogger, runMode
             m ?: "dev"
         }()
 
-        logger.logDebug("ConfigManager","Config Mode: $mode")
-        
+        logger.logDebug("ConfigManager", "Config Mode: $mode")
+
         loadFolder("conf/$mode")
+
+        val conf = File(File("").absoluteFile, "conf")
+        if (conf.isDirectory) {
+            loadUrl(conf.toURI().toURL(), "conf")
+        }
 
         val c = JSONObject()
         for (key in config.keys) {
@@ -46,7 +51,7 @@ class ConfigManager(val classloader: ClassLoader, val logger: AppLogger, runMode
         }
         config = c
 
-        logger.logDebug("ConfigManager","Init Success")
+        logger.logDebug("ConfigManager", "Init Success")
 
     }
 
@@ -59,36 +64,41 @@ class ConfigManager(val classloader: ClassLoader, val logger: AppLogger, runMode
         val configFiles = ArrayList<String>();
 
         for (url in dirs) {
-            val protocol = url.protocol
-            if ("file" == protocol) {
-                val filePath = URLDecoder.decode(url.file, "UTF-8")
-                val dir = File(filePath)
-                if (dir.isDirectory)
-                    for (ss in dir.listFiles()) {
-                        if (ss.isFile) {
-                            val name = ss.name
-                            configFiles.add(name)
-                            loadConfigFile(name, FileInputStream(ss))
-                        }
-                    }
-            } else if ("jar" == protocol) {
-                val prefix = "$folder/"
-                val jar = (url.openConnection() as JarURLConnection).jarFile
-                for (entry in jar.entries()) {
-                    if (entry.isDirectory) continue
-                    val name = entry.name.replace(prefix, "")
-                    if (name.contains("/")) continue
-                    loadConfigFile(name, jar.getInputStream(entry))
-                }
-            }
+
+            loadUrl(url, folder)
 
         }
 
         return configFiles
     }
 
+    private fun loadUrl(url: URL, folder: String) {
+        val protocol = url.protocol
+        if ("file" == protocol) {
+            val filePath = URLDecoder.decode(url.file, "UTF-8")
+            val dir = File(filePath)
+            if (dir.isDirectory)
+                for (ss in dir.listFiles()) {
+                    if (ss.isFile) {
+                        val name = ss.name
+//                        configFiles.add(name)
+                        loadConfigFile(name, FileInputStream(ss))
+                    }
+                }
+        } else if ("jar" == protocol) {
+            val prefix = "$folder/"
+            val jar = (url.openConnection() as JarURLConnection).jarFile
+            for (entry in jar.entries()) {
+                if (entry.isDirectory) continue
+                val name = entry.name.replace(prefix, "")
+                if (name.contains("/")) continue
+                loadConfigFile(name, jar.getInputStream(entry))
+            }
+        }
+    }
+
     private fun loadConfigFile(name: String, inputStream: InputStream) {
-        logger.logDebug("ConfigManager","LoadConfig: $name")
+        logger.logDebug("ConfigManager", "LoadConfig: $name")
 
         val jo = config[name] as JSONObject? ?: {
             val jo = JSONObject()

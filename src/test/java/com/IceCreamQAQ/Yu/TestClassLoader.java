@@ -16,17 +16,17 @@ public class TestClassLoader {
 
     public static void main(String[] args) throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
 
-        YuHook.put(new HookItem("com.IceCreamQAQ.Yu.TestA", "c", HookA.class.getName()));
-
-        val a = new AppClassloader(TestClassLoader.class.getClassLoader(),null);
-        Class t = a.loadClass("com.IceCreamQAQ.Yu.TestA");
-        var o = t.newInstance();
-
-        var m = t.getMethod("c",String.class);
-
-        val r = m.invoke(o,"123");
-
-        System.out.println(r);
+//        YuHook.put(new HookItem("com.IceCreamQAQ.Yu.TestA", "c", HookA.class.getName()));
+//
+//        val a = new AppClassloader(TestClassLoader.class.getClassLoader(),null);
+//        Class t = a.loadClass("com.IceCreamQAQ.Yu.TestA");
+//        var o = t.newInstance();
+//
+//        var m = t.getMethod("c",String.class);
+//
+//        val r = m.invoke(o,"123");
+//
+//        System.out.println(r);
 
     }
 

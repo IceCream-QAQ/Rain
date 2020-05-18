@@ -1,8 +1,6 @@
 package com.icecreamqaq.test.yu.controller
 
-import com.IceCreamQAQ.Yu.annotation.Action
-import com.IceCreamQAQ.Yu.annotation.Before
-import com.IceCreamQAQ.Yu.annotation.DefaultController
+import com.IceCreamQAQ.Yu.annotation.*
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.icecreamqaq.test.yu.util.TestUtil
 import javax.inject.Inject
@@ -15,6 +13,10 @@ class TestController {
     @field:Named("testCache")
     private lateinit var c: EhcacheHelp<String>
 
+    @Config("conf.test")
+    @Default("123456")
+    private lateinit var conf:String
+
     @Before
     fun testBefore(): String {
         return "Test Before"
@@ -25,7 +27,7 @@ class TestController {
 
     @Action("t2")
     fun t2() {
-        c["aaa"] = "bbb"
+        c["aaa"] = conf
     }
 
     @Action("test")
