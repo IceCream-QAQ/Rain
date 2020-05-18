@@ -39,6 +39,9 @@ class TestApp : DefaultApp() {
         paths[0] = "t1"
         router.invoke(paths[0], ac)
 
+        paths[0] = "t3t3t3"
+        router.invoke(paths[0], ac)
+
         println("result: ${(ac.result as TestResult).obj}")
     }
 }

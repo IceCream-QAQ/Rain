@@ -7,8 +7,8 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Pattern
 
 open class DefaultRouter(val level: Int) : RouterPlus {
-    protected var needMatch: MutableMap<String, RouterPlus> = ConcurrentHashMap()
-    var routers: MutableMap<String, RouterPlus> = ConcurrentHashMap()
+    val needMatch: MutableMap<String, RouterPlus> = ConcurrentHashMap()
+    val routers: MutableMap<String, RouterPlus> = ConcurrentHashMap()
 
     override fun invoke(path: String, context: ActionContext): Boolean {
 
@@ -18,7 +18,7 @@ open class DefaultRouter(val level: Int) : RouterPlus {
         else {
             for ((k, v) in needMatch) {
                 if (Pattern.matches(k, path))
-                    if (v.invoke(nextPath, context)) return true
+                    return v.invoke(nextPath, context)
             }
         }
         return false

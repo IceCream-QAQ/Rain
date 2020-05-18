@@ -26,31 +26,32 @@ abstract class DefaultControllerLoader : Loader_ {
     private lateinit var logger: AppLogger
 
     @Inject
-    private lateinit var context:YuContext
+    private lateinit var context: YuContext
 
     override fun load(items: Map<String, LoadItem_>) {
-        val rootRouters = HashMap<String,DefaultRouter>()
+        val rootRouters = HashMap<String, DefaultRouter>()
         for (item in items.values) {
             val clazz = item.type
-            val name = clazz.getAnnotation(Named::class.java)?.value ?: item.annotation::class.java.interfaces[0].getAnnotation(Named::class.java)?.value ?: continue
-            val rootRouter = rootRouters[name] ?:{
+            val name = clazz.getAnnotation(Named::class.java)?.value
+                    ?: item.annotation::class.java.interfaces[0].getAnnotation(Named::class.java)?.value ?: continue
+            val rootRouter = rootRouters[name] ?: {
                 val r = DefaultRouter(0)
                 rootRouters[name] = r
                 r
             }()
 
-            controllerToRouter_(context[clazz]?: continue,rootRouter)
+            controllerToRouter_(context[clazz] ?: continue, rootRouter)
         }
 
         for ((k, v) in rootRouters) {
-            context.putBean(v,k)
+            context.putBean(v, k)
         }
     }
 
     @Throws(java.lang.Exception::class)
     protected abstract fun createMethodInvoker_(obj: Any, method: Method): MethodInvoker
 
-    protected abstract fun createActionInvoker_(level: Int,actionMethod: Method): DefaultActionInvoker
+    protected abstract fun createActionInvoker_(level: Int, actionMethod: Method): DefaultActionInvoker
 
     fun controllerToRouter_(instance: Any, rootRouter: DefaultRouter) {
         val controllerClass = instance::class.java
@@ -89,7 +90,9 @@ abstract class DefaultControllerLoader : Loader_ {
                 val actionInvoker = createActionInvoker_(actionRootRouter.level + 1, method)
                 actionInvoker.invoker = methodInvoker
                 actionInvoker.befores = before
-                actionRootRouter.routers[path] = actionInvoker
+                if (path.startsWith("{") && path.endsWith("}"))
+                    actionRootRouter.needMatch[path.substring(1).substring(0, path.length - 2)] = actionInvoker
+                else actionRootRouter.routers[path] = actionInvoker
             }
         }
         logger.logInfo("YuQ Loader", "共有 " + befores.size + " 个 Before 被载入。")

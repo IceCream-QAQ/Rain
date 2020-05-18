@@ -2,6 +2,7 @@ package com.icecreamqaq.test.yu.controller
 
 import com.IceCreamQAQ.Yu.annotation.*
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
+import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.icecreamqaq.test.yu.util.TestUtil
 import javax.inject.Inject
 import javax.inject.Named
@@ -15,7 +16,7 @@ class TestController {
 
     @Config("conf.test")
     @Default("123456")
-    private lateinit var conf:String
+    private lateinit var conf: String
 
     @Before
     fun testBefore(): String {
@@ -28,6 +29,11 @@ class TestController {
     @Action("t2")
     fun t2() {
         c["aaa"] = conf
+    }
+
+    @Action("{t3.*}")
+    fun t3(actionContext: ActionContext) {
+        println(actionContext.path[0])
     }
 
     @Action("test")
