@@ -7,6 +7,7 @@ import lombok.var;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Deprecated
 public class YuQInjectBase {
 
     protected Map<String, Map<String, Object>> injectObjects;

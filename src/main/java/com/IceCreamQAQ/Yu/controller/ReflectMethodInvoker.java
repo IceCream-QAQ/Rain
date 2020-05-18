@@ -11,6 +11,7 @@ import org.objectweb.asm.tree.MethodNode;
 import java.lang.reflect.Method;
 import java.util.List;
 
+@Deprecated
 public class ReflectMethodInvoker implements MethodInvoker {
 
     private MethodPara[] mps;

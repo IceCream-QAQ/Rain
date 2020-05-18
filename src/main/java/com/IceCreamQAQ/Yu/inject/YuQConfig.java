@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Deprecated
 public class YuQConfig {
 
     private ClassLoader appClassLoader;

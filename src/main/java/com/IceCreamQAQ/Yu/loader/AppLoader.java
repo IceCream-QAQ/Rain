@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+@Deprecated
 public class AppLoader {
 
     @Config("project.package")

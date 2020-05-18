@@ -12,6 +12,7 @@ import lombok.val;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
+@Deprecated
 public class ControllerInvoker implements RouteInvoker {
 
     public MethodInvoker[] befores;

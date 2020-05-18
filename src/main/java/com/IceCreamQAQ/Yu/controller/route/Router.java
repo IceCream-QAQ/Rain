@@ -7,6 +7,7 @@ import lombok.val;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Deprecated
 @Getter
 public class Router implements RouteInvoker {
 

@@ -9,6 +9,7 @@ import lombok.val;
 
 import java.util.List;
 
+@Deprecated
 public class EventListenerLoader implements Loader {
 
     @Inject

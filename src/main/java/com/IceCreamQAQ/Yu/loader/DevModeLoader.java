@@ -3,6 +3,7 @@ package com.IceCreamQAQ.Yu.loader;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+@Deprecated
 public class DevModeLoader extends URLClassLoader {
 
 

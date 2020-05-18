@@ -14,6 +14,7 @@ import java.util.List;
 
 import static org.objectweb.asm.Opcodes.*;
 
+@Deprecated
 public class MethodInvokerCreator {
 
     private static final String invokerClassName = Type.getInternalName(MethodInvoker.class);

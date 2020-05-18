@@ -4,6 +4,7 @@ import lombok.var;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+@Deprecated
 public class ActionContextInject extends YuQInjectBase{
 
     public void putInjectObj(String clazz, String name, Object instance) {

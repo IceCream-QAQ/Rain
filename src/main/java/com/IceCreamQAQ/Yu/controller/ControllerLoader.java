@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+@Deprecated
 public abstract class ControllerLoader implements Loader {
 
     @Config("project.package.controller")

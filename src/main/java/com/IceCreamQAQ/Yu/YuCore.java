@@ -8,6 +8,7 @@ import com.IceCreamQAQ.Yu.inject.YuQInject;
 import com.IceCreamQAQ.Yu.loader.ReloadAble;
 import com.IceCreamQAQ.Yu.loader.AppLoader;
 
+@Deprecated
 public class YuCore {
 
     public YuQInject inject;

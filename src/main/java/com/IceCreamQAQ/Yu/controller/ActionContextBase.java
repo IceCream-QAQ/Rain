@@ -11,6 +11,7 @@ import lombok.var;
 
 import javax.validation.constraints.NotNull;
 
+@Deprecated
 public abstract class ActionContextBase {
 
     @Getter

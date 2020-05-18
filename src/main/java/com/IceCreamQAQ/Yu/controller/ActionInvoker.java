@@ -3,6 +3,7 @@ package com.IceCreamQAQ.Yu.controller;
 import com.IceCreamQAQ.Yu.controller.route.RouteInvoker;
 import lombok.Data;
 
+@Deprecated
 @Data
 public abstract class ActionInvoker implements RouteInvoker {
 

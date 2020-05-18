@@ -4,6 +4,7 @@ import com.IceCreamQAQ.Yu.entity.DoNone;
 import com.IceCreamQAQ.Yu.entity.Result;
 import lombok.val;
 
+@Deprecated
 public class DefaultActionInvoker extends ActionInvoker {
     @Override
     public void invoke(String path, ActionContextBase context) throws Exception {
