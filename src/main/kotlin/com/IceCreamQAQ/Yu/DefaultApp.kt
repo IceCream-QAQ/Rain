@@ -26,7 +26,7 @@ open class DefaultApp {
         val logger = PrintAppLog()
 
         val appClassloader = DefaultApp::class.java.classLoader
-        val configManager = ConfigManager(appClassloader, logger, null)
+        val configManager = ConfigManager(appClassloader, logger, System.getProperty("yu-runMode"))
         val context = YuContext(configManager, logger)
 
         context.putBean(ClassLoader::class.java, "appClassLoader", appClassloader)

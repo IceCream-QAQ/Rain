@@ -1,6 +1,6 @@
 package com.IceCreamQAQ.Yu.entity;
 
-public class Result extends Exception {
+public class Result extends RuntimeException {
 
 
 }

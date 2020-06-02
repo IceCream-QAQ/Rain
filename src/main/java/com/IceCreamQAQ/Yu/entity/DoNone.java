@@ -1,6 +1,6 @@
 package com.IceCreamQAQ.Yu.entity;
 
-public class DoNone extends Result {
+public class DoNone extends RuntimeException {
 
     private String message;
 

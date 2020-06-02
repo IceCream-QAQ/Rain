@@ -11,6 +11,7 @@ import net.sf.ehcache.CacheManager
 import net.sf.ehcache.Element
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import javax.inject.Named
 
 @NotSearch
 class EhcacheHelp<T>(private val cache: Cache) {
@@ -39,6 +40,10 @@ class EhcacheHelpFactory : BeanFactory<EhcacheHelp<*>?>, ApplicationService {
     @Inject
     private lateinit var configManager: ConfigManager
 
+    @Inject
+    @field:Named("appClassLoader")
+    private lateinit var classLoader: ClassLoader
+
     private var cmDefaultMap = ConcurrentHashMap<String, CacheManager>()
 
     override fun createBean(clazz: Class<EhcacheHelp<*>?>, name: String): EhcacheHelp<*>? {
@@ -46,14 +51,20 @@ class EhcacheHelpFactory : BeanFactory<EhcacheHelp<*>?>, ApplicationService {
             val cm = cmDefaultMap[name] ?: {
                 val location = configManager.get("yu.cache.ehcache.caches.$name.default", String::class.java)
                 if (location != null) {
-                    val url = javaClass.classLoader.getResource(location)
+                    val url = classLoader.getResource(location)
                     if (url != null) {
                         val cm = CacheManager.newInstance(url) ?: null
                         if (cm != null) cmDefaultMap[name] = cm
                         cm
                     }
-                    else null
-                } else null
+                    else {
+                        println("url: $location is null")
+                        null
+                    }
+                } else {
+                    println("location: $name is null")
+                    null
+                }
             }()
             cm?.getCache(name)
         }() ?: return null

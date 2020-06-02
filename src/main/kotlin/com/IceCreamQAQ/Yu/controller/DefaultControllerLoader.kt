@@ -1,19 +1,13 @@
 package com.IceCreamQAQ.Yu.controller
 
 import com.IceCreamQAQ.Yu.AppLogger
-import com.IceCreamQAQ.Yu.annotation.Action
-import com.IceCreamQAQ.Yu.annotation.Before
-import com.IceCreamQAQ.Yu.annotation.Path
-import com.IceCreamQAQ.Yu.annotation.Path_
+import com.IceCreamQAQ.Yu.annotation.*
 import com.IceCreamQAQ.Yu.controller.router.DefaultRouter
 import com.IceCreamQAQ.Yu.controller.router.DefaultActionInvoker
 import com.IceCreamQAQ.Yu.controller.router.MethodInvoker
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.loader.LoadItem_
 import com.IceCreamQAQ.Yu.loader.Loader_
-import org.objectweb.asm.ClassReader
-import org.objectweb.asm.tree.ClassNode
-import org.objectweb.asm.tree.MethodNode
 import java.lang.reflect.Method
 import java.util.*
 import javax.inject.Inject
@@ -73,19 +67,8 @@ abstract class DefaultControllerLoader : Loader_ {
             val action = method.getAnnotation(Action::class.java)
             if (action != null) {
                 logger.logInfo("YuQ Loader", "Action " + method.name + " 正在载入。")
-                var path: String = action.value
-                var actionRootRouter: DefaultRouter
-                if (path.contains("/")) {
-                    if (path[0] == '/') {
-                        path = path.substring(1)
-                        actionRootRouter = rootRouter
-                    } else {
-                        actionRootRouter = controllerRouter
-                    }
-                    actionRootRouter = getRouterByPathString(actionRootRouter, path, 1)
-                } else {
-                    actionRootRouter = controllerRouter
-                }
+                val path = action.value
+                val actionRootRouter = getActionRouter(path, controllerRouter, rootRouter)
                 val methodInvoker = createMethodInvoker_(instance, method)
                 val actionInvoker = createActionInvoker_(actionRootRouter.level + 1, method)
                 actionInvoker.invoker = methodInvoker
@@ -93,9 +76,35 @@ abstract class DefaultControllerLoader : Loader_ {
                 if (path.startsWith("{") && path.endsWith("}"))
                     actionRootRouter.needMatch[path.substring(1).substring(0, path.length - 2)] = actionInvoker
                 else actionRootRouter.routers[path] = actionInvoker
+
+                val s = method.getAnnotation(Synonym::class.java)?:continue
+                val paths = s.value
+                for (path in paths) {
+                    val actionRootRouter = getActionRouter(path, controllerRouter, rootRouter)
+                    if (path.startsWith("{") && path.endsWith("}"))
+                        actionRootRouter.needMatch[path.substring(1).substring(0, path.length - 2)] = actionInvoker
+                    else actionRootRouter.routers[path] = actionInvoker
+                }
             }
         }
         logger.logInfo("YuQ Loader", "共有 " + befores.size + " 个 Before 被载入。")
+    }
+
+    fun getActionRouter(pathString: String, controllerRouter: DefaultRouter, rootRouter: DefaultRouter): DefaultRouter {
+        var path = pathString
+        var actionRootRouter: DefaultRouter
+        if (path.contains("/")) {
+            if (path[0] == '/') {
+                path = path.substring(1)
+                actionRootRouter = rootRouter
+            } else {
+                actionRootRouter = controllerRouter
+            }
+            actionRootRouter = getRouterByPathString(actionRootRouter, path, 1)
+        } else {
+            actionRootRouter = controllerRouter
+        }
+        return actionRootRouter
     }
 
 //    @Throws(Exception::class)

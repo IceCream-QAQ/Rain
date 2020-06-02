@@ -1,5 +1,6 @@
 package com.icecreamqaq.test.yu
 
+import com.IceCreamQAQ.Yu.DefaultStarter
 import com.IceCreamQAQ.Yu.loader.AppClassloader
 
 class TestStarter {
@@ -7,7 +8,9 @@ class TestStarter {
     companion object{
 
         @JvmStatic
-        fun start(){
+        fun start(args:Array<String>){
+            DefaultStarter.init(args)
+
             val appClassLoader = AppClassloader(TestStarter::class.java.classLoader)
 
             val appClass = appClassLoader.loadClass("com.icecreamqaq.test.yu.TestApp")
