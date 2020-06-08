@@ -28,12 +28,12 @@ class JobLoader : Loader_ {
                     if (Character.isDigit(c)) cTime += c
                     else {
                         val cc = cTime.toLong()
-                        time += when {
-                            c == 'd' -> cc * 1000 * 60 * 60 * 24
-                            c == 'h' -> cc * 1000 * 60 * 60
-                            c == 'm' -> cc * 1000 * 60
-                            c == 's' -> cc * 1000
-                            c == 'S' -> cc
+                        time += when (c) {
+                            'd' -> cc * 1000 * 60 * 60 * 24
+                            'h' -> cc * 1000 * 60 * 60
+                            'm' -> cc * 1000 * 60
+                            's' -> cc * 1000
+                            'S' -> cc
                             else -> 0L
                         }
                         cTime = ""
