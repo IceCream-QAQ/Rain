@@ -1,8 +1,8 @@
 package com.IceCreamQAQ.Yu.`as`
 
-import com.IceCreamQAQ.Yu.annotation.LoadBy_
+import com.IceCreamQAQ.Yu.annotation.LoadBy
 
-@LoadBy_(AsLoader::class)
+@LoadBy(AsLoader::class)
 interface ApplicationService {
 
     fun init()

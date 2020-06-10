@@ -3,11 +3,8 @@ package com.IceCreamQAQ.Yu.loader
 import com.IceCreamQAQ.Yu.AppLogger
 import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.annotation.LoadBy
-import com.IceCreamQAQ.Yu.annotation.LoadBy_
 import com.IceCreamQAQ.Yu.annotation.NotSearch
-import com.IceCreamQAQ.Yu.di.BeanFactoryLoader
 import com.IceCreamQAQ.Yu.di.YuContext
-import com.IceCreamQAQ.Yu.error.BeanCreateError
 import com.IceCreamQAQ.Yu.isBean
 import java.io.File
 import java.io.IOException
@@ -22,7 +19,7 @@ import javax.inject.Named
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-class AppLoader_ {
+class AppLoader {
 
     @Inject
     lateinit var context: YuContext
@@ -43,7 +40,7 @@ class AppLoader_ {
             for (s in scanPackages) {
                 classes.putAll(getClasses(s))
             }
-            val loadItemsMap = HashMap<Class<out Loader_>, MutableMap<String, LoadItem_>>()
+            val loadItemsMap = HashMap<Class<out Loader>, MutableMap<String, LoadItem>>()
 
             for (clazz in classes.values) {
                 searchLoadBy(clazz, clazz, loadItemsMap)
@@ -53,7 +50,7 @@ class AppLoader_ {
 //            val bfl = context.newBean(BeanFactoryLoader::class.java) ?: throw BeanCreateError("Cant Instanced Loader!")
 //            bfl.load(beanFactories)
 //            loadItemsMap.remove(BeanFactoryLoader::class.java)
-            val loaders = ArrayList<Loader_>()
+            val loaders = ArrayList<Loader>()
 
             for (loader in loadItemsMap.keys) {
                 loaders.add(context[loader] ?: continue)
@@ -83,9 +80,9 @@ class AppLoader_ {
         }
     }
 
-    fun searchLoadBy(loadClass: Class<*>, searchClass: Class<*>, loadItemsMap: HashMap<Class<out Loader_>, MutableMap<String, LoadItem_>>) {
+    fun searchLoadBy(loadClass: Class<*>, searchClass: Class<*>, loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, LoadItem>>) {
         if (!loadClass.isBean()) return
-        val loadBy = searchClass.getAnnotation(LoadBy_::class.java)
+        val loadBy = searchClass.getAnnotation(LoadBy::class.java)
         if (loadBy != null) {
             addLoadItem(loadClass, loadBy, loadBy, loadItemsMap)
         }
@@ -93,7 +90,7 @@ class AppLoader_ {
         val annotationInstances = searchClass.annotations
         for (annotationInstance in annotationInstances) {
             val annotationClass = annotationInstance::class.java.interfaces[0]
-            addLoadItem(loadClass, annotationInstance, annotationClass.getAnnotation(LoadBy_::class.java)
+            addLoadItem(loadClass, annotationInstance, annotationClass.getAnnotation(LoadBy::class.java)
                     ?: continue, loadItemsMap)
 //            return
         }
@@ -107,14 +104,14 @@ class AppLoader_ {
         }
     }
 
-    fun addLoadItem(loadClass: Class<*>, annotationInstance: Annotation, loadBy: LoadBy_, loadItemsMap: HashMap<Class<out Loader_>, MutableMap<String, LoadItem_>>) {
-        val loader = Class.forName(loadBy.value.java.name) as Class<out Loader_>
+    fun addLoadItem(loadClass: Class<*>, annotationInstance: Annotation, loadBy: LoadBy, loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, LoadItem>>) {
+        val loader = Class.forName(loadBy.value.java.name) as Class<out Loader>
         val loadItems = loadItemsMap[loader] ?: {
-            val l = HashMap<String, LoadItem_>()
+            val l = HashMap<String, LoadItem>()
             loadItemsMap[loader] = l
             l
         }()
-        val loadItem = LoadItem_()
+        val loadItem = LoadItem()
         loadItem.annotation = annotationInstance
         loadItem.type = loadClass
         loadItems[loadClass.name] = loadItem

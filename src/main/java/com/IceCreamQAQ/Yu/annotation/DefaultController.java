@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@LoadBy_(DefaultControllerLoaderImpl.class)
+@LoadBy(DefaultControllerLoaderImpl.class)
 @Named("default")
 @EnchantBy(MethodParaNamedEnchanter.class)
 public @interface DefaultController {

@@ -17,6 +17,15 @@ import javax.inject.Named
 
 class YuContext(private val configer: ConfigManager, private val logger: AppLogger) {
 
+    class ClassContext(val clazz: Class<*>) {
+//        val multi:Boolean
+//        init {
+//            multi =
+//        }
+    }
+
+    fun checkClassMulti():Boolean = true
+
     private val context: MutableMap<String, MutableMap<String, Any>> = ConcurrentHashMap()
     private var factoryManager: BeanFactoryManager? = null
 

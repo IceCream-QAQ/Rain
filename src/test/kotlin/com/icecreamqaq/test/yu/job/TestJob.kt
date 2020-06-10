@@ -28,4 +28,15 @@ class TestJob {
         println("时间：${dateUtil.formatDateTimeSSS()}，c2 定时任务触发。当前 Cache: ${c["ccc"]}")
     }
 
+    @Cron("At:23:56")
+    fun curfew(){
+
+    }
+
+    @Cron("At:06:00")
+    fun morning(){
+
+    }
+
+
 }

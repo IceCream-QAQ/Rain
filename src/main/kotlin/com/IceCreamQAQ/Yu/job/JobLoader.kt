@@ -2,19 +2,19 @@ package com.IceCreamQAQ.Yu.job
 
 import com.IceCreamQAQ.Yu.annotation.Cron
 import com.IceCreamQAQ.Yu.di.YuContext
-import com.IceCreamQAQ.Yu.loader.LoadItem_
-import com.IceCreamQAQ.Yu.loader.Loader_
+import com.IceCreamQAQ.Yu.loader.LoadItem
+import com.IceCreamQAQ.Yu.loader.Loader
 import javax.inject.Inject
 
-class JobLoader : Loader_ {
+class JobLoader : Loader {
 
     @Inject
     private lateinit var context: YuContext
 
     @Inject
-    private lateinit var jobManager: JobManager_
+    private lateinit var jobManager: JobManager
 
-    override fun load(items: Map<String, LoadItem_>) {
+    override fun load(items: Map<String, LoadItem>) {
         val jobs = ArrayList<Job>()
         for (item in items.values) {
             val instance = context[item.type] ?: continue

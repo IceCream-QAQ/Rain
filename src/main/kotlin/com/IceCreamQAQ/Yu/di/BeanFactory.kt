@@ -1,8 +1,8 @@
 package com.IceCreamQAQ.Yu.di
 
-import com.IceCreamQAQ.Yu.annotation.LoadBy_
+import com.IceCreamQAQ.Yu.annotation.LoadBy
 
-@LoadBy_(BeanFactoryLoader::class)
+@LoadBy(BeanFactoryLoader::class)
 interface BeanFactory<T> {
 
     fun createBean(clazz: Class<T>,name:String):T

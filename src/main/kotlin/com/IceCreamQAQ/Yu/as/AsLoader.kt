@@ -1,18 +1,18 @@
 package com.IceCreamQAQ.Yu.`as`
 
 import com.IceCreamQAQ.Yu.di.YuContext
-import com.IceCreamQAQ.Yu.loader.LoadItem_
-import com.IceCreamQAQ.Yu.loader.Loader_
+import com.IceCreamQAQ.Yu.loader.LoadItem
+import com.IceCreamQAQ.Yu.loader.Loader
 import javax.inject.Inject
 
-class AsLoader : Loader_ {
+class AsLoader : Loader {
 
     @Inject
     private lateinit var context: YuContext
 
     private lateinit var instances: List<ApplicationService>
 
-    override fun load(items: Map<String, LoadItem_>) {
+    override fun load(items: Map<String, LoadItem>) {
         val list = ArrayList<ApplicationService>()
         for (item in items.values) {
             val a = context[item.type] as? ApplicationService ?: continue

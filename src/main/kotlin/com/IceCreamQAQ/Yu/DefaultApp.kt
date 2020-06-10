@@ -6,15 +6,14 @@ import com.IceCreamQAQ.Yu.di.ConfigManager
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.event.EventBus
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent
-import com.IceCreamQAQ.Yu.loader.AppClassloader
-import com.IceCreamQAQ.Yu.loader.AppLoader_
+import com.IceCreamQAQ.Yu.loader.AppLoader
 import javax.inject.Inject
 
 @NotSearch
 open class DefaultApp {
 
     @Inject
-    lateinit var loader: AppLoader_
+    lateinit var loader: AppLoader
 
     @Inject
     lateinit var asLoader: AsLoader

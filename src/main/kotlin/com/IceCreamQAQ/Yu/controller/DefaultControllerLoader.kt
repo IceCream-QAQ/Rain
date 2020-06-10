@@ -6,15 +6,15 @@ import com.IceCreamQAQ.Yu.controller.router.DefaultRouter
 import com.IceCreamQAQ.Yu.controller.router.DefaultActionInvoker
 import com.IceCreamQAQ.Yu.controller.router.MethodInvoker
 import com.IceCreamQAQ.Yu.di.YuContext
-import com.IceCreamQAQ.Yu.loader.LoadItem_
-import com.IceCreamQAQ.Yu.loader.Loader_
+import com.IceCreamQAQ.Yu.loader.LoadItem
+import com.IceCreamQAQ.Yu.loader.Loader
 import java.lang.reflect.Method
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
 
 
-abstract class DefaultControllerLoader : Loader_ {
+abstract class DefaultControllerLoader : Loader {
 
     @Inject
     private lateinit var logger: AppLogger
@@ -22,7 +22,7 @@ abstract class DefaultControllerLoader : Loader_ {
     @Inject
     private lateinit var context: YuContext
 
-    override fun load(items: Map<String, LoadItem_>) {
+    override fun load(items: Map<String, LoadItem>) {
         val rootRouters = HashMap<String, DefaultRouter>()
         for (item in items.values) {
             val clazz = item.type

@@ -4,7 +4,7 @@ import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import java.util.*
 import kotlin.collections.ArrayList
 
-class JobManager_ : ApplicationService{
+class JobManager : ApplicationService{
 
     var jobs:ArrayList<Job> = ArrayList()
 

@@ -1,8 +1,8 @@
 package com.IceCreamQAQ.Yu.loader
 
-interface Loader_ {
+interface Loader {
 
     fun width(): Int = 10
 
-    fun load(items: Map<String, LoadItem_>)
+    fun load(items: Map<String, LoadItem>)
 }

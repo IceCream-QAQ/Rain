@@ -1,8 +1,6 @@
 package com.IceCreamQAQ.Yu.event;
 
-import com.IceCreamQAQ.Yu.di.YuContext;
 import com.IceCreamQAQ.Yu.event.events.Event;
-import com.IceCreamQAQ.Yu.inject.YuQInject;
 import lombok.val;
 
 import javax.inject.Inject;
@@ -32,13 +30,7 @@ public class EventBus {
         return false;
     }
 
-    public void register(Object object) throws IllegalAccessException, ClassNotFoundException, InstantiationException {
-//        EventInvokerCreator handler = handlers.get(object);
-//        if (handler == null) {
-//            handler = inject.spawnInstance(EventInvokerCreator.class);
-//
-//            handlers.put(object, handler);
-//        }
+    public void register(Object object) {
         val eventInvokersLists= creator.register(object);
         for (int i = 0; i < 3; i++) {
             this.eventInvokersLists[i].addAll(eventInvokersLists[i]);
