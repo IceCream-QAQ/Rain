@@ -19,23 +19,30 @@ class TestJob {
 
     @Cron("2s")
     fun c1() {
-        println("时间：${dateUtil.formatDateTimeSSS()}，c1 定时任务触发。")
-        c["ccc"] = (c["ccc"] ?: 0) + 1
+//        println("时间：${dateUtil.formatDateTimeSSS()}，c1 定时任务触发。")
+//        c["ccc"] = (c["ccc"] ?: 0) + 1
     }
 
     @Cron("10s")
     fun c2() {
-        println("时间：${dateUtil.formatDateTimeSSS()}，c2 定时任务触发。当前 Cache: ${c["ccc"]}")
+//        println("时间：${dateUtil.formatDateTimeSSS()}，c2 定时任务触发。当前 Cache: ${c["ccc"]}")
     }
 
-    @Cron("At:23:56")
+    @Cron("At::d::02:32")
     fun curfew(){
-
+        println("到32啦！")
+        println("当前时间：${dateUtil.formatDateTimeSSS()}")
+    }
+    @Cron("At::h::57")
+    fun morning2(){
+        println("到57啦！")
+        println("当前时间：${dateUtil.formatDateTimeSSS()}")
     }
 
-    @Cron("At:06:00")
+    @Cron("At::h::00")
     fun morning(){
-
+        println("到整点啦！")
+        println("当前时间：${dateUtil.formatDateTimeSSS()}")
     }
 
 

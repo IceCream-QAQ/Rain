@@ -1,11 +1,15 @@
 package com.IceCreamQAQ.Yu.annotation
 
 import com.IceCreamQAQ.Yu.job.JobLoader
+import com.IceCreamQAQ.Yu.loader.Loader
+import kotlin.reflect.KClass
 
 annotation class MultiInstance
 
+annotation class LoadBy(val value: KClass<out Loader>)
+
 annotation class Synonym(val value: Array<String>)
-annotation class Path_(val value: String)
+annotation class Path(val value: String)
 
 @LoadBy(JobLoader::class)
 annotation class JobCenter

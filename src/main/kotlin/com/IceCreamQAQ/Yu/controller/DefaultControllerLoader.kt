@@ -50,7 +50,7 @@ abstract class DefaultControllerLoader : Loader {
     fun controllerToRouter_(instance: Any, rootRouter: DefaultRouter) {
         val controllerClass = instance::class.java
 
-        val controllerRouter = getRouterByPathString(rootRouter, controllerClass.getAnnotation(Path_::class.java)?.value, 0)
+        val controllerRouter = getRouterByPathString(rootRouter, controllerClass.getAnnotation(Path::class.java)?.value, 0)
 
         val methods = controllerClass.methods
         val befores = ArrayList<MethodInvoker>()

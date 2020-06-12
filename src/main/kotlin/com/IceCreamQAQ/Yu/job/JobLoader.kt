@@ -22,26 +22,34 @@ class JobLoader : Loader {
             for (method in methods) {
                 val cron = method.getAnnotation(Cron::class.java) ?: continue
                 val timeStr = cron.value
-                var time = 0L
-                var cTime = ""
-                for (c in timeStr) {
-                    if (Character.isDigit(c)) cTime += c
-                    else {
-                        val cc = cTime.toLong()
-                        time += when (c) {
-                            'd' -> cc * 1000 * 60 * 60 * 24
-                            'h' -> cc * 1000 * 60 * 60
-                            'm' -> cc * 1000 * 60
-                            's' -> cc * 1000
-                            'S' -> cc
-                            else -> 0L
+                val job = if (timeStr.startsWith("At::")) {
+                    val tt = timeStr.split("::")
+
+                    val time = if (tt[1] == "h") 60 * 60 * 1000
+                    else 24 * 60 * 60 * 1000
+
+                    Job(time.toLong(), cron.async, ReflectCronInvoker(instance, method),tt[2])
+                } else {
+                    var time = 0L
+                    var cTime = ""
+                    for (c in timeStr) {
+                        if (Character.isDigit(c)) cTime += c
+                        else {
+                            val cc = cTime.toLong()
+                            time += when (c) {
+                                'd' -> cc * 1000 * 60 * 60 * 24
+                                'h' -> cc * 1000 * 60 * 60
+                                'm' -> cc * 1000 * 60
+                                's' -> cc * 1000
+                                'S' -> cc
+                                else -> 0L
+                            }
+                            cTime = ""
                         }
-                        cTime = ""
                     }
+                    Job(time, cron.async, ReflectCronInvoker(instance, method))
                 }
 
-
-                val job = Job(time, cron.async, ReflectCronInvoker(instance, method))
                 jobs.add(job)
             }
         }

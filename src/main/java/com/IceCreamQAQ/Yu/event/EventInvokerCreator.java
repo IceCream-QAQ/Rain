@@ -120,7 +120,7 @@ public class EventInvokerCreator {
 
         cw.visit(V1_6, ACC_PUBLIC | ACC_SUPER, desc, null, "java/lang/Object", new String[]{listererClassName});
 
-        cw.visitSource(".dynamic", null);
+        cw.visitSource("YuCoreAutoCreatedEventInvoker.java", null);
         {
             if (!isStatic)
                 cw.visitField(ACC_PUBLIC, "instance", "Ljava/lang/Object;", null, null).visitEnd();
