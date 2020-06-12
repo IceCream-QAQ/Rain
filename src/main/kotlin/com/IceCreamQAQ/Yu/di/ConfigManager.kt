@@ -123,11 +123,10 @@ class ConfigManager(val classloader: ClassLoader, val logger: AppLogger, runMode
             val s = checkPropName(oo.toString())
             val ss = s.split(".")
             var ooo = o
-            val max = ss.size - 1
-            for (i in 0..max) {
+            for (i in ss.indices) {
                 val sss = ss[i]
 
-                if (i == max) {
+                if (i == ss.lastIndex) {
                     if (sss.startsWith("[")) {
                         val ssss = sss.replace("[", "")
                         val oooo = ooo[ssss]
