@@ -2,15 +2,13 @@ package com.IceCreamQAQ.Yu.loader;
 
 import com.IceCreamQAQ.Yu.hook.YuHook;
 import com.IceCreamQAQ.Yu.loader.enchant.EnchantManager;
+import com.IceCreamQAQ.Yu.loader.transformer.ClassTransformer;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import lombok.var;
 import sun.misc.Resource;
-import sun.net.www.protocol.jar.JarURLConnection;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -20,17 +18,27 @@ import java.util.List;
 @Slf4j
 public class AppClassloader extends ClassLoader {
 
+    private final List<ClassTransformer> transformers = new ArrayList<>();
 
     public AppClassloader(ClassLoader parent) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         super(parent);
         YuHook.init(this);
         EnchantManager.init(this);
+
+        for (String s : transformerList) {
+            transformers.add((ClassTransformer) loadClass(s, true, false).newInstance());
+        }
     }
 
-    private List<String> blackList = new ArrayList<>();
+    private static final List<String> blackList = new ArrayList<>();
+    private static final List<String> transformerList = new ArrayList<>();
 
-    public void registerBackList(List<String> packageName) {
+    public static void registerBackList(List<String> packageName) {
         blackList.addAll(packageName);
+    }
+
+    public static void registerTransformerList(String packageName) {
+        transformerList.add(packageName);
     }
 
     @SneakyThrows
@@ -58,7 +66,7 @@ public class AppClassloader extends ClassLoader {
     }
 
     private Class<?> loadAppClass(String name) throws IOException, ClassNotFoundException {
-        log.debug("Load Class: %s.", name);
+        log.debug(String.format("Load Class: %s.", name));
 
         val path = name.replace(".", "/") + ".class";
 
@@ -97,6 +105,9 @@ public class AppClassloader extends ClassLoader {
 //                System.out.println(i + ": " + bytes[i]);
 //            }
 //        }
+        for (ClassTransformer transformer : transformers) {
+            bytes = transformer.transform(bytes, name);
+        }
 
         bytes = EnchantManager.checkClass(bytes);
 
@@ -117,7 +128,11 @@ public class AppClassloader extends ClassLoader {
                 || name.startsWith("com.IceCreamQAQ.Yu.annotation.")
                 || name.startsWith("com.IceCreamQAQ.Yu.hook.")
                 || name.startsWith("com.IceCreamQAQ.Yu.loader.enchant.")
-                ;
+                || name.startsWith("ch.qos.logback.core.")
+                || name.startsWith("org.xml")
+                || name.startsWith("org.slf4j.")
+                || name.startsWith("org.hibernate")
+                || name.startsWith("org.jboss");
         if (b) return true;
         for (String s : blackList) {
             if (name.startsWith(s)) return true;
