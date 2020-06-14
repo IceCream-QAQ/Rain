@@ -7,7 +7,7 @@
     <packaging>jar</packaging>
 
     <modelVersion>4.0.0</modelVersion>
-    <version>0.1.0.1</version>
+    <version>0.1.0.2-SNAPSHOT</version>
 
     <parent>
         <groupId>com.IceCreamQAQ</groupId>
@@ -17,6 +17,8 @@
 
     <properties>
         <kotlin.version>1.3.72</kotlin.version>
+
+        <logback.version>1.2.3</logback.version>
     </properties>
 
     <dependencies>
@@ -52,12 +54,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-nop</artifactId>
-            <version>1.7.2</version>
-        </dependency>
-
-        <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
             <version>1.1.0.Final</version>
@@ -67,7 +63,24 @@
             <groupId>net.sf.ehcache</groupId>
             <artifactId>ehcache</artifactId>
             <version>2.10.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-nop</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
@@ -101,7 +114,7 @@
                     </execution>
                     <execution>
                         <id>test-compile</id>
-<!--                        <goals> <goal>test-compile</goal> </goals>-->
+                        <goals> <goal>test-compile</goal> </goals>
                         <configuration>
                             <sourceDirs>
                                 <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
@@ -130,11 +143,11 @@
                         <phase>compile</phase>
                         <goals> <goal>compile</goal> </goals>
                     </execution>
-                    <execution>
-                        <id>java-test-compile</id>
-                        <phase>test-compile</phase>
-                        <goals> <goal>testCompile</goal> </goals>
-                    </execution>
+<!--                    <execution>-->
+<!--                        <id>java-test-compile</id>-->
+<!--                        <phase>test-compile</phase>-->
+<!--                        <goals> <goal>testCompile</goal> </goals>-->
+<!--                    </execution>-->
                 </executions>
             </plugin>
             <plugin> <!-- 打源码 -->
