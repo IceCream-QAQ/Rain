@@ -24,7 +24,7 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
 //        }
     }
 
-    fun checkClassMulti():Boolean = true
+    fun checkClassMulti(): Boolean = true
 
     private val context: MutableMap<String, MutableMap<String, Any>> = ConcurrentHashMap()
     private var factoryManager: BeanFactoryManager? = null
@@ -115,7 +115,10 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
                 val name = field.getAnnotation(Named::class.java)?.value ?: ""
 
                 field.isAccessible = true
-                field[obj] = getBean(field.type.name, name)
+                field[obj] = getBean(field.type.name,
+                        if (name.startsWith("{")) name.substring(1).substring(0, name.length - 2)
+                        else name
+                )
             }
         }
     }
