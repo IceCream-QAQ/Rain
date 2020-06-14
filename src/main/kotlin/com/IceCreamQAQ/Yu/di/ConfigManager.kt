@@ -264,6 +264,7 @@ class ConfigManager(val classloader: ClassLoader, val logger: AppLogger, runMode
     private fun checkPropName(name: String): String {
         return when (name) {
             "yu.scanPackages" -> "yu.[scanPackages"
+            "yu.classRegister" -> "yu.[classRegister"
             else -> name
         }
     }

@@ -34,8 +34,16 @@ class AppLoader {
     @Config("yu.scanPackages")
     lateinit var scanPackages: List<String>
 
+    @Config("yu.classRegister")
+    var classRegister: List<String> = listOf()
+
     fun load() {
         try {
+            val rsList = ArrayList<ClassRegister>(classRegister.size)
+            for (rs in classRegister) {
+                rsList.add(context.getBean(rs, "") as ClassRegister?
+                        ?: error("Can't Create ClassRegister: $rs Instance."))
+            }
             val classes = HashMap<String, Class<*>>()
             for (s in scanPackages) {
                 classes.putAll(getClasses(s))
@@ -43,6 +51,9 @@ class AppLoader {
             val loadItemsMap = HashMap<Class<out Loader>, MutableMap<String, LoadItem>>()
 
             for (clazz in classes.values) {
+                for (register in rsList) {
+                    register.register(clazz)
+                }
                 searchLoadBy(clazz, clazz, loadItemsMap)
             }
 
@@ -58,7 +69,7 @@ class AppLoader {
             }
 
             for (i in 0 until loaders.size) {
-                for (j in 0 until loaders.size -1 - i) {
+                for (j in 0 until loaders.size - 1 - i) {
                     val c = loaders[j]
                     val n = loaders[j + 1]
                     if (c.width() > n.width()) {
@@ -156,7 +167,7 @@ class AppLoader {
                                         try {
                                             val clazz = appClassloader.loadClass("$packageName.$className")
                                             if (clazz.getAnnotation(NotSearch::class.java) == null)
-                                            classes.putIfAbsent(clazz.name, clazz)
+                                                classes.putIfAbsent(clazz.name, clazz)
                                         } catch (e: ClassNotFoundException) {
                                             e.printStackTrace()
                                         }
@@ -189,7 +200,7 @@ class AppLoader {
                 try {
                     val clazz = Class.forName("$packageName.$className")
                     if (clazz.getAnnotation(NotSearch::class.java) == null)
-                    classes.putIfAbsent(clazz.name, clazz)
+                        classes.putIfAbsent(clazz.name, clazz)
                 } catch (e: ClassNotFoundException) {
                     e.printStackTrace()
                 }
