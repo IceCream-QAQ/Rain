@@ -28,7 +28,6 @@ public class EnchantManager {
 
         if (node.visibleAnnotations != null) {
 
-//            boolean cz = false;
             for (AnnotationNode annotation : (List<AnnotationNode>) node.visibleAnnotations) {
                 val annotationClassName = annotation.desc.substring(1, annotation.desc.length() - 1).replace("/", ".");
                 val annotationClass = classloader.loadClass(annotationClassName, false, false);
@@ -37,19 +36,15 @@ public class EnchantManager {
                     if (a instanceof EnchantBy) {
                         val enchanter = ((EnchantBy) a).value().newInstance();
                         enchanter.enchantClass(node);
-//                        cz = true;
                     }
                 }
             }
 
-//            if (cz){
+            ClassWriter cw = new ClassWriter(0);
+            node.accept(cw);
+            bytes = cw.toByteArray();
 
-//            }
         }
-
-        ClassWriter cw = new ClassWriter(0);
-        node.accept(cw);
-        bytes = cw.toByteArray();
         return bytes;
     }
 
