@@ -66,7 +66,7 @@ public class AppClassloader extends ClassLoader {
     }
 
     private Class<?> loadAppClass(String name) throws IOException, ClassNotFoundException {
-        log.debug(String.format("Load Class: %s.", name));
+        log.trace(String.format("Load Class: %s.", name));
 
         val path = name.replace(".", "/") + ".class";
 

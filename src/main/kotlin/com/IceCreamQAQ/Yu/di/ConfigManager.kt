@@ -2,10 +2,12 @@ package com.IceCreamQAQ.Yu.di
 
 import com.IceCreamQAQ.Yu.AppLogger
 import com.IceCreamQAQ.Yu.annotation.NotSearch
+import com.IceCreamQAQ.Yu.controller.NewControllerLoader
 import com.IceCreamQAQ.Yu.error.ConfigFormatError
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
+import org.slf4j.LoggerFactory
 import java.io.*
 import java.lang.Exception
 import java.lang.StringBuilder
@@ -15,13 +17,16 @@ import java.net.URLDecoder
 import java.util.*
 import kotlin.collections.ArrayList
 
-class ConfigManager(val classloader: ClassLoader, val logger: AppLogger, runMode: String?) {
+class ConfigManager(val classloader: ClassLoader, private val logger: AppLogger, runMode: String?) {
 
     private var config: JSONObject = JSONObject()
 
+    private val log = LoggerFactory.getLogger(ConfigManager::class.java)
+
     init {
 
-        logger.logDebug("ConfigManager", "Init.")
+//        logger.logDebug("ConfigManager", "Init.")
+        log.info("ConfigManager Init.")
 
         loadFolder("conf/module")
         loadFolder("conf")
@@ -36,7 +41,8 @@ class ConfigManager(val classloader: ClassLoader, val logger: AppLogger, runMode
             m ?: "dev"
         }()
 
-        logger.logDebug("ConfigManager", "Config Mode: $mode")
+        log.info("ConfigManager Config Mode: $mode.")
+//        logger.logDebug("ConfigManager", "Config Mode: $mode")
 
         loadFolder("conf/$mode")
 
@@ -51,7 +57,8 @@ class ConfigManager(val classloader: ClassLoader, val logger: AppLogger, runMode
         }
         config = c
 
-        logger.logDebug("ConfigManager", "Init Success")
+        log.info("ConfigManager Init Success.")
+//        logger.logDebug("ConfigManager", "Init Success")
 
     }
 
@@ -98,7 +105,8 @@ class ConfigManager(val classloader: ClassLoader, val logger: AppLogger, runMode
     }
 
     private fun loadConfigFile(name: String, inputStream: InputStream) {
-        logger.logDebug("ConfigManager", "LoadConfig: $name")
+        log.debug("ConfigManager LoadConfig: $name")
+//        logger.logDebug("ConfigManager", "LoadConfig: $name")
 
         val jo = config[name] as JSONObject? ?: {
             val jo = JSONObject()

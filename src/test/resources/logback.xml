@@ -17,7 +17,7 @@
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--日志文件输出的文件名-->
-            <FileNamePattern>${LOG_HOME}/Sister.log.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <FileNamePattern>${LOG_HOME}/Yu-Core.log.%d{yyyy-MM-dd}.log</FileNamePattern>
             <!--日志文件保留天数-->
             <MaxHistory>30</MaxHistory>
         </rollingPolicy>
@@ -36,7 +36,7 @@
     </appender>
 
     <!-- 日志输出级别 -->
-    <logger name="com.IceCreamQAQ.Yu" level="INFO" additivity="false">
+    <logger name="com.IceCreamQAQ.Yu" level="DEBUG" additivity="false">
         <appender-ref ref="FILE" />
         <appender-ref ref="STDOUT" />
     </logger>
