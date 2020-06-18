@@ -8,6 +8,7 @@ import com.IceCreamQAQ.Yu.event.EventBus
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent
 import com.IceCreamQAQ.Yu.loader.AppLoader
 import javax.inject.Inject
+import kotlin.system.exitProcess
 
 @NotSearch
 open class DefaultApp {
@@ -31,11 +32,14 @@ open class DefaultApp {
         context.putBean(ClassLoader::class.java, "appClassLoader", appClassloader)
 
         context.injectBean(this)
+
+        Runtime.getRuntime().addShutdownHook(Thread(Runnable {
+            asLoader.stop()
+        }))
     }
 
     fun start(){
         loader.load()
-//        asLoader.init()
         asLoader.start()
         eventBus.post(AppStartEvent())
     }
