@@ -61,7 +61,10 @@ class JobManager : ApplicationService {
     }
 
     override fun stop() {
-
+        asyncTimer.cancel()
+        for (syncTimer in syncTimers) {
+            syncTimer.cancel()
+        }
     }
 
 }
