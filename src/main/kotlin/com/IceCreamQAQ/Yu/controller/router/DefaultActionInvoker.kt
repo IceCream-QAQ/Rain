@@ -5,6 +5,7 @@ import com.IceCreamQAQ.Yu.entity.DoNone
 import com.IceCreamQAQ.Yu.entity.Result
 import java.lang.Exception
 
+@Deprecated("已经弃用")
 open class DefaultActionInvoker(level: Int) : DefaultRouter(level) {
 
     lateinit var befores: Array<MethodInvoker>

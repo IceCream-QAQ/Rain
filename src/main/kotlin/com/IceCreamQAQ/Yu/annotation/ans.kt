@@ -6,6 +6,8 @@ import kotlin.reflect.KClass
 
 annotation class MultiInstance
 
+
+annotation class With(val value: Array<KClass<*>>)
 annotation class LoadBy(val value: KClass<out Loader>)
 
 annotation class Synonym(val value: Array<String>)

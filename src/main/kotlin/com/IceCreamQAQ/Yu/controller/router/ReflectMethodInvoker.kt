@@ -4,6 +4,7 @@ import com.IceCreamQAQ.Yu.controller.ActionContext
 import java.lang.reflect.Method
 import javax.inject.Named
 
+@Deprecated("已经弃用")
 class ReflectMethodInvoker(val method: Method, val instance: Any) : MethodInvoker {
 
     var returnFlag: Boolean = false

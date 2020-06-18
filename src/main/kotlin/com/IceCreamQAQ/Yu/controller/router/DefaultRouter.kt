@@ -4,6 +4,7 @@ import com.IceCreamQAQ.Yu.controller.ActionContext
 import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Pattern
 
+@Deprecated("已经弃用")
 open class DefaultRouter(val level: Int) : RouterPlus {
     val needMatch: MutableMap<String, RouterPlus> = ConcurrentHashMap()
     val routers: MutableMap<String, RouterPlus> = ConcurrentHashMap()
