@@ -12,3 +12,4 @@ public @interface AutoBind {
 
     String name() default "";
 }
+
