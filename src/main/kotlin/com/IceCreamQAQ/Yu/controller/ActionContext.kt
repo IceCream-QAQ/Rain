@@ -2,6 +2,7 @@ package com.IceCreamQAQ.Yu.controller
 
 import com.IceCreamQAQ.Yu.entity.Result
 
+@Deprecated("已经弃用")
 interface ActionContext {
 
     var path:Array<String>

@@ -1,7 +1,10 @@
 package com.IceCreamQAQ.Yu.controller
 
 import com.IceCreamQAQ.Yu.AppLogger
-import com.IceCreamQAQ.Yu.annotation.*
+import com.IceCreamQAQ.Yu.annotation.Action
+import com.IceCreamQAQ.Yu.annotation.Before
+import com.IceCreamQAQ.Yu.annotation.Path
+import com.IceCreamQAQ.Yu.annotation.Synonym
 import com.IceCreamQAQ.Yu.controller.router.DefaultRouter
 import com.IceCreamQAQ.Yu.controller.router.DefaultActionInvoker
 import com.IceCreamQAQ.Yu.controller.router.MethodInvoker
@@ -13,7 +16,7 @@ import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
 
-
+@Deprecated("已经弃用")
 abstract class DefaultControllerLoader : Loader {
 
     @Inject

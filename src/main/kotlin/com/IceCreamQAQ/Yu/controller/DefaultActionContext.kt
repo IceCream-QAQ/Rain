@@ -2,6 +2,7 @@ package com.IceCreamQAQ.Yu.controller
 
 import com.IceCreamQAQ.Yu.entity.Result
 
+@Deprecated("已经弃用")
 class DefaultActionContext :ActionContext {
 
     override lateinit var path: Array<String>
@@ -27,6 +28,7 @@ class DefaultActionContext :ActionContext {
     override fun buildResult(obj: Any): Result {
         return TestResult(obj)
     }
-}
 
-data class TestResult(val obj:Any):Result()
+    @Deprecated("已经弃用")
+    data class TestResult(val obj:Any):Result()
+}
