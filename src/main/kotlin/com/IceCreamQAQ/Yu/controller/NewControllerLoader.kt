@@ -132,7 +132,7 @@ abstract class NewControllerLoader : Loader {
                 for (pv in pvs) {
                     if (pv.contains(":")) {
                         val s = pv.split(":")
-                        path = path.replace("{${s[0]}}", "(${s[1]})")
+                        path = path.replace("{$pv}", "(${s[1]})")
                         matchNames.add(s[0])
                     } else {
                         path = path.replace("{$pv}", "(.*)")
