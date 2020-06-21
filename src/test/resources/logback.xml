@@ -36,12 +36,12 @@
     </appender>
 
     <!-- 日志输出级别 -->
-    <logger name="com.IceCreamQAQ.Yu" level="DEBUG" additivity="false">
+    <logger name="com.IceCreamQAQ.Yu" level="trace" additivity="false">
         <appender-ref ref="FILE" />
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <root level="INFO">
+    <root level="trace">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>
