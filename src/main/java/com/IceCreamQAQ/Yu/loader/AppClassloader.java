@@ -3,15 +3,13 @@ package com.IceCreamQAQ.Yu.loader;
 import com.IceCreamQAQ.Yu.hook.YuHook;
 import com.IceCreamQAQ.Yu.loader.enchant.EnchantManager;
 import com.IceCreamQAQ.Yu.loader.transformer.ClassTransformer;
+import com.IceCreamQAQ.Yu.util.IO;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import lombok.var;
-import sun.misc.Resource;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,41 +68,10 @@ public class AppClassloader extends ClassLoader {
 
         val path = name.replace(".", "/") + ".class";
 
-        val url = this.getParent().getResource(path);
-        if (url == null) throw new ClassNotFoundException(name);
-        val uc = url.openConnection();
-        val resource = new Resource() {
-            @Override
-            public String getName() {
-                return path;
-            }
+        val in = this.getParent().getResourceAsStream(path);
+        if (in == null) throw new ClassNotFoundException(name);
 
-            @Override
-            public URL getURL() {
-                return url;
-            }
-
-            @Override
-            public URL getCodeSourceURL() {
-                return url;
-            }
-
-            @Override
-            public InputStream getInputStream() throws IOException {
-                return uc.getInputStream();
-            }
-
-            @Override
-            public int getContentLength() throws IOException {
-                return uc.getContentLength();
-            }
-        };
-        var bytes = resource.getBytes();
-//        if (name.equals("cn/hutool/core/util/ArrayUtil".replace("/", "."))) {
-//            for (int i = 0; i < 48772; i++) {
-//                System.out.println(i + ": " + bytes[i]);
-//            }
-//        }
+        var bytes = IO.read(in,true);
         for (ClassTransformer transformer : transformers) {
             bytes = transformer.transform(bytes, name);
         }
