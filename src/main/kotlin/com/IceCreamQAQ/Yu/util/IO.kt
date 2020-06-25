@@ -2,6 +2,7 @@ package com.IceCreamQAQ.Yu.util
 
 import com.IceCreamQAQ.Yu.annotation.NotSearch
 import java.io.File
+import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.*
@@ -40,5 +41,11 @@ class IO {
         @JvmStatic
         fun tmpFile() = File(tmpLocation, UUID.randomUUID().toString())
 
+        @JvmStatic
+        fun writeTmpFile(fileName:String, byteArray: ByteArray){
+            val o = FileOutputStream(File(tmpLocation,fileName))
+            o.write(byteArray)
+            o.close()
+        }
     }
 }
