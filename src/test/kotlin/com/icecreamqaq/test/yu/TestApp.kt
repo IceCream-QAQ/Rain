@@ -21,9 +21,9 @@ class TestApp : DefaultApp() {
         val test = this.context.getBean(TestUtil::class.java, "123")
         println(test)
 
-        val router = context.getBean(RouterPlus::class.java, "default")!!
+//        val router = context.getBean(RouterPlus::class.java, "default")!!
 
-        val ac = DefaultActionContext()
+//        val ac = DefaultActionContext()
 
         val paths = arrayOf("11", "menu", "123321")
 //        ac.path = paths

@@ -30,7 +30,7 @@ abstract class DefaultControllerLoader : Loader {
         for (item in items.values) {
             val clazz = item.type
             val name = clazz.getAnnotation(Named::class.java)?.value
-                    ?: item.annotation::class.java.interfaces[0].getAnnotation(Named::class.java)?.value ?: continue
+                    ?: item.loadBy::class.java.interfaces[0].getAnnotation(Named::class.java)?.value ?: continue
             val rootRouter = rootRouters[name] ?: {
                 val r = DefaultRouter(0)
                 rootRouters[name] = r

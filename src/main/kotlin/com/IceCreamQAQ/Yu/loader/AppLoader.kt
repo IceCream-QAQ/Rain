@@ -49,7 +49,7 @@ class AppLoader {
             for (s in scanPackages) {
                 classes.putAll(getClasses(s))
             }
-            val loadItemsMap = HashMap<Class<out Loader>, MutableMap<String, LoadItem>>()
+            val loadItemsMap = HashMap<Class<out Loader>, MutableMap<String, MutableMap<String, LoadItem>>>()
 
             for (clazz in classes.values) {
                 for (register in rsList) {
@@ -81,7 +81,10 @@ class AppLoader {
             }
 
             for (loader in loaders) {
-                loader.load(loadItemsMap[loader::class.java] ?: continue)
+                val ls = loadItemsMap[loader::class.java] ?: continue
+                for (l in ls.values) {
+                    loader.load(l)
+                }
             }
 
             for (clazz in classes.values) {
@@ -96,7 +99,7 @@ class AppLoader {
         }
     }
 
-    fun searchLoadBy(loadClass: Class<*>, searchClass: Class<*>, loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, LoadItem>>) {
+    fun searchLoadBy(loadClass: Class<*>, searchClass: Class<*>, loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, MutableMap<String, LoadItem>>>) {
         if (!loadClass.isBean()) return
         val loadBy = searchClass.getAnnotation(LoadBy::class.java)
         if (loadBy != null) {
@@ -120,17 +123,22 @@ class AppLoader {
         }
     }
 
-    fun addLoadItem(loadClass: Class<*>, annotationInstance: Annotation, loadBy: LoadBy, loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, LoadItem>>) {
+    fun addLoadItem(loadClass: Class<*>, annotationInstance: Annotation, loadBy: LoadBy, loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, MutableMap<String, LoadItem>>>) {
         val loader = Class.forName(loadBy.value.java.name) as Class<out Loader>
         val loadItems = loadItemsMap[loader] ?: {
-            val l = HashMap<String, LoadItem>()
+            val l = HashMap<String, MutableMap<String, LoadItem>>()
             loadItemsMap[loader] = l
             l
         }()
+        val lii = loadItems[annotationInstance::class.java.name] ?: {
+            val l = HashMap<String, LoadItem>()
+            loadItems[annotationInstance::class.java.name] = l
+            l
+        }()
         val loadItem = LoadItem()
-        loadItem.annotation = annotationInstance
+        loadItem.loadBy = annotationInstance
         loadItem.type = loadClass
-        loadItems[loadClass.name] = loadItem
+        lii[loadClass.name] = loadItem
     }
 
     @Throws(MalformedURLException::class)
