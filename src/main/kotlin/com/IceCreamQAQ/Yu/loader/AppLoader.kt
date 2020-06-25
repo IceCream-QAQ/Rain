@@ -5,6 +5,7 @@ import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.annotation.LoadBy
 import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.hook.YuHook
 import com.IceCreamQAQ.Yu.isBean
 import java.io.File
 import java.io.IOException
@@ -85,6 +86,10 @@ class AppLoader {
 
             for (clazz in classes.values) {
                 context[clazz]
+            }
+
+            for (hook in YuHook.getRunnables()) {
+                context.injectBean(hook)
             }
         } catch (e: Exception) {
             throw RuntimeException("程序初始化失败！", e)

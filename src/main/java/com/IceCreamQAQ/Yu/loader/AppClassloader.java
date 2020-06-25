@@ -20,8 +20,9 @@ public class AppClassloader extends ClassLoader {
 
     public AppClassloader(ClassLoader parent) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         super(parent);
-        YuHook.init(this);
         EnchantManager.init(this);
+        YuHook.init(this);
+
 
         for (String s : transformerList) {
             transformers.add((ClassTransformer) loadClass(s, true, false).newInstance());
@@ -78,7 +79,7 @@ public class AppClassloader extends ClassLoader {
 
         bytes = EnchantManager.checkClass(bytes);
 
-//        bytes = YuHook.checkClass(name, bytes);
+        bytes = YuHook.checkClass(name, bytes);
 
         return defineClass(name, bytes, 0, bytes.length);
     }

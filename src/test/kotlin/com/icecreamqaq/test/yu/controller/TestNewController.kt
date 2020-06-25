@@ -3,6 +3,7 @@ package com.icecreamqaq.test.yu.controller
 import com.IceCreamQAQ.Yu.annotation.Action
 import com.IceCreamQAQ.Yu.annotation.NewDefaultController
 import com.IceCreamQAQ.Yu.annotation.Path
+import com.icecreamqaq.test.yu.annotation.TestHook
 
 @NewDefaultController
 class TestNewController {
@@ -22,6 +23,7 @@ class TestNewController2 {
     @Action("menu/{ddd}")
     fun menu(ddd:String) = "menu: ddd = $ddd"
 
+    @TestHook
     @Action("{ddd}/menu")
     fun menu2(ddd:String) = "menu2: ddd = $ddd"
 
