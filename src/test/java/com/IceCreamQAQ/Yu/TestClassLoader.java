@@ -22,9 +22,11 @@ public class TestClassLoader {
         Class t = a.loadClass("com.IceCreamQAQ.Yu.TestA");
         var o = t.newInstance();
 
-        var m = t.getMethod("c", String.class, String.class,String.class);
+        val ss = new String[]{"123", "233"};
 
-        val r = m.invoke(o, "123","233","456");
+        var m = t.getMethod("c", String.class, ss.getClass(), int.class);
+
+        val r = m.invoke(o, "123", ss, 456);
 
         System.out.println(r);
 
@@ -41,17 +43,19 @@ public class TestClassLoader {
                 System.out.println("Para: " + para);
             }
             System.out.println("================================");
-            paras[1] = "Yu";
             return false;
         }
 
         @Override
         public void postRun(HookMethod method) {
+            System.out.println("================================");
+            System.out.println(method.result);
+            System.out.println("================================");
         }
 
         @Override
         public boolean onError(HookMethod method) {
-            return true;
+            return false;
         }
     }
 }

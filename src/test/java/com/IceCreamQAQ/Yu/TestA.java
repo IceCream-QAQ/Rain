@@ -8,12 +8,11 @@ import com.IceCreamQAQ.Yu.hook.YuHook;
 
 import javax.inject.Named;
 
-//@NewDefaultController
 public class TestA {
 
     @Action("123")
-    public static String c(String name, String nn,String nm) {
+    public static int c(String name, String[] nn, int nm) {
         System.out.println("fun c run ! name = " + name);
-        return "Hello " + name + "!";
+        return nm;
     }
 }
