@@ -31,7 +31,7 @@ interface Web {
     fun stop()
 }
 
-class WebHelperBeanFactory : BeanFactory<Web>,ApplicationService {
+class WebHelperBeanFactory : BeanFactory<Web>, ApplicationService {
 
     @Config("yu.webHelper.impl")
     @Default("com.IceCreamQAQ.Yu.util.OkHttpWebImpl")
@@ -44,7 +44,9 @@ class WebHelperBeanFactory : BeanFactory<Web>,ApplicationService {
 
 
     override fun init() {
-        web = context.newBean(Class.forName(implClass),null,true) as Web
+        val clazz = Class.forName(implClass)
+        context.register(clazz,true)
+        web = context.newBean(clazz,null, true) as Web
     }
 
     override fun start() {

@@ -5,7 +5,9 @@ import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.annotation.Default
 import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.di.BeanFactory
+import com.IceCreamQAQ.Yu.di.ClassContext
 import com.IceCreamQAQ.Yu.di.ConfigManager
+import com.IceCreamQAQ.Yu.di.YuContext
 import net.sf.ehcache.Cache
 import net.sf.ehcache.CacheManager
 import net.sf.ehcache.Element
@@ -41,10 +43,17 @@ class EhcacheHelpFactory : BeanFactory<EhcacheHelp<*>?>, ApplicationService {
     private lateinit var configManager: ConfigManager
 
     @Inject
+    private lateinit var context: YuContext
+
+    @Inject
     @field:Named("appClassLoader")
     private lateinit var classLoader: ClassLoader
 
     private var cmDefaultMap = ConcurrentHashMap<String, CacheManager>()
+
+//    override fun initClassContext(): ClassContext {
+//
+//    }
 
     override fun createBean(clazz: Class<EhcacheHelp<*>?>, name: String): EhcacheHelp<*>? {
         val cache = cm?.getCache(name) ?: {
@@ -56,8 +65,7 @@ class EhcacheHelpFactory : BeanFactory<EhcacheHelp<*>?>, ApplicationService {
                         val cm = CacheManager.newInstance(url) ?: null
                         if (cm != null) cmDefaultMap[name] = cm
                         cm
-                    }
-                    else {
+                    } else {
                         println("url: $location is null")
                         null
                     }
@@ -72,6 +80,8 @@ class EhcacheHelpFactory : BeanFactory<EhcacheHelp<*>?>, ApplicationService {
     }
 
     override fun init() {
+//        context.register(EhcacheHelp::class.java, true)
+
         val url = javaClass.classLoader.getResource(ehcacheConfigLocation) ?: return
         cm = CacheManager.newInstance(url)
     }
@@ -86,5 +96,7 @@ class EhcacheHelpFactory : BeanFactory<EhcacheHelp<*>?>, ApplicationService {
             cache.shutdown()
         }
     }
+
+
 }
 

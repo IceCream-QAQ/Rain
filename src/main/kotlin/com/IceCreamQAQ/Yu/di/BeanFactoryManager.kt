@@ -12,27 +12,31 @@ class BeanFactoryManager {
     @Inject
     private lateinit var context: YuContext
 
-    fun registerFactory(clazz:Class<BeanFactory<*>>){
+    fun registerFactory(clazz: Class<BeanFactory<*>>) {
         val factory = context[clazz] ?: throw BeanCreateError("Cant Instanced BeanFactory ${clazz.name}")
 
         for (gi in clazz.genericInterfaces) {
-            val pi = gi as? ParameterizedType ?:continue
-            if (pi.rawType == BeanFactory::class.java){
-                val beanClass = pi.actualTypeArguments[0] as? Class<*> ?: (pi.actualTypeArguments[0] as ParameterizedType).rawType as Class<*>
+            val pi = gi as? ParameterizedType ?: continue
+            if (pi.rawType == BeanFactory::class.java) {
+                val beanClass = pi.actualTypeArguments[0] as? Class<*>
+                        ?: (pi.actualTypeArguments[0] as ParameterizedType).rawType as Class<*>
                 factories[beanClass.name] = factory
+
+                context.register(ClassContext(beanClass.name, beanClass, factory.isMulti(), factory))
+
             }
         }
     }
 
-    operator fun get(clazz: String):BeanFactory<*>?{
+    operator fun get(clazz: String): BeanFactory<*>? {
         return getFactory(clazz)
     }
 
-    fun <T> getFactory(clazz:Class<T>):BeanFactory<T>?{
+    fun <T> getFactory(clazz: Class<T>): BeanFactory<T>? {
         return getFactory(clazz.name) as BeanFactory<T>?
     }
 
-    fun getFactory(clazz:String):BeanFactory<Any>?{
+    fun getFactory(clazz: String): BeanFactory<Any>? {
         return factories[clazz] as BeanFactory<Any>?
     }
 

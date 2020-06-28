@@ -87,9 +87,9 @@ class AppLoader {
                 }
             }
 
-            for (clazz in classes.values) {
-                context[clazz]
-            }
+//            for (clazz in classes.values) {
+//                context[clazz]
+//            }
 
             for (hook in YuHook.getRunnables()) {
                 context.injectBean(hook)

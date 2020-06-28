@@ -4,7 +4,9 @@ import com.IceCreamQAQ.Yu.AppLogger
 import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.annotation.Default
+import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.isBean
+import com.IceCreamQAQ.Yu.loader.ClassRegister
 import com.alibaba.fastjson.JSONObject
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
@@ -14,19 +16,59 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
-class YuContext(private val configer: ConfigManager, private val logger: AppLogger) {
+class YuContext(private val configer: ConfigManager, private val logger: AppLogger) : ClassRegister {
 
-    class ClassContext(val clazz: Class<*>) {
-//        val multi:Boolean
-//        init {
-//            multi =
-//        }
+    private val classContextMap = HashMap<String, ClassContext>()
+
+    override fun register(clazz: Class<*>) {
+        register(clazz, false)
+    }
+
+    fun register(context: ClassContext) {
+        classContextMap[context.name] = context
+    }
+
+    fun register(clazz: Class<*>, force: Boolean) {
+        if (classContextMap.containsKey(clazz.name)) return
+        if (!force) if (clazz.getAnnotation(NotSearch::class.java) != null) return
+
+        val classContext = ClassContext(clazz.name, clazz, false)
+        classContextMap[clazz.name] = classContext
+
+        val instanceName = clazz.getAnnotation(Named::class.java)?.value ?: ""
+
+        if (!clazz.isInterface) {
+            val binds = ArrayList<Class<*>>()
+            checkAutoBind(clazz, binds)
+
+            for (bind in binds) {
+                val bcc = getClassContextOrRegister(bind, force)
+                bcc.putBind(instanceName, classContext)
+            }
+        }
+    }
+
+    fun getClassContextOrRegister(clazz: Class<*>, force: Boolean): ClassContext {
+        return classContextMap[clazz.name] ?: {
+            register(clazz, force)
+            classContextMap[clazz.name] ?: error("Cant Init Class: ${clazz.name}.")
+        }()
+    }
+
+    fun checkAutoBind(clazz: Class<*>, binds: ArrayList<Class<*>>) {
+        if (clazz.isInterface) if (clazz.getAnnotation(AutoBind::class.java) != null) binds.add(clazz)
+        checkAutoBind(clazz.superclass ?: return, binds)
+        for (iC in clazz.interfaces) {
+            checkAutoBind(iC, binds)
+        }
     }
 
     fun checkClassMulti(): Boolean = true
 
-    private val context: MutableMap<String, MutableMap<String, Any>> = ConcurrentHashMap()
+    //    private val context: MutableMap<String, MutableMap<String, Any>> = ConcurrentHashMap()
     private var factoryManager: BeanFactoryManager? = null
 
     init {
@@ -41,12 +83,27 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
         return getBean(clazz)
     }
 
-    fun <T> getBean(clazz: Class<T>, name: String = ""): T? {
+    fun <T> getBean(clazz: Class<T>, name: String? = null): T? {
         return getBean(clazz.name, name) as? T
     }
 
-    fun getBean(clazz: String, name: String = ""): Any? {
-        return context[clazz]?.get(name) ?: newBean(Class.forName(clazz), name, true)
+    fun getBean(clazz: String, name: String? = null): Any? {
+        val context = classContextMap[clazz] ?: return newBean(Class.forName(clazz), name, save = true)
+        val bean = if (name == null) context.defaultInstance else null
+        if (bean != null) return bean
+
+        if (clazz == "com.icecreamqaq.test.yu.TestInterface") {
+            println("")
+        }
+        if (clazz == "com.icecreamqaq.test.yu.TestInterfaceImpl") {
+            println("")
+        }
+
+        return context.getInstance(name) ?: {
+            val bc = context.binds?.get(name ?: "")
+            if (bc == null) null
+            else getBean(bc.name, name)
+        }() ?: newBean(Class.forName(clazz), name, true)
     }
 
     fun putBean(obj: Any, name: String = "") {
@@ -54,18 +111,8 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
     }
 
     fun putBean(clazz: Class<*>, name: String, obj: Any) {
-        val cn = clazz.name
-        val objs = context[cn] ?: {
-            val objs = ConcurrentHashMap<String, Any>()
-            context[cn] = objs
-            objs
-        }()
-        objs[name] = obj
-
-        checkAutoBind(clazz.superclass, name, obj)
-        for (i in clazz.interfaces) {
-            checkAutoBind(i, name, obj)
-        }
+        val context = getClassContextOrRegister(clazz, false)
+        context.putInstance(name, obj)
     }
 
     private fun checkAutoBind(clazz: Class<*>?, name: String, obj: Any) {
@@ -112,24 +159,38 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
 
             val injectJsr = field.getAnnotation(Inject::class.java)
             if (injectJsr != null) {
-                val name = field.getAnnotation(Named::class.java)?.value ?: ""
+                val name = field.getAnnotation(Named::class.java)?.value
 
                 field.isAccessible = true
-                field[obj] = getBean(field.type.name,
-                        if (name.startsWith("{")) name.substring(1).substring(0, name.length - 2)
+                val b = getBean(field.type.name,
+                        if (name != null && name.startsWith("{")) name.substring(1).substring(0, name.length - 2)
                         else name
                 )
+                field[obj] = b
             }
         }
     }
 
-    fun <T> newBean(clazz: Class<T>, name: String? = null, save: Boolean = false): T? {
-        val bean = factoryManager?.getFactory(clazz)?.createBean(clazz, name ?: "")
-                ?: createBeanInstance(clazz) ?: return null
+    fun <T> newBean(clazz: Class<T>, name: String? = null, save: Boolean = false, force: Boolean = false): T? {
+        val context = classContextMap[clazz.name] ?: getClassContextOrRegister(clazz, force)
+
+        val bean = (context.factory as? BeanFactory<T>)?.createBean(clazz, name ?: "") ?: createBeanInstance(clazz)
+//        ?: {
+//            val bc = context.binds?.get(name)
+//            if (bc == null) null
+//            else newBean(bc.clazz, name, save, force)
+//        }() as T?
+        ?: return null
+
+
         if (save) putBean(bean, name ?: clazz.getAnnotation(Named::class.java)?.value ?: "")
         injectBean(bean)
         return bean
     }
+
+//    fun getBindBean(context: ClassContext,name: String):Any?{
+//
+//    }
 
     private fun <T> createBeanInstance(clazz: Class<T>): T? {
         if (!clazz.isBean()) return null;
@@ -182,5 +243,6 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
     private fun isArray(clazz: Class<*>): Boolean {
         return clazz.componentType != null
     }
+
 
 }

@@ -7,21 +7,7 @@
     <packaging>jar</packaging>
 
     <modelVersion>4.0.0</modelVersion>
-    <version>0.1.0.10-SNAPSHOT</version>
-
-    <distributionManagement>
-        <repository>
-            <id>kuku-releases</id>
-            <name>internal releases</name>
-            <url>https://maven.kuku.me/repository/maven-releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>kuku-snapshots</id>
-            <name>internal snapshot</name>
-            <url>https://maven.kuku.me/repository/maven-snapshots/</url>
-            <uniqueVersion>false</uniqueVersion>
-        </snapshotRepository>
-    </distributionManagement>
+    <version>0.1.0.12-SNAPSHOT</version>
 
     <parent>
         <groupId>com.IceCreamQAQ</groupId>
@@ -187,7 +173,7 @@
     <repositories>
         <repository>
             <id>IceCream</id>
-            <url>https://maven.kuku.me/repository/maven-public/</url>
+            <url>https://maven.IceCreamQAQ.com/repository/maven-public/</url>
         </repository>
     </repositories>
 </project>
