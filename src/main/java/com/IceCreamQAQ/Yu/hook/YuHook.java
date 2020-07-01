@@ -407,7 +407,7 @@ public class YuHook {
         nn.accept(ncw);
 
         val nbs = ncw.toByteArray();
-        IO.writeTmpFile(name + ".class", nbs);
+
 
         return nbs;
     }

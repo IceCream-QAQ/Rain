@@ -8,6 +8,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,13 @@ import java.util.List;
 public class AppClassloader extends ClassLoader {
 
     private final List<ClassTransformer> transformers = new ArrayList<>();
+    private static File classOutLocation;
+
+    static {
+        classOutLocation = new File(IO.getTmpLocation(),"classOutput");
+        if (classOutLocation.exists())classOutLocation.delete();
+        classOutLocation.mkdirs();
+    }
 
     public AppClassloader(ClassLoader parent) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         super(parent);
@@ -71,7 +79,13 @@ public class AppClassloader extends ClassLoader {
         val in = this.getParent().getResourceAsStream(path);
         if (in == null) throw new ClassNotFoundException(name);
 
-        byte[] bytes = IO.read(in,true);
+        byte[] oldBytes = IO.read(in,true);
+        byte[] bytes = oldBytes;
+
+//        if (name.equals("com.icecreamqaq.test.yu.bf.TestFactory")){
+//            System.out.println("123456");
+//        }
+
         for (ClassTransformer transformer : transformers) {
             bytes = transformer.transform(bytes, name);
         }
@@ -79,6 +93,10 @@ public class AppClassloader extends ClassLoader {
         bytes = EnchantManager.checkClass(bytes);
 
         bytes = YuHook.checkClass(name, bytes);
+
+        if (oldBytes != bytes){
+            IO.writeFile(new File(classOutLocation,name + ".class"), bytes);
+        }
 
         return defineClass(name, bytes, 0, bytes.length);
     }

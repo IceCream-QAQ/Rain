@@ -13,7 +13,8 @@ class IO {
     @NotSearch
     companion object {
 
-        private val tmpLocation = File("tmp")
+        @JvmStatic
+        val tmpLocation = File("tmp")
 
         init {
             if (!tmpLocation.exists() || !tmpLocation.isDirectory) {
@@ -30,6 +31,7 @@ class IO {
         }
 
         @JvmStatic
+        @JvmOverloads
         fun copy(inputStream: InputStream, outputStream: OutputStream, close: Boolean = true) {
             inputStream.copyTo(outputStream)
             if (close) {
@@ -42,8 +44,13 @@ class IO {
         fun tmpFile() = File(tmpLocation, UUID.randomUUID().toString())
 
         @JvmStatic
-        fun writeTmpFile(fileName:String, byteArray: ByteArray){
-            val o = FileOutputStream(File(tmpLocation,fileName))
+        fun writeTmpFile(fileName: String, byteArray: ByteArray) {
+            writeFile(File(tmpLocation, fileName), byteArray)
+        }
+
+        @JvmStatic
+        fun writeFile(file: File, byteArray: ByteArray) {
+            val o = FileOutputStream(file)
             o.write(byteArray)
             o.close()
         }
