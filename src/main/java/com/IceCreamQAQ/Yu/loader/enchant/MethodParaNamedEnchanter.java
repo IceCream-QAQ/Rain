@@ -2,7 +2,6 @@ package com.IceCreamQAQ.Yu.loader.enchant;
 
 import com.IceCreamQAQ.Yu.annotation.NotSearch;
 import lombok.val;
-import lombok.var;
 import org.objectweb.asm.tree.*;
 
 import java.util.ArrayList;
@@ -60,7 +59,7 @@ public class MethodParaNamedEnchanter implements Enchanter {
 
                     na.add(an);
                 } else {
-                    var haveNamed = false;
+                    boolean haveNamed = false;
                     for (val an : ans) {
                         if (!an.desc.equals("Ljavax/inject/Named;")) continue;
                         haveNamed = true;

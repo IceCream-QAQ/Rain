@@ -7,7 +7,6 @@ import com.IceCreamQAQ.Yu.util.IO;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import lombok.var;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,7 +71,7 @@ public class AppClassloader extends ClassLoader {
         val in = this.getParent().getResourceAsStream(path);
         if (in == null) throw new ClassNotFoundException(name);
 
-        var bytes = IO.read(in,true);
+        byte[] bytes = IO.read(in,true);
         for (ClassTransformer transformer : transformers) {
             bytes = transformer.transform(bytes, name);
         }
