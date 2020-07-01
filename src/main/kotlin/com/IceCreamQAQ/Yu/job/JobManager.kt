@@ -5,6 +5,7 @@ import com.IceCreamQAQ.Yu.util.DateUtil
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class JobManager : ApplicationService {
 
@@ -12,12 +13,43 @@ class JobManager : ApplicationService {
 
     private lateinit var asyncTimer: Timer
     private lateinit var syncTimers: ArrayList<Timer>
+    private val registerTimer = HashMap<String, Timer>()
 
     @Inject
     private lateinit var dateUtil: DateUtil
 
     override fun init() {
 
+    }
+
+    @JvmOverloads
+    fun registerTimer(runnable: Runnable, firstTime: Long, nextTime: Long? = null): String {
+        val id = UUID.randomUUID().toString()
+        val syncTimer = Timer()
+        registerTimer[id] = (syncTimer)
+        if (nextTime == null) syncTimer.schedule(RegisterTask(id, runnable, this, false), firstTime)
+        else syncTimer.schedule(RegisterTask(id, runnable, this, true), firstTime, nextTime)
+        return id
+    }
+
+    fun registerTimer(firstTime: Long, nextTime: Long? = null, function: () -> Unit): String {
+        val runnable = Runnable { function() }
+        return registerTimer(runnable, firstTime, nextTime)
+    }
+
+    fun deleteTimer(id: String) {
+        registerTimer[id]?.cancel()
+        registerTimer.remove(id)
+    }
+
+    class RegisterTask(private val id: String, private val runnable: Runnable, private val manager: JobManager, private val next: Boolean) : TimerTask() {
+        override fun run() {
+            runnable.run()
+            if (!next) {
+                manager.registerTimer.remove(id)
+                this.cancel()
+            }
+        }
     }
 
     override fun start() {
@@ -36,13 +68,13 @@ class JobManager : ApplicationService {
                             val ds = dateUtil.formatDate(date)
                             val dd = dateUtil.parseDateTime("$ds $t:00")
                             var tt = dd.time - date.time
-                            if (tt<0) tt += 24 * 60 * 60 * 1000
+                            if (tt < 0) tt += 24 * 60 * 60 * 1000
                             tt
                         } else {
                             val ds = dateUtil.formatDateTime(date)
                             val dd = dateUtil.parseDateTime("${ds.subSequence(0, 14)}$t:00")
                             var tt = dd.time - date.time
-                            if (tt<0) tt += 60 * 60 * 1000
+                            if (tt < 0) tt += 60 * 60 * 1000
                             tt
                         }
                     }
