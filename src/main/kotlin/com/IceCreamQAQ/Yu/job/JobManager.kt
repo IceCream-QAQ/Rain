@@ -79,10 +79,6 @@ class JobManager : ApplicationService {
                         }
                     }
 
-            if (ft < 0) {
-                println("d")
-            }
-
             if (job.async) asyncTimer.schedule(job, ft, job.time)
             else {
                 val syncTimer = Timer()
