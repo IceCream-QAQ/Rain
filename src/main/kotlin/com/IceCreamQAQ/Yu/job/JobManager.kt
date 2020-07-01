@@ -11,7 +11,7 @@ class JobManager : ApplicationService {
 
     var jobs: ArrayList<Job> = ArrayList()
 
-    private lateinit var asyncTimer: Timer
+    private var asyncTimer: Timer? = null
     private lateinit var syncTimers: ArrayList<Timer>
     private val registerTimer = HashMap<String, Timer>()
 
@@ -79,7 +79,7 @@ class JobManager : ApplicationService {
                         }
                     }
 
-            if (job.async) asyncTimer.schedule(job, ft, job.time)
+            if (job.async) asyncTimer?.schedule(job, ft, job.time)
             else {
                 val syncTimer = Timer()
                 syncTimers.add(syncTimer)
@@ -89,9 +89,12 @@ class JobManager : ApplicationService {
     }
 
     override fun stop() {
-        asyncTimer.cancel()
+        asyncTimer?.cancel()
         for (syncTimer in syncTimers) {
             syncTimer.cancel()
+        }
+        for (timer in registerTimer.values) {
+            timer.cancel()
         }
     }
 
