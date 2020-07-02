@@ -9,5 +9,4 @@ import javax.inject.Named
 @Named("priv")
 annotation class CController
 
-@HookBy("com.icecreamqaq.test.yu.HookMb3")
 annotation class TestHook
