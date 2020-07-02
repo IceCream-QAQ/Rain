@@ -51,9 +51,7 @@ class EhcacheHelpFactory : BeanFactory<EhcacheHelp<*>?>, ApplicationService {
 
     private var cmDefaultMap = ConcurrentHashMap<String, CacheManager>()
 
-//    override fun initClassContext(): ClassContext {
-//
-//    }
+    override fun width() = 5
 
     override fun createBean(clazz: Class<EhcacheHelp<*>?>, name: String): EhcacheHelp<*>? {
         val cache = cm?.getCache(name) ?: {
