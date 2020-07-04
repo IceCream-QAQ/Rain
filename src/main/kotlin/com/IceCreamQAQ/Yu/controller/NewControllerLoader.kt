@@ -13,8 +13,6 @@ import java.lang.reflect.Method
 import java.util.regex.Pattern
 import javax.inject.Inject
 import javax.inject.Named
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 
 abstract class NewControllerLoader : Loader {
@@ -23,6 +21,8 @@ abstract class NewControllerLoader : Loader {
 
     @Inject
     private lateinit var context: YuContext
+
+    open val separationCharacter: Array<String> = arrayOf("/")
 
     protected abstract fun createMethodInvoker(obj: Any, method: Method): NewMethodInvoker
     protected abstract fun createActionInvoker(level: Int, actionMethod: Method): NewActionInvoker
@@ -57,7 +57,7 @@ abstract class NewControllerLoader : Loader {
     fun controllerToRouter(instance: Any, rootRouter: NewRouterImpl) {
         val controllerClass = instance::class.java
 
-        val controllerRouter = getRouterByPathString(rootRouter, controllerClass.getAnnotation(Path::class.java)?.value, 0).router
+        val controllerRouter = getRouterByPathString(rootRouter, controllerClass.getAnnotation(Path::class.java)?.value?.split(*separationCharacter), 0).router
 
         val allMethods = ArrayList<Method>()
         getMethods(allMethods, controllerClass)
@@ -153,15 +153,15 @@ abstract class NewControllerLoader : Loader {
 
     fun getActionRouter(pathString: String, controllerRouter: NewRouterImpl, rootRouter: NewRouterImpl): ActionRouterAndPath {
         var path = pathString
-        return if (path.contains("/")) {
-            val router = if (path[0] == '/') {
-                path = path.substring(1)
-                rootRouter
-            } else {
-                controllerRouter
-            }
-            getRouterByPathString(router, path, 1)
-        } else ActionRouterAndPath(controllerRouter, pathString)
+        val router = if (path[0] == '/') {
+            path = path.substring(1)
+            rootRouter
+        } else {
+            controllerRouter
+        }
+        val a = path.split(*separationCharacter)
+        return if (a.size == 1)ActionRouterAndPath(router, path)
+        else getRouterByPathString(router, a, 1)
     }
 
     fun getRouter(router: NewRouterImpl, name: String): NewRouterImpl {
@@ -180,9 +180,9 @@ abstract class NewControllerLoader : Loader {
         return nextRouter
     }
 
-    fun getRouterByPathString(router: NewRouterImpl, pathString: String?, lessLevel: Int): ActionRouterAndPath {
-        if (pathString == null) return ActionRouterAndPath(router, "")
-        val paths = pathString.split("/".toRegex())
+    fun getRouterByPathString(router: NewRouterImpl, paths: List<String>?, lessLevel: Int): ActionRouterAndPath {
+        if (paths == null) return ActionRouterAndPath(router, "")
+//        val paths = pathString.split(*separationCharacter)
         var finishRouter = router
         val length = paths.size - lessLevel
         for (i in 0 until length) {
