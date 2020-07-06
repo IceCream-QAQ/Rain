@@ -59,10 +59,10 @@ open class NewRouterImpl(val level: Int) : NewRouter {
 
 }
 
-open class NewActionInvoker(level: Int, mehtod: Method, instance: Any) : NewRouterImpl(level) {
+open class NewActionInvoker(level: Int, method: Method, instance: Any) : NewRouterImpl(level) {
 
     open lateinit var befores: Array<NewMethodInvoker>
-    open val invoker: NewMethodInvoker = NewReflectMethodInvoker(mehtod, instance)
+    open val invoker: NewMethodInvoker = NewReflectMethodInvoker(method, instance)
     open lateinit var afters: Array<NewMethodInvoker>
     open lateinit var throws: Array<NewMethodInvoker>
 
