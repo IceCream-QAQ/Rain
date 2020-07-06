@@ -1,11 +1,7 @@
 package com.IceCreamQAQ.Yu.controller.router
 
 import com.IceCreamQAQ.Yu.annotation.AutoBind
-import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.Yu.controller.NewActionContext
-import com.IceCreamQAQ.Yu.entity.DoNone
-import com.IceCreamQAQ.Yu.entity.Result
-import java.lang.Exception
 import java.lang.reflect.Method
 import java.util.regex.Pattern
 import javax.inject.Named
@@ -14,11 +10,11 @@ open class MatchItem(
         val needSave: Boolean,
         matchString: String,
         val matchNames: Array<String>?,
-        val router:NewRouter
+        val router: NewRouter
 ) {
     val p: Pattern = Pattern.compile(matchString)
 
-    fun invoke(path: String, context: NewActionContext): Boolean{
+    fun invoke(path: String, context: NewActionContext): Boolean {
         return router.invoke(path, context)
     }
 }
@@ -49,7 +45,7 @@ open class NewRouterImpl(val level: Int) : NewRouter {
         if (nor != null) return nor.invoke(nextPath, context)
         for (matchItem in needMath) {
             val m = matchItem.p.matcher(path)
-            if (m.find()){
+            if (m.find()) {
                 if (matchItem.needSave) {
                     for ((i, name) in matchItem.matchNames!!.withIndex()) {
                         context[name] = m.group(i + 1)
@@ -63,12 +59,12 @@ open class NewRouterImpl(val level: Int) : NewRouter {
 
 }
 
-open class NewActionInvoker(level: Int) : NewRouterImpl(level) {
+open class NewActionInvoker(level: Int, mehtod: Method, instance: Any) : NewRouterImpl(level) {
 
-    lateinit var befores: Array<NewMethodInvoker>
-    lateinit var invoker: NewMethodInvoker
-    lateinit var afters: Array<NewMethodInvoker>
-    lateinit var throws: Array<NewMethodInvoker>
+    open lateinit var befores: Array<NewMethodInvoker>
+    open val invoker: NewMethodInvoker = NewReflectMethodInvoker(mehtod, instance)
+    open lateinit var afters: Array<NewMethodInvoker>
+    open lateinit var throws: Array<NewMethodInvoker>
 
     override fun invoke(path: String, context: NewActionContext): Boolean {
         if (super.invoke(path, context)) return true
@@ -125,7 +121,6 @@ class NewReflectMethodInvoker(val method: Method, val instance: Any) : NewMethod
         }
 
         val re = if (mps.isEmpty()) method.invoke(instance)
-
         else {
             method.invoke(instance, *paras)
         }

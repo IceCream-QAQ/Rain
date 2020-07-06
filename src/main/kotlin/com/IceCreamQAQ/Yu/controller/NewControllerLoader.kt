@@ -24,8 +24,8 @@ abstract class NewControllerLoader : Loader {
 
     open val separationCharacter: Array<String> = arrayOf("/")
 
-    protected abstract fun createMethodInvoker(obj: Any, method: Method): NewMethodInvoker
-    protected abstract fun createActionInvoker(level: Int, actionMethod: Method): NewActionInvoker
+    protected abstract fun createMethodInvoker(instance: Any, method: Method): NewMethodInvoker
+    protected abstract fun createActionInvoker(level: Int, actionMethod: Method, instance: Any): NewActionInvoker
 
     override fun load(items: Map<String, LoadItem>) {
         val rootRouters = HashMap<String, NewRouterImpl>()
@@ -87,9 +87,9 @@ abstract class NewControllerLoader : Loader {
                 val actionRootRouter = aa.router
                 val actionPath = aa.path
 
-                val methodInvoker = createMethodInvoker(instance, method)
-                val actionInvoker = createActionInvoker(actionRootRouter.level + 1, method)
-                actionInvoker.invoker = methodInvoker
+//                val methodInvoker = createMethodInvoker(instance, method)
+                val actionInvoker = createActionInvoker(actionRootRouter.level + 1, method, instance)
+//                actionInvoker.invoker = methodInvoker
 
                 val abs = ArrayList<NewMethodInvoker>()
                 w@ for ((before, invoker) in befores) {
@@ -160,7 +160,7 @@ abstract class NewControllerLoader : Loader {
             controllerRouter
         }
         val a = path.split(*separationCharacter)
-        return if (a.size == 1)ActionRouterAndPath(router, path)
+        return if (a.size == 1) ActionRouterAndPath(router, path)
         else getRouterByPathString(router, a, 1)
     }
 
@@ -195,7 +195,7 @@ abstract class NewControllerLoader : Loader {
 }
 
 open class NewControllerLoaderImpl : NewControllerLoader() {
-    override fun createMethodInvoker(obj: Any, method: Method): NewMethodInvoker = NewReflectMethodInvoker(method, obj)
+    override fun createMethodInvoker(instance: Any, method: Method): NewMethodInvoker = NewReflectMethodInvoker(method, instance)
 
-    override fun createActionInvoker(level: Int, actionMethod: Method): NewActionInvoker = NewActionInvoker(level)
+    override fun createActionInvoker(level: Int, actionMethod: Method, instance: Any): NewActionInvoker = NewActionInvoker(level, actionMethod, instance)
 }
