@@ -1,9 +1,6 @@
 package com.IceCreamQAQ.Yu.controller
 
-import com.IceCreamQAQ.Yu.annotation.Action
-import com.IceCreamQAQ.Yu.annotation.Before
-import com.IceCreamQAQ.Yu.annotation.Path
-import com.IceCreamQAQ.Yu.annotation.With
+import com.IceCreamQAQ.Yu.annotation.*
 import com.IceCreamQAQ.Yu.controller.router.*
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.loader.LoadItem
@@ -69,11 +66,18 @@ abstract class NewControllerLoader : Loader {
 
         val methods = controllerClass.methods
         val befores = HashMap<Before, NewMethodInvoker>()
+        val afters = HashMap<After,NewMethodInvoker>()
+
         for (method in allMethods) {
             val before = method.getAnnotation(Before::class.java)
             if (before != null) {
                 val beforeInvoker = createMethodInvoker(instance, method)
-                befores[before] = (beforeInvoker)
+                befores[before] = beforeInvoker
+            }
+            val after = method.getAnnotation(After::class.java)
+            if (after != null) {
+                val afterInvoker = createMethodInvoker(instance, method)
+                afters[after] = afterInvoker
             }
         }
 //        val before = befores.toTypedArray()
@@ -101,8 +105,19 @@ abstract class NewControllerLoader : Loader {
                     }
                     abs.add(invoker)
                 }
+                val aas = ArrayList<NewMethodInvoker>()
+                w@ for ((after, invoker) in afters) {
+                    if (after.except.size != 1 || after.except[0] != "") for (s in after.except) {
+                        if (s == actionMethodName) continue@w
+                    }
+                    if (after.only.size != 1 || after.only[0] != "") for (s in after.only) {
+                        if (s != actionMethodName) continue@w
+                    }
+                    aas.add(invoker)
+                }
 
                 actionInvoker.befores = abs.toTypedArray()
+                actionInvoker.afters = aas.toTypedArray()
 
                 val mi = getMatchItem(actionPath, actionInvoker)
 

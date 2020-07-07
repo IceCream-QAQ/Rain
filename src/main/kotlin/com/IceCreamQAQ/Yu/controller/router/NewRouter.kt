@@ -73,8 +73,12 @@ open class NewActionInvoker(level: Int, method: Method, instance: Any) : NewRout
                 val o = before.invoke(context)
                 if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
             }
-            val result = invoker.invoke(context) ?: return true
+            val result = invoker.invoke(context)
             context.onSuccess(result)
+            for (after in afters) {
+                val o = after.invoke(context)
+                if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
+            }
         } catch (e: Exception) {
             throw context.onError(e) ?: return true
         }

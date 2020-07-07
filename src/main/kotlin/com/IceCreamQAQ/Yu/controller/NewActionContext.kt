@@ -10,7 +10,7 @@ interface NewActionContext {
     operator fun set(name: String, obj: Any)
 
     fun onError(e: Throwable): Throwable?
-    fun onSuccess(result: Any): Any?
+    fun onSuccess(result: Any?): Any?
 
 }
 
@@ -29,7 +29,7 @@ class NewActionContextImpl : NewActionContext {
 
     override fun onError(e: Throwable): Throwable = e
 
-    override fun onSuccess(result: Any): Any? {
+    override fun onSuccess(result: Any?): Any? {
         this.result = result
         return null
     }
