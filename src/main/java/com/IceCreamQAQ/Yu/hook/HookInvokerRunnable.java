@@ -3,7 +3,7 @@ package com.IceCreamQAQ.Yu.hook;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HookInvokerRunnable implements HookRunnable {
+public class HookInvokerRunnable {
 
     private final List<HookRunnable> runnables = new ArrayList<>();
 
@@ -11,7 +11,6 @@ public class HookInvokerRunnable implements HookRunnable {
         this.runnables.add(runnable);
     }
 
-    @Override
     public boolean preRun(HookMethod method) {
         for (HookRunnable runnable : runnables) {
             if (runnable.preRun(method))return true;
@@ -19,14 +18,12 @@ public class HookInvokerRunnable implements HookRunnable {
         return false;
     }
 
-    @Override
     public void postRun(HookMethod method) {
         for (HookRunnable runnable : runnables) {
             runnable.postRun(method);
         }
     }
 
-    @Override
     public boolean onError(HookMethod method) {
         for (HookRunnable runnable : runnables) {
             if (runnable.onError(method))return true;

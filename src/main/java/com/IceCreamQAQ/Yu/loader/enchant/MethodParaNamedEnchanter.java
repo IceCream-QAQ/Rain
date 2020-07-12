@@ -50,7 +50,7 @@ public class MethodParaNamedEnchanter implements Enchanter {
                     pas[i] = na;
 
                     val an = new AnnotationNode("Ljavax/inject/Named;");
-                    val values = new ArrayList<String>();
+                    val values = new ArrayList();
 
                     values.add("value");
                     values.add(paraName.get(i));
@@ -69,7 +69,7 @@ public class MethodParaNamedEnchanter implements Enchanter {
                     if (haveNamed) continue;
 
                     val an = new AnnotationNode("Ljavax/inject/Named;");
-                    val values = new ArrayList<String>();
+                    val values = new ArrayList();
                     values.add("value");
                     values.add(paraName.get(i));
                     an.values = values;
