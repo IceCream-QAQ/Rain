@@ -2,8 +2,8 @@ package com.IceCreamQAQ.Yu.hook;
 
 import com.IceCreamQAQ.Yu.annotation.HookBy;
 import com.IceCreamQAQ.Yu.loader.AppClassloader;
-import com.IceCreamQAQ.Yu.util.IO;
-import lombok.*;
+import lombok.val;
+import lombok.var;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -149,7 +149,11 @@ public class YuHook {
 
             int maxPara;
 
-            val paras = readPara(ap);
+            val isStatic = (method.access >> 3 & 1) == 1;
+
+            val firstStack = isStatic ? 0 : 1;
+
+            val paras = readPara(ap, firstStack);
 
             maxPara = paras.size();
 
@@ -161,10 +165,8 @@ public class YuHook {
                 returnType = ar;
             }
 
-            val isStatic = (method.access >> 3 & 1) == 1;
 
             if (!isStatic) maxPara += 1;
-
 
             val mv = cw.visitMethod(method.access, mn, method.desc, method.signature, new String[]{"java/lang/Throwable"});
 
@@ -174,13 +176,17 @@ public class YuHook {
             Label catchLabel = new Label();
             mv.visitTryCatchBlock(tryStart, tryEnd, catchLabel, "java/lang/Throwable");
 
+            val lastPara = paras.get(paras.size() - 1);
 
-            int stack = maxPara - 1;
+            int stack = lastPara.stackNum + lastPara.stackSize - 1;
             int hookMethodStack;
             int paraStack;
 
+            val newHookMethodLabel = new Label();
+            val setClassNameLabel = new Label();
+            val newParasLabel = new Label();
             {// HookMethod
-                val newHookMethodLabel = new Label();
+
                 mv.visitLabel(newHookMethodLabel);
                 mv.visitTypeInsn(NEW, "com/IceCreamQAQ/Yu/hook/HookMethod");
                 mv.visitInsn(DUP);
@@ -189,7 +195,7 @@ public class YuHook {
 
                 hookMethodStack = stack;
 
-                val setClassNameLabel = new Label();
+
                 mv.visitLabel(setClassNameLabel);
                 mv.visitVarInsn(ALOAD, hookMethodStack);
                 mv.visitLdcInsn(name);
@@ -203,7 +209,6 @@ public class YuHook {
 
                 // Paras
                 {
-                    val newParasLabel = new Label();
                     mv.visitLabel(newParasLabel);
                     if (isStatic) mv.visitIntInsn(SIPUSH, maxPara + 1);
                     else mv.visitIntInsn(SIPUSH, maxPara);
@@ -212,46 +217,66 @@ public class YuHook {
                     mv.visitVarInsn(ASTORE, ++stack);
                     paraStack = stack;
 
-                    if (isStatic) {
-                        mv.visitVarInsn(ALOAD, paraStack);
-                        mv.visitInsn(ICONST_0);
-                        mv.visitInsn(ACONST_NULL);
-                        mv.visitInsn(AASTORE);
+//                    if (isStatic) {
+//                        mv.visitVarInsn(ALOAD, paraStack);
+//                        mv.visitInsn(ICONST_0);
+//                        mv.visitInsn(ACONST_NULL);
+//                        mv.visitInsn(AASTORE);
+//
+//                        for (int i = 0; i < maxPara; i++) {
+//                            mv.visitVarInsn(ALOAD, paraStack);
+//                            mv.visitIntInsn(SIPUSH, i + 1);
+//                            val p = paras.get(i).type;
+//                            if (p.length() == 1) {
+//                                mv.visitVarInsn(getLoad(p), i);
+//                                val typed = getTyped(p);
+//                                mv.visitMethodInsn(INVOKESTATIC, typed, "valueOf", "(" + p + ")L" + typed + ";", false);
+//                            } else {
+//                                mv.visitVarInsn(ALOAD, i);
+//                            }
+//                            mv.visitInsn(AASTORE);
+//
+//                        }
+//                    } else {
+//                        mv.visitVarInsn(ALOAD, paraStack);
+//                        mv.visitInsn(ICONST_0);
+//                        mv.visitVarInsn(ALOAD, 0);
+//                        mv.visitInsn(AASTORE);
+//                        for (int i = 1; i < maxPara; i++) {
+//                            mv.visitVarInsn(ALOAD, paraStack);
+//                            mv.visitIntInsn(SIPUSH, i);
+//                            val p = paras.get(i - 1).type;
+//                            if (p.length() == 1) {
+//                                mv.visitVarInsn(getLoad(p), i);
+//                                val typed = getTyped(p);
+//                                mv.visitMethodInsn(INVOKESTATIC, typed, "valueOf", "(" + p + ")L" + typed + ";", false);
+//                            } else {
+//                                mv.visitVarInsn(ALOAD, i);
+//                            }
+//                            mv.visitInsn(AASTORE);
+//                        }
+//                    }
 
-                        for (int i = 0; i < maxPara; i++) {
-                            mv.visitVarInsn(ALOAD, paraStack);
-                            mv.visitIntInsn(SIPUSH, i + 1);
-                            val p = paras.get(i);
-                            if (p.length() == 1) {
-                                mv.visitVarInsn(ILOAD, i);
-                                val typed = getTyped(p);
-                                mv.visitMethodInsn(INVOKESTATIC, typed, "valueOf", "(" + p + ")L" + typed + ";", false);
-                            } else {
-                                mv.visitVarInsn(ALOAD, i);
-                            }
-                            mv.visitInsn(AASTORE);
+                    mv.visitVarInsn(ALOAD, paraStack);
+                    mv.visitInsn(ICONST_0);
+                    if (isStatic) mv.visitInsn(ACONST_NULL);
+                    else mv.visitVarInsn(ALOAD, 0);
+                    mv.visitInsn(AASTORE);
 
-                        }
-                    } else {
+                    for (int i = 0; i < paras.size(); i++) {
+                        val para = paras.get(i);
                         mv.visitVarInsn(ALOAD, paraStack);
-                        mv.visitInsn(ICONST_0);
-                        mv.visitVarInsn(ALOAD, 0);
-                        mv.visitInsn(AASTORE);
-                        for (int i = 1; i < maxPara; i++) {
-                            mv.visitVarInsn(ALOAD, paraStack);
-                            mv.visitIntInsn(SIPUSH, i);
-                            val p = paras.get(i - 1);
-                            if (p.length() == 1) {
-                                mv.visitVarInsn(ILOAD, i);
-                                val typed = getTyped(p);
-                                mv.visitMethodInsn(INVOKESTATIC, typed, "valueOf", "(" + p + ")L" + typed + ";", false);
-                            } else {
-                                mv.visitVarInsn(ALOAD, i);
-                            }
-                            mv.visitInsn(AASTORE);
+                        mv.visitIntInsn(BIPUSH, i + 1);
+                        val p = para.type;
+                        if (p.length() == 1) {
+                            mv.visitVarInsn(getLoad(p), para.stackNum);
+                            val typed = getTyped(p);
+                            mv.visitMethodInsn(INVOKESTATIC, typed, "valueOf", "(" + p + ")L" + typed + ";", false);
+                        } else {
+                            mv.visitVarInsn(ALOAD, para.stackNum);
                         }
+                        mv.visitInsn(AASTORE);
                     }
-
 
                     val setParasLabel = new Label();
                     mv.visitLabel(setParasLabel);
@@ -262,6 +287,7 @@ public class YuHook {
                 }
             }
             int hookRunnableStack;
+
             {// HookRunnable
 
                 val getHookRunnableLabel = new Label();
@@ -274,13 +300,14 @@ public class YuHook {
 
                 hookRunnableStack = stack;
             }
+            val preRunLabel = new Label();
             {// preRun
 
-                val preRunLabel = new Label();
+
                 mv.visitLabel(preRunLabel);
                 mv.visitVarInsn(ALOAD, hookRunnableStack);
                 mv.visitVarInsn(ALOAD, hookMethodStack);
-                mv.visitMethodInsn(INVOKEINTERFACE, "com/IceCreamQAQ/Yu/hook/HookRunnable", "preRun", "(Lcom/IceCreamQAQ/Yu/hook/HookMethod;)Z", true);
+                mv.visitMethodInsn(INVOKEVIRTUAL, "com/IceCreamQAQ/Yu/hook/HookInvokerRunnable", "preRun", "(Lcom/IceCreamQAQ/Yu/hook/HookMethod;)Z", false);
                 mv.visitJumpInsn(IFEQ, tryStart);
 
                 if (returnFlag) {
@@ -288,7 +315,7 @@ public class YuHook {
                     mv.visitFieldInsn(GETFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "result", "Ljava/lang/Object;");
 //                    mv.visitTypeInsn(CHECKCAST, returnType);
                     makeCast(mv, returnType);
-                    if (returnType.length() == 1) mv.visitInsn(IRETURN);
+                    if (returnType.length() == 1) mv.visitInsn(getReturnTyped(returnType));
                     else mv.visitInsn(ARETURN);
                 } else {
                     mv.visitInsn(RETURN);
@@ -303,7 +330,7 @@ public class YuHook {
                     mv.visitVarInsn(ALOAD, paraStack);
                     mv.visitIntInsn(BIPUSH, i + 1);
                     mv.visitInsn(AALOAD);
-                    makeCast(mv, paras.get(i));
+                    makeCast(mv, paras.get(i).type);
                 }
 
 
@@ -321,7 +348,7 @@ public class YuHook {
                 mv.visitLabel(postRunLabel);
                 mv.visitVarInsn(ALOAD, hookRunnableStack);
                 mv.visitVarInsn(ALOAD, hookMethodStack);
-                mv.visitMethodInsn(INVOKEINTERFACE, "com/IceCreamQAQ/Yu/hook/HookRunnable", "postRun", "(Lcom/IceCreamQAQ/Yu/hook/HookMethod;)V", true);
+                mv.visitMethodInsn(INVOKEVIRTUAL, "com/IceCreamQAQ/Yu/hook/HookInvokerRunnable", "postRun", "(Lcom/IceCreamQAQ/Yu/hook/HookMethod;)V", false);
 
                 val returnLabel = new Label();
                 mv.visitLabel(returnLabel);
@@ -330,12 +357,13 @@ public class YuHook {
                     mv.visitVarInsn(ALOAD, hookMethodStack);
                     mv.visitFieldInsn(GETFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "result", "Ljava/lang/Object;");
                     makeCast(mv, returnType);
-                    if (returnType.length() == 1) mv.visitInsn(IRETURN);
+                    if (returnType.length() == 1) mv.visitInsn(getReturnTyped(returnType));
                     else mv.visitInsn(ARETURN);
                 } else {
                     mv.visitInsn(RETURN);
                 }
             }
+            val setErrorLabel = new Label();
             {// catch
                 mv.visitLabel(catchLabel);
                 mv.visitVarInsn(ASTORE, ++stack);
@@ -343,7 +371,6 @@ public class YuHook {
                 val errorStack = stack;
 
 
-                val setErrorLabel = new Label();
                 mv.visitLabel(setErrorLabel);
                 mv.visitVarInsn(ALOAD, hookMethodStack);
                 mv.visitVarInsn(ALOAD, errorStack);
@@ -354,20 +381,20 @@ public class YuHook {
                 mv.visitLabel(onErrorLabel);
                 mv.visitVarInsn(ALOAD, hookRunnableStack);
                 mv.visitVarInsn(ALOAD, hookMethodStack);
-                mv.visitMethodInsn(INVOKEINTERFACE, "com/IceCreamQAQ/Yu/hook/HookRunnable", "onError", "(Lcom/IceCreamQAQ/Yu/hook/HookMethod;)Z", true);
+                mv.visitMethodInsn(INVOKEVIRTUAL, "com/IceCreamQAQ/Yu/hook/HookInvokerRunnable", "onError", "(Lcom/IceCreamQAQ/Yu/hook/HookMethod;)Z", false);
 
 
                 val throwLabel = new Label();
                 val returnLabel = new Label();
                 mv.visitLabel(returnLabel);
                 mv.visitJumpInsn(IFEQ, throwLabel);
-                mv.visitVarInsn(ALOAD, hookMethodStack);
-                mv.visitFieldInsn(GETFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "result", "Ljava/lang/Object;");
+//                mv.visitVarInsn(ALOAD, hookMethodStack);
+//                mv.visitFieldInsn(GETFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "result", "Ljava/lang/Object;");
                 if (returnFlag) {
                     mv.visitVarInsn(ALOAD, hookMethodStack);
                     mv.visitFieldInsn(GETFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "result", "Ljava/lang/Object;");
                     makeCast(mv, returnType);
-                    if (returnType.length() == 1) mv.visitInsn(IRETURN);
+                    if (returnType.length() == 1) mv.visitInsn(getReturnTyped(returnType));
                     else mv.visitInsn(ARETURN);
                 } else {
                     mv.visitInsn(RETURN);
@@ -378,7 +405,26 @@ public class YuHook {
                 mv.visitVarInsn(ALOAD, hookMethodStack);
                 mv.visitFieldInsn(GETFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "error", "Ljava/lang/Throwable;");
                 mv.visitInsn(ATHROW);
+
+
             }
+
+//            Label localsLabel = new Label();
+//            mv.visitLabel(localsLabel);
+
+//            // error
+//            mv.visitLocalVariable("error", "Ljava/lang/Throwable;", null, setErrorLabel, localsLabel, 6);
+//
+//            // this
+//            mv.visitLocalVariable("this", "Lcom/IceCreamQAQ/Yu/util/TaT;", null, newHookMethodLabel, localsLabel, 0);
+//
+//            // paras
+//            mv.visitLocalVariable("n", "J", null, newHookMethodLabel, localsLabel, 1);
+//
+//            mv.visitLocalVariable("hookMethod", "Lcom/IceCreamQAQ/Yu/hook/HookMethod;", null, setClassNameLabel, localsLabel, 3);
+//            mv.visitLocalVariable("paras", "[Ljava/lang/Object;", null, newParasLabel, localsLabel, 4);
+//            mv.visitLocalVariable("invoker", "Lcom/IceCreamQAQ/Yu/hook/HookInvokerRunnable;", null, preRunLabel, localsLabel, 5);
+
             mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
@@ -389,7 +435,8 @@ public class YuHook {
         ClassNode nn = new ClassNode();
         nr.accept(nn, 0);
 
-        for (String mn : newMethods.keySet()) {
+        for (
+                String mn : newMethods.keySet()) {
             val m = ((List<MethodNode>) nn.methods).stream().filter(s -> s.name.equals(mn)).findFirst().get();
             val mh = ((List<MethodNode>) nn.methods).stream().filter(s -> s.name.equals(mn + "_IceCreamQAQ_YuHook")).findFirst().get();
 
@@ -420,7 +467,7 @@ public class YuHook {
                 return "java/lang/Short";
             case 'I':
                 return "java/lang/Integer";
-            case 'L':
+            case 'J':
                 return "java/lang/Long";
             case 'F':
                 return "java/lang/Float";
@@ -432,6 +479,44 @@ public class YuHook {
                 return "java/lang/Character";
         }
         return type;
+    }
+
+    private static int getLoad(String type) {
+        switch (type.charAt(0)) {
+            case 'B':
+            case 'S':
+            case 'I':
+            case 'Z':
+            case 'C':
+                return ILOAD;
+            case 'J':
+                return LLOAD;
+            case 'F':
+                return FLOAD;
+            case 'D':
+                return DLOAD;
+
+        }
+        return ALOAD;
+    }
+
+    private static int getReturnTyped(String type) {
+        switch (type.charAt(0)) {
+            case 'B':
+            case 'S':
+            case 'I':
+            case 'Z':
+            case 'C':
+                return IRETURN;
+            case 'J':
+                return LRETURN;
+            case 'F':
+                return FRETURN;
+            case 'D':
+                return DRETURN;
+
+        }
+        return ARETURN;
     }
 
     private static void makeCast(MethodVisitor mv, String type) {
@@ -449,9 +534,9 @@ public class YuHook {
                     mv.visitTypeInsn(CHECKCAST, "java/lang/Integer");
                     mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I", false);
                     break;
-                case 'L':
+                case 'J':
                     mv.visitTypeInsn(CHECKCAST, "java/lang/Long");
-                    mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Long", "longValue", "()L", false);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Long", "longValue", "()J", false);
                     break;
                 case 'F':
                     mv.visitTypeInsn(CHECKCAST, "java/lang/Float");
@@ -476,8 +561,22 @@ public class YuHook {
         }
     }
 
-    private static List<String> readPara(String desc) {
-        val paraList = new ArrayList<String>();
+    public static class MethodPara {
+        public int stackSize;
+        public int stackNum;
+        public String type;
+        public String name;
+
+        public MethodPara(int stackSize, int stackNum, String type) {
+            this.stackSize = stackSize;
+            this.stackNum = stackNum;
+            this.type = type;
+        }
+
+    }
+
+    private static List<MethodPara> readPara(String desc, int num) {
+        val paraList = new ArrayList<MethodPara>();
         if (desc.isEmpty()) return paraList;
         val s = desc.toCharArray();
 
@@ -492,7 +591,10 @@ public class YuHook {
                         sb = new StringBuilder();
                         break;
                     default:
-                        paraList.add(String.valueOf(c));
+//                        paraList.add(String.valueOf(c));
+                        int width = getTypedWidth(String.valueOf(c));
+                        paraList.add(new MethodPara(width, num, String.valueOf(c)));
+                        num += width;
                         break;
                 }
             } else {
@@ -500,11 +602,30 @@ public class YuHook {
                     var p = sb.toString();
                     sb = null;
                     if (p.startsWith("[")) p += ";";
-                    paraList.add(p);
+//                    paraList.add(p);
+                    paraList.add(new MethodPara(1, num, p));
+                    num += 1;
                 } else sb.append(c);
             }
         }
         return paraList;
+    }
+
+    private static int getTypedWidth(String type) {
+        switch (type.charAt(0)) {
+            case 'B':
+            case 'S':
+            case 'I':
+            case 'Z':
+            case 'F':
+            case 'C':
+                return 1;
+            case 'J':
+            case 'D':
+                return 2;
+
+        }
+        return ARETURN;
     }
 
     static boolean isSysMethod(String name) {
