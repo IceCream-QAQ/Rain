@@ -66,7 +66,7 @@ abstract class NewControllerLoader : Loader {
 
         val methods = controllerClass.methods
         val befores = HashMap<Before, NewMethodInvoker>()
-        val afters = HashMap<After,NewMethodInvoker>()
+        val afters = HashMap<After, NewMethodInvoker>()
 
         for (method in allMethods) {
             val before = method.getAnnotation(Before::class.java)
@@ -138,26 +138,81 @@ abstract class NewControllerLoader : Loader {
                     nextRouter
             )
         else {
-            val pvs = ArrayList<String>()
-            val m = p.matcher(path)
-            while (m.find()) pvs.add(m.group(1))
-            if (pvs.size == 0) null
+//            val pvs = ArrayList<String>()
+//            val m = p.matcher(path)
+//            while (m.find()) pvs.add(m.group(1))
+//            if (pvs.size == 0) null
+//            else {
+//                val matchNames = ArrayList<String>()
+//                for (pv in pvs) {
+//                    if (pv.contains(":")) {
+//                        val s = pv.split(":")
+//                        path = path.replace("{$pv}", "(${s[1]})")
+//                        matchNames.add(s[0])
+//                    } else {
+//                        path = path.replace("{$pv}", "(.*)")
+//                        matchNames.add(pv)
+//                    }
+//                }
+//                MatchItem(
+//                        true,
+//                        "^$path",
+//                        matchNames.toTypedArray(),
+//                        nextRouter
+//                )
+//            }
+            if (!path.contains("{") || !path.contains("}")) null
             else {
-                val matchNames = ArrayList<String>()
-                for (pv in pvs) {
-                    if (pv.contains(":")) {
-                        val s = pv.split(":")
-                        path = path.replace("{$pv}", "(${s[1]})")
-                        matchNames.add(s[0])
-                    } else {
-                        path = path.replace("{$pv}", "(.*)")
-                        matchNames.add(pv)
-                    }
+                val pvs = ArrayList<String>()
+
+                val newPath = StringBuilder("^")
+
+                var startSearch = false
+
+                var name = StringBuilder()
+                var regex: StringBuilder? = null
+
+                var lessD = 0
+                var haveM = false
+
+                for (c in path) {
+                    if (c == '{') if (!startSearch) {
+                        startSearch = true
+                        continue
+                    } else lessD += 1
+                    if (startSearch) {
+                        if (c == '}') {
+                            if (lessD != 0) lessD -= 1
+                            else {
+                                pvs.add(name.toString())
+
+                                if (haveM) regex!!.append(")")
+                                newPath.append(regex?.toString() ?: "(.*)")
+
+                                name = StringBuilder()
+                                regex = null
+
+                                lessD = 0
+                                haveM = false
+                                startSearch = false
+                                continue
+                            }
+                        }
+                        if (haveM) {
+                            regex!!.append(c)
+                        } else {
+                            if (c == ':') {
+                                haveM = true
+                                regex = StringBuilder("(")
+                            } else name.append(c)
+                        }
+                    } else newPath.append(c)
                 }
+
                 MatchItem(
                         true,
-                        "^$path",
-                        matchNames.toTypedArray(),
+                        newPath.toString(),
+                        pvs.toTypedArray(),
                         nextRouter
                 )
             }

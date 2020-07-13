@@ -4,7 +4,6 @@ import com.IceCreamQAQ.Yu.annotation.Action
 import com.IceCreamQAQ.Yu.annotation.After
 import com.IceCreamQAQ.Yu.annotation.NewDefaultController
 import com.IceCreamQAQ.Yu.annotation.Path
-import com.icecreamqaq.test.yu.annotation.TestHook
 
 @NewDefaultController
 class TestNewController {
@@ -15,10 +14,9 @@ class TestNewController {
     @Action("m{abc}b{bbc}")
     fun mb(abc: String, bbc: String) = "mb: abc = $abc, bbc = $bbc."
 
-    @After
-    fun after(){
-        println("TestNewControllerAfter")
-    }
+    @Action("{id:BV.{10,10}}")
+    fun bv(id: String) = id
+
 
 }
 
@@ -27,11 +25,11 @@ class TestNewController {
 class TestNewController2 {
 
     @Action("menu/{ddd}")
-    fun menu(ddd:String) = "menu: ddd = $ddd"
+    fun menu(ddd: String) = "menu: ddd = $ddd"
 
-    @TestHook
+    //    @TestHook
     @Action("{ddd}/menu")
-    fun menu2(ddd:String) = "menu2: ddd = $ddd"
+    fun menu2(ddd: String) = "menu2: ddd = $ddd"
 
     @Action("a{abc}b{bbc}")
     fun ab(abc: String, bbc: String) = "ab: abc = $abc, bbc = $bbc."

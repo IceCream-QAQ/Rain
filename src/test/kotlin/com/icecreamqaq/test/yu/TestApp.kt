@@ -71,5 +71,10 @@ class TestApp : DefaultApp() {
         newRouter.invoke(paths[0], nac)
         println(nac.result)
         nac.saves = HashMap()
+
+        paths[0] = "BV1vh411o7p3"
+        newRouter.invoke(paths[0], nac)
+        println("BV: " + nac.result)
+        nac.saves = HashMap()
     }
 }
