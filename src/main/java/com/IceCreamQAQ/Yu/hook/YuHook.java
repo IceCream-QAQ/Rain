@@ -176,9 +176,16 @@ public class YuHook {
             Label catchLabel = new Label();
             mv.visitTryCatchBlock(tryStart, tryEnd, catchLabel, "java/lang/Throwable");
 
-            val lastPara = paras.get(paras.size() - 1);
 
-            int stack = lastPara.stackNum + lastPara.stackSize - 1;
+            int stack;
+            if (paras.size() == 0)
+                if (isStatic) stack = -1;
+                else stack = 0;
+            else {
+                val lastPara = paras.get(paras.size() - 1);
+                stack = lastPara.stackNum + lastPara.stackSize - 1;
+            }
+
             int hookMethodStack;
             int paraStack;
 

@@ -15,14 +15,18 @@ fun main(args: Array<String>) {
     val tac = appClassLoader.loadClass("com.icecreamqaq.test.yu.Ta")
     val ta = tac.newInstance()
 
-    val g = tac.getMethod("g", Int::class.java, Long::class.java)
+    val g = tac.getMethod("g")
 //    val g = tac.getMethod("g", Int::class.java, Int::class.java)
 
-    println(g.invoke(ta, 1.1, 12.2))
+    println(g.invoke(ta))
 }
 
 class Ta {
-    fun g(tt: Float, i: Double) = (i + tt)
+    //    companion object{
+//        @JvmStatic
+//
+//    }
+    fun g() = 2.toLong()
 }
 
 
