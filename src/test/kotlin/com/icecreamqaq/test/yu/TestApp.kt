@@ -49,32 +49,44 @@ class TestApp : DefaultApp() {
         paths[0] = "menu"
         newRouter.invoke(paths[0], nac)
         println("menu: " + nac.result)
+        nac.result = null
         nac.saves = HashMap()
 
         paths[0] = "m111b222"
         newRouter.invoke(paths[0], nac)
         println("m111b222: " + nac.result)
+        nac.result = null
+        nac.saves = HashMap()
+
+        paths[0] = "c333b444"
+        newRouter.invoke(paths[0], nac)
+        println("c333b444: " + nac.result)
+        nac.result = null
         nac.saves = HashMap()
 
         paths[0] = "11"
         newRouter.invoke(paths[0], nac)
         println("11: " + nac.result)
+        nac.result = null
         nac.saves = HashMap()
 
         paths[1] = "menu"
         newRouter.invoke(paths[0], nac)
-        println(nac.result)
+        println("menu: ${nac.result}")
+        nac.result = null
         nac.saves = HashMap()
 
         paths[1] = "123123"
         paths[2] = "menu"
         newRouter.invoke(paths[0], nac)
-        println(nac.result)
+        println("menu2: ${nac.result}")
+        nac.result = null
         nac.saves = HashMap()
 
         paths[0] = "BV1vh411o7p3"
         newRouter.invoke(paths[0], nac)
         println("BV: " + nac.result)
+        nac.result = null
         nac.saves = HashMap()
     }
 }

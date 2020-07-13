@@ -87,12 +87,11 @@ abstract class NewControllerLoader : Loader {
                 val actionMethodName = method.name
 
                 val path = action.value
-                val aa = getActionRouter(path, controllerRouter, rootRouter)
-                val actionRootRouter = aa.router
-                val actionPath = aa.path
+//                val aa = getActionRouter(path, controllerRouter, rootRouter)
+//                val actionRootRouter = aa.router
+//                val actionPath = aa.path
 
 //                val methodInvoker = createMethodInvoker(instance, method)
-                val actionInvoker = createActionInvoker(actionRootRouter.level + 1, method, instance)
 //                actionInvoker.invoker = methodInvoker
 
                 val abs = ArrayList<NewMethodInvoker>()
@@ -116,13 +115,19 @@ abstract class NewControllerLoader : Loader {
                     aas.add(invoker)
                 }
 
+                val actionInvoker = getActionInvoker(path, controllerRouter, rootRouter, method, instance)
+
                 actionInvoker.befores = abs.toTypedArray()
                 actionInvoker.afters = aas.toTypedArray()
 
-                val mi = getMatchItem(actionPath, actionInvoker)
+                val synonym = method.getAnnotation(Synonym::class.java) ?:continue
+                for (s in synonym.value) {
+                    val sai = getActionInvoker(s, controllerRouter, rootRouter, method, instance)
 
-                if (mi == null) actionRootRouter.noMatch[actionPath] = actionInvoker
-                else actionRootRouter.needMath.add(mi)
+                    sai.befores = abs.toTypedArray()
+                    sai.afters = aas.toTypedArray()
+                }
+
             }
         }
 
@@ -220,6 +225,27 @@ abstract class NewControllerLoader : Loader {
     }
 
     data class ActionRouterAndPath(val router: NewRouterImpl, val path: String)
+
+    fun getActionInvoker(path: String, controllerRouter: NewRouterImpl, rootRouter: NewRouterImpl,  method: Method, instance: Any): NewActionInvoker {
+        val aa = getActionRouter(path, controllerRouter, rootRouter)
+        val actionRootRouter = aa.router
+        val actionPath = aa.path
+
+        val actionInvoker = createActionInvoker(actionRootRouter.level + 1, method, instance)
+
+        val mi = getMatchItem(actionPath, actionInvoker)
+
+        if (mi == null) {
+            val router = actionRootRouter.noMatch[actionPath]
+            if (router != null) {
+                actionInvoker.needMath.addAll(router.needMath)
+                actionInvoker.noMatch.putAll(router.noMatch)
+            }
+            actionRootRouter.noMatch[actionPath] = actionInvoker
+        } else actionRootRouter.needMath.add(mi)
+
+        return actionInvoker
+    }
 
     fun getActionRouter(pathString: String, controllerRouter: NewRouterImpl, rootRouter: NewRouterImpl): ActionRouterAndPath {
         var path = pathString
