@@ -62,12 +62,12 @@ class AsLoader : Loader {
     fun stop() {
         for (instance in instances) {
             try {
-                log.info("Start ApplicationService: ${instance::class.simpleName}.")
+                log.info("Stop ApplicationService: ${instance::class.simpleName}.")
                 context.injectBean(instance)
                 instance.stop()
-                log.info("Start ApplicationService: ${instance::class.simpleName} Success!")
+                log.info("Stop ApplicationService: ${instance::class.simpleName} Success!")
             } catch (e: Exception) {
-                log.info("Start ApplicationService: ${instance::class.simpleName} Error!", e)
+                log.info("Stop ApplicationService: ${instance::class.simpleName} Error!", e)
             }
         }
     }
