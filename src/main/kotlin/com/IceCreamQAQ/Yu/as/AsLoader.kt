@@ -63,7 +63,6 @@ class AsLoader : Loader {
         for (instance in instances) {
             try {
                 log.info("Stop ApplicationService: ${instance::class.simpleName}.")
-                context.injectBean(instance)
                 instance.stop()
                 log.info("Stop ApplicationService: ${instance::class.simpleName} Success!")
             } catch (e: Exception) {
