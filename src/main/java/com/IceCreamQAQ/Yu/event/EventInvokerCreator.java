@@ -1,6 +1,5 @@
 package com.IceCreamQAQ.Yu.event;
 
-import com.IceCreamQAQ.Yu.annotation.Inject;
 import com.IceCreamQAQ.Yu.event.events.Event;
 import com.IceCreamQAQ.Yu.loader.InvokerClassLoader;
 import lombok.val;
@@ -9,6 +8,7 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 
+import javax.inject.Inject;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -27,8 +27,6 @@ public class EventInvokerCreator {
 
     @Inject
     private EventBus eventBus;
-
-
 
     @Inject
     private InvokerClassLoader classLoader;

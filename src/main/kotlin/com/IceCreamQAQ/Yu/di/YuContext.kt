@@ -130,14 +130,14 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
         }
 
         for (field in fields) {
-            val inject = field.getAnnotation(com.IceCreamQAQ.Yu.annotation.Inject::class.java)
-            if (inject != null) {
-                var injectType: String = inject.value.java.name
-                if (injectType.toLowerCase() == "com.icecreamqaq.yu.annotation.inject") injectType = field.type.name
-                field.isAccessible = true
-                field[obj] = getBean(injectType, inject.name)
-                continue
-            }
+//            val inject = field.getAnnotation(com.IceCreamQAQ.Yu.annotation.Inject::class.java)
+//            if (inject != null) {
+//                var injectType: String = inject.value.java.name
+//                if (injectType.toLowerCase() == "com.icecreamqaq.yu.annotation.inject") injectType = field.type.name
+//                field.isAccessible = true
+//                field[obj] = getBean(injectType, inject.name)
+//                continue
+//            }
 
             val config = field.getAnnotation(Config::class.java)
             if (config != null) {
