@@ -50,6 +50,7 @@ abstract class NewControllerLoader : Loader {
         getMethods(methods, clazz.superclass ?: return)
     }
 
+    data class DoMethod(val annotation: Annotation,val invoker: NewMethodInvoker)
     val p = Pattern.compile("\\{(.*?)}")
     fun controllerToRouter(instance: Any, rootRouter: NewRouterImpl) {
         val controllerClass = instance::class.java
@@ -65,19 +66,19 @@ abstract class NewControllerLoader : Loader {
             }
 
         val methods = controllerClass.methods
-        val befores = HashMap<Before, NewMethodInvoker>()
-        val afters = HashMap<After, NewMethodInvoker>()
+        val befores = ArrayList<DoMethod>()
+        val afters = ArrayList<DoMethod>()
 
         for (method in allMethods) {
             val before = method.getAnnotation(Before::class.java)
             if (before != null) {
                 val beforeInvoker = createMethodInvoker(instance, method)
-                befores[before] = beforeInvoker
+                befores.add(DoMethod(before,beforeInvoker))
             }
             val after = method.getAnnotation(After::class.java)
             if (after != null) {
                 val afterInvoker = createMethodInvoker(instance, method)
-                afters[after] = afterInvoker
+                afters.add(DoMethod(before,afterInvoker))
             }
         }
 //        val before = befores.toTypedArray()
@@ -96,6 +97,7 @@ abstract class NewControllerLoader : Loader {
 
                 val abs = ArrayList<NewMethodInvoker>()
                 w@ for ((before, invoker) in befores) {
+                    before as Before
                     if (before.except.size != 1 || before.except[0] != "") for (s in before.except) {
                         if (s == actionMethodName) continue@w
                     }
@@ -106,6 +108,7 @@ abstract class NewControllerLoader : Loader {
                 }
                 val aas = ArrayList<NewMethodInvoker>()
                 w@ for ((after, invoker) in afters) {
+                    after as After
                     if (after.except.size != 1 || after.except[0] != "") for (s in after.except) {
                         if (s == actionMethodName) continue@w
                     }
