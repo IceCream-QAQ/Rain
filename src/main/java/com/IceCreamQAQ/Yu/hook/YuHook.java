@@ -224,46 +224,6 @@ public class YuHook {
                     mv.visitVarInsn(ASTORE, ++stack);
                     paraStack = stack;
 
-//                    if (isStatic) {
-//                        mv.visitVarInsn(ALOAD, paraStack);
-//                        mv.visitInsn(ICONST_0);
-//                        mv.visitInsn(ACONST_NULL);
-//                        mv.visitInsn(AASTORE);
-//
-//                        for (int i = 0; i < maxPara; i++) {
-//                            mv.visitVarInsn(ALOAD, paraStack);
-//                            mv.visitIntInsn(SIPUSH, i + 1);
-//                            val p = paras.get(i).type;
-//                            if (p.length() == 1) {
-//                                mv.visitVarInsn(getLoad(p), i);
-//                                val typed = getTyped(p);
-//                                mv.visitMethodInsn(INVOKESTATIC, typed, "valueOf", "(" + p + ")L" + typed + ";", false);
-//                            } else {
-//                                mv.visitVarInsn(ALOAD, i);
-//                            }
-//                            mv.visitInsn(AASTORE);
-//
-//                        }
-//                    } else {
-//                        mv.visitVarInsn(ALOAD, paraStack);
-//                        mv.visitInsn(ICONST_0);
-//                        mv.visitVarInsn(ALOAD, 0);
-//                        mv.visitInsn(AASTORE);
-//                        for (int i = 1; i < maxPara; i++) {
-//                            mv.visitVarInsn(ALOAD, paraStack);
-//                            mv.visitIntInsn(SIPUSH, i);
-//                            val p = paras.get(i - 1).type;
-//                            if (p.length() == 1) {
-//                                mv.visitVarInsn(getLoad(p), i);
-//                                val typed = getTyped(p);
-//                                mv.visitMethodInsn(INVOKESTATIC, typed, "valueOf", "(" + p + ")L" + typed + ";", false);
-//                            } else {
-//                                mv.visitVarInsn(ALOAD, i);
-//                            }
-//                            mv.visitInsn(AASTORE);
-//                        }
-//                    }
-
                     mv.visitVarInsn(ALOAD, paraStack);
                     mv.visitInsn(ICONST_0);
                     if (isStatic) mv.visitInsn(ACONST_NULL);

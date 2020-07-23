@@ -13,11 +13,20 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
 interface Web {
+
+    fun saveCookie(
+            domain: String,
+            path: String,
+            name: String,
+            value: String,
+            expiresAt: Long = 253402300799999L,
+            httpOnly: Boolean = true,
+            hostOnly: Boolean = false
+    )
 
     fun get(url: String): String
     fun post(url: String, para: Map<String, String>): String
@@ -45,8 +54,8 @@ class WebHelperBeanFactory : BeanFactory<Web>, ApplicationService {
 
     override fun init() {
         val clazz = Class.forName(implClass)
-        context.register(clazz,true)
-        web = context.newBean(clazz,null, true) as Web
+        context.register(clazz, true)
+        web = context.newBean(clazz, null, true) as Web
     }
 
     override fun start() {
@@ -57,29 +66,84 @@ class WebHelperBeanFactory : BeanFactory<Web>, ApplicationService {
         web?.stop()
     }
 
+    override fun width() = 2
+
     override fun createBean(clazz: Class<Web>, name: String): Web? = web
 }
 
 @NotSearch
 class OkHttpWebImpl : Web {
 
-    private var client: OkHttpClient
+    var client: OkHttpClient
+
+    val domainMap = ConcurrentHashMap<String, ArrayList<Cookie>>()
+
+    fun getDomainCookies(domain: String) =
+            domainMap[domain] ?: {
+                val domainCookies = ArrayList<Cookie>()
+                domainMap[domain] = domainCookies
+                domainCookies
+            }()
 
     init {
         val builder = OkHttpClient.Builder()
         builder.cookieJar(object : CookieJar {
-            var cookieMap: MutableMap<String, Cookie> = ConcurrentHashMap()
+
+
             override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
                 for (cookie in cookies) {
-                    cookieMap[cookie.name] = cookie
+                    val domain = cookie.domain
+                    val host = url.host
+                    if (domain == host) {
+                        getDomainCookies(domain).add(cookie)
+                    }
+                    if (host.endsWith(".$domain")) {
+                        getDomainCookies(domain).add(cookie)
+                    }
                 }
             }
 
+            fun domainType(domain: String): Int {
+                if (domain.contains(":")) return 2
+                return if (domain.last().toLowerCase().toInt() > 97) 0 else 1
+            }
+
             override fun loadForRequest(url: HttpUrl): List<Cookie> {
-                return ArrayList(cookieMap.values)
+                val cookies = ArrayList<Cookie>()
+                val host = url.host
+
+                val domains = ArrayList<String>()
+                domains.add(host)
+                if (domainType(host) == 0)
+                    for ((i, c) in host.withIndex()) {
+                        if (c == '.') domains.add(host.substring(i + 1))
+                    }
+
+                val time = System.currentTimeMillis()
+                val path = url.encodedPath
+                for (domain in domains) {
+                    val dcs = domainMap[domain] ?: continue
+                    val i = dcs.iterator()
+                    while (i.hasNext()) {
+                        val cookie = i.next()
+                        if (cookie.expiresAt < time) {
+                            i.remove()
+                            continue
+                        }
+                        if (path.startsWith(cookie.path)) if (!cookie.hostOnly) cookies.add(cookie) else if (cookie.domain == domain) cookies.add(cookie)
+                    }
+                }
+                return cookies
             }
         })
         client = builder.build()
+    }
+
+    override fun saveCookie(domain: String, path: String, name: String, value: String, expiresAt: Long, httpOnly: Boolean, hostOnly: Boolean) {
+        val cb = Cookie.Builder().domain(domain).path(path).name(name).value(value).expiresAt(expiresAt)
+        if (httpOnly) cb.httpOnly()
+        if (hostOnly) cb.hostOnlyDomain(domain)
+        getDomainCookies(domain).add(cb.build())
     }
 
     override fun get(url: String) = client.newCall(Request.Builder().url(url).build()).execute().body!!.string()
