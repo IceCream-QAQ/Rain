@@ -38,6 +38,7 @@ class AsLoader : Loader {
         for (instance in instances) {
             try {
                 log.info("Init ApplicationService: ${instance::class.simpleName}.")
+                context.injectBean(instance)
                 instance.init()
                 log.info("Init ApplicationService: ${instance::class.simpleName} Success!")
             } catch (e: Exception) {
