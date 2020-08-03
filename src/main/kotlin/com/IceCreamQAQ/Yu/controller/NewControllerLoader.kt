@@ -78,7 +78,7 @@ abstract class NewControllerLoader : Loader {
             val after = method.getAnnotation(After::class.java)
             if (after != null) {
                 val afterInvoker = createMethodInvoker(instance, method)
-                afters.add(DoMethod(before,afterInvoker))
+                afters.add(DoMethod(after,afterInvoker))
             }
         }
 //        val before = befores.toTypedArray()
