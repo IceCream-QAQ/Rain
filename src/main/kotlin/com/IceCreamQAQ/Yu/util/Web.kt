@@ -76,11 +76,11 @@ class OkHttpWebImpl : Web {
 
     var client: OkHttpClient
 
-    val domainMap = ConcurrentHashMap<String, ArrayList<Cookie>>()
+    val domainMap = ConcurrentHashMap<String, MutableMap<String, Cookie>>()
 
     fun getDomainCookies(domain: String) =
             domainMap[domain] ?: {
-                val domainCookies = ArrayList<Cookie>()
+                val domainCookies = HashMap<String, Cookie>()
                 domainMap[domain] = domainCookies
                 domainCookies
             }()
@@ -95,10 +95,10 @@ class OkHttpWebImpl : Web {
                     val domain = cookie.domain
                     val host = url.host
                     if (domain == host) {
-                        getDomainCookies(domain).add(cookie)
+                        getDomainCookies(domain)[cookie.name] = cookie
                     }
                     if (host.endsWith(".$domain")) {
-                        getDomainCookies(domain).add(cookie)
+                        getDomainCookies(domain)[cookie.name] = cookie
                     }
                 }
             }
@@ -123,9 +123,10 @@ class OkHttpWebImpl : Web {
                 val path = url.encodedPath
                 for (domain in domains) {
                     val dcs = domainMap[domain] ?: continue
-                    val i = dcs.iterator()
+                    val i = dcs.keys.iterator()
                     while (i.hasNext()) {
-                        val cookie = i.next()
+                        val cookieName = i.next()
+                        val cookie = dcs[cookieName]!!
                         if (cookie.expiresAt < time) {
                             i.remove()
                             continue
@@ -143,7 +144,7 @@ class OkHttpWebImpl : Web {
         val cb = Cookie.Builder().domain(domain).path(path).name(name).value(value).expiresAt(expiresAt)
         if (httpOnly) cb.httpOnly()
         if (hostOnly) cb.hostOnlyDomain(domain)
-        getDomainCookies(domain).add(cb.build())
+        getDomainCookies(domain)[name] = cb.build()
     }
 
     override fun get(url: String) = client.newCall(Request.Builder().url(url).build()).execute().body!!.string()
