@@ -1,7 +1,7 @@
 package com.IceCreamQAQ.Yu.event;
 
 import com.IceCreamQAQ.Yu.event.events.Event;
-import com.IceCreamQAQ.Yu.loader.InvokerClassLoader;
+import com.IceCreamQAQ.Yu.loader.SpawnClassLoader;
 import lombok.val;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -29,7 +29,7 @@ public class EventInvokerCreator {
     private EventBus eventBus;
 
     @Inject
-    private InvokerClassLoader classLoader;
+    private SpawnClassLoader classLoader;
 
     List<EventInvoker>[] register(Object o){
         try {
@@ -65,7 +65,6 @@ public class EventInvokerCreator {
 
     private List<EventInvoker>[] registerEventListener(Object object) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         Class<?> pluginEventClass = object.getClass();
-        List<Method> listenerMethods = new ArrayList<>();
 
         List<EventInvoker> height = new ArrayList<>();
         List<EventInvoker> normal = new ArrayList<>();
@@ -77,7 +76,6 @@ public class EventInvokerCreator {
             if (e == null) continue;
             int methodParaCount = method.getParameterCount();
             if (methodParaCount != 1) continue;
-            Class<? extends Event> eventType = (Class<? extends Event>) method.getParameterTypes()[0];
             EventInvoker invoker;
             if (Modifier.isStatic(method.getModifiers()))
                 invoker = (EventInvoker) createEventHandlerInvokerClass(method).newInstance();
