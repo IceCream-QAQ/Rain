@@ -10,5 +10,6 @@ import java.lang.annotation.Target;
 public @interface Action {
 
     String value();
+    int loadWeight() default 0;
 
 }

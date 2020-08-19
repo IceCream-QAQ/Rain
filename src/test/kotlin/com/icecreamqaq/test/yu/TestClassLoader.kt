@@ -8,25 +8,30 @@ import com.IceCreamQAQ.Yu.loader.AppClassloader
 
 
 fun main(args: Array<String>) {
-    YuHook.put(HookItem("com.icecreamqaq.test.yu.Ta", "g", "com.icecreamqaq.test.yu.HookTa"))
+    YuHook.put(HookItem("com.icecreamqaq.test.yu.Tb", "f", "com.icecreamqaq.test.yu.HookTa"))
 
     val appClassLoader = AppClassloader(TestStarter::class.java.classLoader)
 
-    val tac = appClassLoader.loadClass("com.icecreamqaq.test.yu.Ta")
+    val tac = appClassLoader.loadClass("com.icecreamqaq.test.yu.Tb")
     val ta = tac.newInstance()
 
-    val g = tac.getMethod("g")
+    val g = tac.getMethod("f")
 //    val g = tac.getMethod("g", Int::class.java, Int::class.java)
 
     println(g.invoke(ta))
 }
 
-class Ta {
+open class Ta {
     //    companion object{
 //        @JvmStatic
 //
 //    }
     fun g() = 2.toLong()
+}
+
+class Tb:Ta() {
+
+    fun f() = super.g()
 }
 
 

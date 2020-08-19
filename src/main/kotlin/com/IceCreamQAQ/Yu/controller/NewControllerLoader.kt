@@ -50,7 +50,9 @@ abstract class NewControllerLoader : Loader {
         getMethods(methods, clazz.superclass ?: return)
     }
 
-    data class DoMethod(val annotation: Annotation,val invoker: NewMethodInvoker)
+    data class DoMethod(val annotation: Annotation, val invoker: NewMethodInvoker)
+    data class ActionMap(val action: Action, val method: Method, val weight: Int = action.loadWeight)
+
     val p = Pattern.compile("\\{(.*?)}")
     fun controllerToRouter(instance: Any, rootRouter: NewRouterImpl) {
         val controllerClass = instance::class.java
@@ -73,21 +75,37 @@ abstract class NewControllerLoader : Loader {
             val before = method.getAnnotation(Before::class.java)
             if (before != null) {
                 val beforeInvoker = createMethodInvoker(instance, method)
-                befores.add(DoMethod(before,beforeInvoker))
+                befores.add(DoMethod(before, beforeInvoker))
             }
             val after = method.getAnnotation(After::class.java)
             if (after != null) {
                 val afterInvoker = createMethodInvoker(instance, method)
-                afters.add(DoMethod(after,afterInvoker))
+                afters.add(DoMethod(after, afterInvoker))
             }
         }
-//        val before = befores.toTypedArray()
-        for (method in methods) {
-            val action = method.getAnnotation(Action::class.java)
-            if (action != null) {
-                val actionMethodName = method.name
 
-                val path = action.value
+        val actionMap = ArrayList<ActionMap>()
+        for (method in methods) actionMap.add(ActionMap(method.getAnnotation(Action::class.java) ?: continue, method))
+
+        for (i in 0 until actionMap.size) {
+            for (j in 0 until actionMap.size - 1 - i) {
+                val c = actionMap[j]
+                val n = actionMap[j + 1]
+                if (c.weight > n.weight) {
+                    actionMap[j] = n
+                    actionMap[j + 1] = c
+                }
+            }
+        }
+
+
+//        val before = befores.toTypedArray()
+        for (am in actionMap) {
+            val method = am.method
+            val action = am.action
+            val actionMethodName = method.name
+
+            val path = action.value
 //                val aa = getActionRouter(path, controllerRouter, rootRouter)
 //                val actionRootRouter = aa.router
 //                val actionPath = aa.path
@@ -95,53 +113,53 @@ abstract class NewControllerLoader : Loader {
 //                val methodInvoker = createMethodInvoker(instance, method)
 //                actionInvoker.invoker = methodInvoker
 
-                val abs = ArrayList<NewMethodInvoker>()
-                w@ for ((before, invoker) in befores) {
-                    before as Before
-                    if (before.except.size != 1 || before.except[0] != "") for (s in before.except) {
-                        if (s == actionMethodName) continue@w
-                    }
-                    if (before.only.size != 1 || before.only[0] != "") for (s in before.only) {
-                        if (s != actionMethodName) continue@w
-                    }
-                    abs.add(invoker)
+            val abs = ArrayList<NewMethodInvoker>()
+            w@ for ((before, invoker) in befores) {
+                before as Before
+                if (before.except.size != 1 || before.except[0] != "") for (s in before.except) {
+                    if (s == actionMethodName) continue@w
                 }
-                val aas = ArrayList<NewMethodInvoker>()
-                w@ for ((after, invoker) in afters) {
-                    after as After
-                    if (after.except.size != 1 || after.except[0] != "") for (s in after.except) {
-                        if (s == actionMethodName) continue@w
-                    }
-                    if (after.only.size != 1 || after.only[0] != "") for (s in after.only) {
-                        if (s != actionMethodName) continue@w
-                    }
-                    aas.add(invoker)
+                if (before.only.size != 1 || before.only[0] != "") for (s in before.only) {
+                    if (s != actionMethodName) continue@w
                 }
-
-                val actionInvoker = getActionInvoker(path, controllerRouter, rootRouter, method, instance)
-
-                actionInvoker.befores = abs.toTypedArray()
-                actionInvoker.afters = aas.toTypedArray()
-
-                val synonym = method.getAnnotation(Synonym::class.java) ?:continue
-                for (s in synonym.value) {
-                    val sai = getActionInvoker(s, controllerRouter, rootRouter, method, instance)
-
-                    sai.befores = abs.toTypedArray()
-                    sai.afters = aas.toTypedArray()
-                }
-
+                abs.add(invoker)
             }
+            val aas = ArrayList<NewMethodInvoker>()
+            w@ for ((after, invoker) in afters) {
+                after as After
+                if (after.except.size != 1 || after.except[0] != "") for (s in after.except) {
+                    if (s == actionMethodName) continue@w
+                }
+                if (after.only.size != 1 || after.only[0] != "") for (s in after.only) {
+                    if (s != actionMethodName) continue@w
+                }
+                aas.add(invoker)
+            }
+
+
+
+            val actionInvoker = getActionInvoker(path, controllerRouter, rootRouter, method, instance)
+
+            actionInvoker.befores = abs.toTypedArray()
+            actionInvoker.afters = aas.toTypedArray()
+
+            val synonym = method.getAnnotation(Synonym::class.java) ?: continue
+            for (s in synonym.value) {
+                val sai = getActionInvoker(s, controllerRouter, rootRouter, method, instance)
+
+                sai.befores = abs.toTypedArray()
+                sai.afters = aas.toTypedArray()
+            }
+
         }
 
     }
 
     fun getMatchItem(pathString: String, nextRouter: NewRouterImpl): MatchItem? {
-        var path = pathString
-        return if (path.startsWith("\\") && path.endsWith("\\"))
+        return if (pathString.startsWith("\\") && pathString.endsWith("\\"))
             MatchItem(
                     false,
-                    path.substring(1).substring(0, path.length - 2),
+                    pathString.substring(1).substring(0, pathString.length - 2),
                     null,
                     nextRouter
             )
@@ -169,7 +187,7 @@ abstract class NewControllerLoader : Loader {
 //                        nextRouter
 //                )
 //            }
-            if (!path.contains("{") || !path.contains("}")) null
+            if (!pathString.contains("{") || !pathString.contains("}")) null
             else {
                 val pvs = ArrayList<String>()
 
@@ -183,7 +201,7 @@ abstract class NewControllerLoader : Loader {
                 var lessD = 0
                 var haveM = false
 
-                for (c in path) {
+                for (c in pathString) {
                     if (c == '{') if (!startSearch) {
                         startSearch = true
                         continue
@@ -229,7 +247,7 @@ abstract class NewControllerLoader : Loader {
 
     data class ActionRouterAndPath(val router: NewRouterImpl, val path: String)
 
-    fun getActionInvoker(path: String, controllerRouter: NewRouterImpl, rootRouter: NewRouterImpl,  method: Method, instance: Any): NewActionInvoker {
+    fun getActionInvoker(path: String, controllerRouter: NewRouterImpl, rootRouter: NewRouterImpl, method: Method, instance: Any): NewActionInvoker {
         val aa = getActionRouter(path, controllerRouter, rootRouter)
         val actionRootRouter = aa.router
         val actionPath = aa.path

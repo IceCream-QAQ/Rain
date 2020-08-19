@@ -15,6 +15,16 @@ class TestNewController {
     @Action("{id:BV.{10,10}}")
     fun bv(id: String) = id
 
+    @Action("co{id}", loadWeight = 1)
+    fun co(id: String) = id
+
+    @Action("coc{id}")
+    fun coc(id: String) = id
+
+    @After
+    fun after(){
+        println("TNC After!")
+    }
 
 }
 
