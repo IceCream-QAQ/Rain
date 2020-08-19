@@ -6,7 +6,7 @@ interface CronInvoker {
     fun invoker()
 }
 
-class ReflectCronInvoker(val instance:Any,val method:Method):CronInvoker {
+class ReflectCronInvoker(val instance: Any, val method: Method) : CronInvoker {
 
     override fun invoker() {
         method.invoke(instance)
