@@ -3,12 +3,12 @@ package com.IceCreamQAQ.Yu.loader;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-public class InvokerClassLoader extends ClassLoader {
+public class SpawnClassLoader extends ClassLoader {
 
     private Long time;
 
     @Inject
-    public InvokerClassLoader(@Named("appClassLoader") ClassLoader appClassLoader) {
+    public SpawnClassLoader(@Named("appClassLoader") ClassLoader appClassLoader) {
         super(appClassLoader);
     }
 
