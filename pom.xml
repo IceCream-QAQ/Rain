@@ -7,7 +7,7 @@
     <packaging>jar</packaging>
 
     <modelVersion>4.0.0</modelVersion>
-    <version>0.1.5.0</version>
+    <version>0.1.4.7</version>
 
     <parent>
         <groupId>com.IceCreamQAQ</groupId>
@@ -39,7 +39,7 @@
 
         <logback.version>1.2.3</logback.version>
         <okhttp.version>4.7.2</okhttp.version>
-        <fastjson.version>1.2.62</fastjson.version>
+        <fastjson.version>1.2.73</fastjson.version>
         <ecj.version>3.22.0</ecj.version>
 
         <asm.version>8.0.1</asm.version>

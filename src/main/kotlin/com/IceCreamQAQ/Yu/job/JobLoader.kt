@@ -41,6 +41,8 @@ class JobLoader : Loader {
                         else {
                             val cc = cTime.toLong()
                             time += when (c) {
+                                'y' -> cc * 1000 * 60 * 60 * 24 * 365
+                                'M' -> cc * 1000 * 60 * 60 * 24 * 30
                                 'd' -> cc * 1000 * 60 * 60 * 24
                                 'h' -> cc * 1000 * 60 * 60
                                 'm' -> cc * 1000 * 60

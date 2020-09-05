@@ -32,16 +32,14 @@ open class DefaultApp {
         context.putBean(ClassLoader::class.java, "appClassLoader", appClassloader)
 
         context.injectBean(this)
-
-        Runtime.getRuntime().addShutdownHook(Thread(Runnable {
-            asLoader.stop()
-        }))
     }
 
     fun start(){
         loader.load()
         asLoader.start()
         eventBus.post(AppStartEvent())
+
+        Runtime.getRuntime().addShutdownHook(Thread { asLoader.stop() })
     }
 
     fun stop(){

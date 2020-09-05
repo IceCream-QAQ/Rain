@@ -17,7 +17,7 @@ class TestJob {
     @field:Named("testCache2")
     private lateinit var c: EhcacheHelp<Int>
 
-    @Cron("2s")
+    @Cron("1d1h1m1s1S")
     fun c1() {
 //        println("时间：${dateUtil.formatDateTimeSSS()}，c1 定时任务触发。")
 //        c["ccc"] = (c["ccc"] ?: 0) + 1

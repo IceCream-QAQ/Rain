@@ -10,6 +10,7 @@ import com.IceCreamQAQ.Yu.toJSONString
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.internal.http.BridgeInterceptor
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -137,6 +138,7 @@ class OkHttpWebImpl : Web {
                 return cookies
             }
         })
+//        builder.
         client = builder.build()
     }
 
@@ -174,6 +176,5 @@ class OkHttpWebImpl : Web {
     override fun stop() {
 
     }
-
 
 }
