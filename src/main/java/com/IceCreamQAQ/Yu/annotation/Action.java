@@ -10,6 +10,8 @@ import java.lang.annotation.Target;
 public @interface Action {
 
     String value();
+    boolean prefix() default true;
+    boolean suffix() default true;
     int loadWeight() default 0;
 
 }
