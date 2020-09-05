@@ -15,6 +15,11 @@ annotation class Path(val value: String)
 
 @LoadBy(JobLoader::class)
 annotation class JobCenter
-annotation class Cron(val value: String, val time: Long = 0, val async: Boolean = false)
+annotation class Cron(
+        val value: String,
+        val time: Long = 0,
+        val async: Boolean = false,
+        val runWithStart: Boolean = false
+)
 
 annotation class NotSearch

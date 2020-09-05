@@ -32,7 +32,7 @@ class JobLoader : Loader {
                     val time = if (tt[1] == "h") 60 * 60 * 1000
                     else 24 * 60 * 60 * 1000
 
-                    Job(time.toLong(), cron.async, ReflectCronInvoker(instance, method),tt[2])
+                    Job(time.toLong(), cron.async, ReflectCronInvoker(instance, method), cron.runWithStart, tt[2])
                 } else {
                     var time = 0L
                     var cTime = ""
@@ -53,7 +53,7 @@ class JobLoader : Loader {
                             cTime = ""
                         }
                     }
-                    Job(time, cron.async, ReflectCronInvoker(instance, method))
+                    Job(time, cron.async, ReflectCronInvoker(instance, method), cron.runWithStart)
                 }
                 jobs.add(job)
                 log.debug("Register Job: ${method.name} Success!")

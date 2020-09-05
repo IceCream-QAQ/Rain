@@ -7,6 +7,7 @@ class Job(
         val time: Long,
         val async: Boolean,
         private val invoker: CronInvoker,
+        val runWithStart : Boolean,
         val at: String = ""
 ) : TimerTask() {
 

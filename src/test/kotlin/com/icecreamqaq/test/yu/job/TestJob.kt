@@ -17,9 +17,9 @@ class TestJob {
     @field:Named("testCache2")
     private lateinit var c: EhcacheHelp<Int>
 
-    @Cron("1d1h1m1s1S")
+    @Cron("60s", runWithStart = true)
     fun c1() {
-//        println("时间：${dateUtil.formatDateTimeSSS()}，c1 定时任务触发。")
+        println("时间：${dateUtil.formatDateTimeSSS()}，c1 定时任务触发。")
 //        c["ccc"] = (c["ccc"] ?: 0) + 1
     }
 
@@ -29,18 +29,19 @@ class TestJob {
     }
 
     @Cron("At::d::02:32")
-    fun curfew(){
+    fun curfew() {
         println("到32啦！")
         println("当前时间：${dateUtil.formatDateTimeSSS()}")
     }
+
     @Cron("At::h::57")
-    fun morning2(){
+    fun morning2() {
         println("到57啦！")
         println("当前时间：${dateUtil.formatDateTimeSSS()}")
     }
 
     @Cron("At::h::00")
-    fun morning(){
+    fun morning() {
         println("到整点啦！")
         println("当前时间：${dateUtil.formatDateTimeSSS()}")
     }

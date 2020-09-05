@@ -76,7 +76,7 @@ class JobManager : ApplicationService {
 
         for (job in jobs) {
             val ft =
-                    if (job.at == "") job.time
+                    if (job.at == "") if(job.runWithStart)1000 else job.time
                     else getTime(job.at)
 
             if (job.async) asyncTimer?.schedule(job, ft, job.time)
