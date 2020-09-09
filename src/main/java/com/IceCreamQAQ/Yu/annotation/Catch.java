@@ -7,9 +7,11 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Before {
+public @interface Catch {
 
     int weight() default 0;
+
+    Class<? extends Throwable> error();
 
     String[] except() default "";
 

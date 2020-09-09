@@ -2,8 +2,6 @@ package com.icecreamqaq.test.yu.controller
 
 import com.IceCreamQAQ.Yu.annotation.*
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
-import com.IceCreamQAQ.Yu.controller.ActionContext
-import com.icecreamqaq.test.yu.util.TestUtil
 import javax.inject.Inject
 import javax.inject.Named
 import javax.validation.constraints.Max
@@ -11,7 +9,7 @@ import javax.validation.constraints.Min
 import javax.validation.constraints.NotNull
 
 @NotSearch
-@DefaultController
+//@DefaultController
 class TestController {
 
     @Inject
@@ -35,11 +33,11 @@ class TestController {
         c["aaa"] = conf
     }
 
-    @Action("{t3.*}")
-    @Synonym(["{t4.*}"])
-    fun t3(actionContext: ActionContext) {
-        println(actionContext.path[0])
-    }
+//    @Action("{t3.*}")
+//    @Synonym(["{t4.*}"])
+//    fun t3(actionContext: ActionContext) {
+//        println(actionContext.path[0])
+//    }
 
     @Action("test")
     fun testAction(@NotNull(message = "请输入正确参数！") aaa: String,

@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface After {
 
-    int value() default 0;
+    int weight() default 0;
 
     String[] except() default "";
 

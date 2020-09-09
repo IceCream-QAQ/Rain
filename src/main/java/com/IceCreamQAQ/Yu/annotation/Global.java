@@ -7,12 +7,5 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Before {
-
-    int weight() default 0;
-
-    String[] except() default "";
-
-    String[] only() default "";
-
+public @interface Global {
 }

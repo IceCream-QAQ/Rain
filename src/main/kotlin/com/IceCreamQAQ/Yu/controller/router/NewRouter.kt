@@ -21,13 +21,20 @@ open class MatchItem(
 
 @AutoBind
 interface NewRouter {
-    fun invoke(path: String, context: NewActionContext): Boolean
+    operator fun invoke(path: String, context: NewActionContext): Boolean
 }
 
 interface NewMethodInvoker {
     @Throws(Exception::class)
     fun invoke(context: NewActionContext): Any?
 }
+
+interface CatchInvoker {
+    @Throws(Exception::class)
+    fun invoke(context: NewActionContext, error: Throwable): Any?
+}
+
+interface ActionInvoker : NewRouter
 
 open class NewRouterImpl(val level: Int) : NewRouter {
 
@@ -61,26 +68,52 @@ open class NewRouterImpl(val level: Int) : NewRouter {
 
 open class NewActionInvoker(level: Int, method: Method, instance: Any) : NewRouterImpl(level) {
 
+    open lateinit var globalBefores:MutableList<NewMethodInvoker>
+    open lateinit var globalAfters:MutableList<NewMethodInvoker>
+    open lateinit var globalCatchs:MutableList<CatchInvoker>
+
+
     open lateinit var befores: Array<NewMethodInvoker>
     open val invoker: NewMethodInvoker = NewReflectMethodInvoker(method, instance)
     open lateinit var afters: Array<NewMethodInvoker>
-    open lateinit var throws: Array<NewMethodInvoker>
+    open lateinit var catchs: Array<CatchInvoker>
 
     override fun invoke(path: String, context: NewActionContext): Boolean {
         if (super.invoke(path, context)) return true
         try {
+            for (before in globalBefores) {
+                val o = before.invoke(context)
+                if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
+            }
             for (before in befores) {
                 val o = before.invoke(context)
                 if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
             }
             val result = invoker.invoke(context)
             context.onSuccess(result)
+            for (after in globalAfters) {
+                val o = after.invoke(context)
+                if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
+            }
             for (after in afters) {
                 val o = after.invoke(context)
                 if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
             }
         } catch (e: Exception) {
-            throw context.onError(e) ?: return true
+            val er= context.onError(e) ?: return true
+            context["exception"] = er
+            try {
+                for (catch in globalCatchs) {
+                    val o=catch.invoke(context,er)
+                    if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
+                }
+                for (catch in catchs) {
+                    val o=catch.invoke(context,er)
+                    if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
+                }
+            }catch (ee : Exception){
+                throw context.onError(ee) ?: return true
+            }
         }
         return true
     }
@@ -92,7 +125,7 @@ open class NewActionInvoker(level: Int, method: Method, instance: Any) : NewRout
 
 }
 
-class NewReflectMethodInvoker(val method: Method, val instance: Any) : NewMethodInvoker {
+open class NewReflectMethodInvoker(val method: Method, val instance: Any) : NewMethodInvoker {
 
     var returnFlag: Boolean = false
     var mps: Array<MethodPara?>? = null
@@ -137,4 +170,14 @@ class NewReflectMethodInvoker(val method: Method, val instance: Any) : NewMethod
             val type: Int,
             val data: Any
     )
+}
+
+class ReflectCatchInvoker(val type: Class<out Throwable>, method: Method, instance: Any):CatchInvoker {
+
+    private val methodInvoker = NewReflectMethodInvoker(method, instance)
+
+    override fun invoke(context: NewActionContext, error: Throwable): Any? {
+        if (!type.isAssignableFrom(error::class.java))return null
+        return methodInvoker.invoke(context)
+    }
 }

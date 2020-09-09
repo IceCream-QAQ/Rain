@@ -13,7 +13,10 @@ class TestNewController {
     fun mb(abc: String, bbc: String) = "mb: abc = $abc, bbc = $bbc."
 
     @Action("{id:BV.{10,10}}")
-    fun bv(id: String) = id
+    fun bv(id: String): String {
+        throw RuntimeException(id)
+    }
+
 
     @Action("co{id}", loadWeight = 1)
     fun co(id: String) = id
@@ -21,9 +24,27 @@ class TestNewController {
     @Action("coc{id}")
     fun coc(id: String) = id
 
+    @Before
+    @Global
+    fun before(){
+        println("TNC Before!")
+    }
+    @Global
+    @Before(weight = 2)
+    fun before2(){
+        println("TNC Before2!")
+    }
+
     @After
-    fun after(){
+    @Global
+    fun after() {
         println("TNC After!")
+    }
+
+    @After(weight = 2)
+    @Global
+    fun after2() {
+        println("TNC After2!")
     }
 
 }
@@ -41,5 +62,11 @@ class TestNewController2 {
 
     @Action("a{abc}b{bbc}")
     fun ab(abc: String, bbc: String) = "ab: abc = $abc, bbc = $bbc."
+
+    @Global
+    @Catch(error = Exception::class)
+    fun catch(exception: Exception) {
+        println(exception.cause)
+    }
 
 }
