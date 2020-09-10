@@ -10,12 +10,37 @@ import com.IceCreamQAQ.Yu.toJSONString
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.internal.http.BridgeInterceptor
+import okhttp3.internal.userAgent
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.io.InputStream
+import java.net.InetSocketAddress
+import java.net.Proxy
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+
+
+class WebProxy {
+    lateinit var type: String
+    lateinit var host: String
+    var port: Int = 0
+    var username: String? = null
+    var password: String? = null
+}
+
+class WebConfig {
+
+    var ua: String? = null
+
+    var readTimeout: Long? = null
+    var writeTimeout: Long? = null
+    var connectTimeout: Long? = null
+
+    var proxy: WebProxy? = null
+
+}
 
 interface Web {
 
@@ -28,6 +53,8 @@ interface Web {
             httpOnly: Boolean = true,
             hostOnly: Boolean = false
     )
+
+    fun init()
 
     fun get(url: String): String
     fun post(url: String, para: Map<String, String>): String
@@ -57,6 +84,7 @@ class WebHelperBeanFactory : BeanFactory<Web>, ApplicationService {
         val clazz = Class.forName(implClass)
         context.register(clazz, true)
         web = context.newBean(clazz, null, true) as Web
+        web!!.init()
     }
 
     override fun start() {
@@ -75,9 +103,13 @@ class WebHelperBeanFactory : BeanFactory<Web>, ApplicationService {
 @NotSearch
 class OkHttpWebImpl : Web {
 
-    var client: OkHttpClient
+    lateinit var client: OkHttpClient
+    lateinit var ua:String
 
     val domainMap = ConcurrentHashMap<String, MutableMap<String, Cookie>>()
+
+    @Config("yu.web")
+    var config: WebConfig? = null
 
     fun getDomainCookies(domain: String) =
             domainMap[domain] ?: {
@@ -86,7 +118,7 @@ class OkHttpWebImpl : Web {
                 domainCookies
             }()
 
-    init {
+    override fun init() {
         val builder = OkHttpClient.Builder()
         builder.cookieJar(object : CookieJar {
 
@@ -138,7 +170,40 @@ class OkHttpWebImpl : Web {
                 return cookies
             }
         })
+
+        val config = this.config ?: {
+            val wc = WebConfig()
+            this.config = wc
+            wc
+        }()
+        ua = config.ua?: "Rain/$userAgent"
+
+        val proxy = config.proxy
+        if (proxy != null) {
+            when (proxy.type.toLowerCase()) {
+                "http", "https" -> builder.proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(proxy.host, proxy.port)))
+                "socks", "socks5" -> builder.proxy(Proxy(Proxy.Type.SOCKS, InetSocketAddress(proxy.host, proxy.port)))
+            }
+            builder.proxyAuthenticator(object : Authenticator {
+                @Throws(IOException::class)
+                override fun authenticate(route: Route?, response: Response): Request? {
+                    //设置代理服务器账号密码
+                    val credential = Credentials.basic(proxy.username ?: "", proxy.password ?: "")
+                    return response.request.newBuilder()
+                            .header("Proxy-Authorization", credential)
+                            .build()
+                }
+            })
+        }
+
+        if (config.readTimeout != null) builder.readTimeout(config.readTimeout!!, TimeUnit.MINUTES)
+        if (config.writeTimeout != null) builder.writeTimeout(config.writeTimeout!!, TimeUnit.MINUTES)
+        if (config.connectTimeout != null) builder.connectTimeout(config.connectTimeout!!, TimeUnit.MINUTES)
+
+
 //        builder.
+//        builder.readTimeout()
+
         client = builder.build()
     }
 
@@ -149,7 +214,7 @@ class OkHttpWebImpl : Web {
         getDomainCookies(domain)[name] = cb.build()
     }
 
-    override fun get(url: String) = client.newCall(Request.Builder().url(url).build()).execute().body!!.string()
+    override fun get(url: String) = client.newCall(createRequest(url)).execute().body!!.string()
 
     override fun post(url: String, para: Map<String, String>): String {
         val fbBuilder = FormBody.Builder()
@@ -157,8 +222,8 @@ class OkHttpWebImpl : Web {
             fbBuilder.add(s, para[s] ?: "")
         }
         val formBody = fbBuilder.build()
-        val request = Request.Builder().post(formBody).url(url).build()
-        val call = client.newCall(request)
+//        val request = Request.Builder().post(formBody).url(url).build()
+        val call = client.newCall(createRequest(url, formBody))
         val response = call.execute()
         return response.body!!.string()
     }
@@ -166,13 +231,20 @@ class OkHttpWebImpl : Web {
     override fun postJSON(url: String, json: String): String {
         val mediaType = "application/json".toMediaTypeOrNull()
         val requestBody = json.toRequestBody(mediaType)
-        val request = Request.Builder().post(requestBody).url(url).build()
-        val call = client.newCall(request)
+//        val request = Request.Builder().post(requestBody).url(url).build()
+        val call = client.newCall(createRequest(url, requestBody))
         val response = call.execute()
         return response.body!!.string()
     }
 
-    override fun download(url: String) = client.newCall(Request.Builder().url(url).build()).execute().body!!.byteStream()
+    fun createRequest(url: String, requestBody: RequestBody? = null): Request {
+        val rb = Request.Builder().url(url)
+        if (requestBody != null) rb.post(requestBody)
+        rb.header("User-Agent", ua)
+        return rb.build()
+    }
+
+    override fun download(url: String) = client.newCall(createRequest(url)).execute().body!!.byteStream()
     override fun stop() {
 
     }
