@@ -37,7 +37,7 @@ class AsLoader : Loader {
 
         for (instance in instances) {
             try {
-                log.info("Init ApplicationService: ${instance::class.simpleName}.")
+                log.debug("Init ApplicationService: ${instance::class.simpleName}.")
                 context.injectBean(instance)
                 instance.init()
                 log.info("Init ApplicationService: ${instance::class.simpleName} Success!")
@@ -51,7 +51,7 @@ class AsLoader : Loader {
     fun start() {
         for (instance in instances) {
             try {
-                log.info("Start ApplicationService: ${instance::class.simpleName}.")
+                log.debug("Start ApplicationService: ${instance::class.simpleName}.")
                 context.injectBean(instance)
                 instance.start()
                 log.info("Start ApplicationService: ${instance::class.simpleName} Success!")
@@ -65,7 +65,7 @@ class AsLoader : Loader {
     fun stop() {
         for (instance in instances) {
             try {
-                log.info("Stop ApplicationService: ${instance::class.simpleName}.")
+                log.debug("Stop ApplicationService: ${instance::class.simpleName}.")
                 instance.stop()
                 log.info("Stop ApplicationService: ${instance::class.simpleName} Success!")
             } catch (e: Exception) {
