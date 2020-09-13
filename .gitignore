@@ -1,2 +1,7 @@
-/log/**
+*.iml
+/.idea
+
+/target
+
+/log
 /tmp
