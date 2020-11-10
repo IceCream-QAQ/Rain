@@ -26,13 +26,13 @@ class EventListenerLoader : Loader {
 
         for (item in items.values) {
             if (!item.type.isBean()) continue
-            log.info("Register EventListener: ${item.type.name}.")
+            log.debug("Register EventListener: ${item.type.name}.")
             try {
                 eventBus.register(context.getBean(item.type, ""))
                 log.info("Register EventListener: ${item.type.name} Success!")
             } catch (e: Exception) {
                 e.printStackTrace()
-                log.info("Register EventListener: ${item.type.name} Fail!", e)
+                log.error("Register EventListener: ${item.type.name} Fail!", e)
             }
         }
     }

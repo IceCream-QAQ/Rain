@@ -21,7 +21,7 @@ class JobLoader : Loader {
         val jobs = jobManager.jobs
         for (item in items.values) {
             if (!item.type.isBean()) continue
-            log.info("Register JobCenter: ${item.type.name}.")
+            log.debug("Register JobCenter: ${item.type.name}.")
             val instance = context[item.type] ?: continue
             val methods = item.type.methods
             for (method in methods) {

@@ -42,7 +42,7 @@ class AsLoader : Loader {
                 instance.init()
                 log.info("Init ApplicationService: ${instance::class.simpleName} Success!")
             } catch (e: Exception) {
-                log.info("Init ApplicationService: ${instance::class.simpleName} Error!", e)
+                log.error("Init ApplicationService: ${instance::class.simpleName} Error!", e)
                 throw e
             }
         }
@@ -56,7 +56,7 @@ class AsLoader : Loader {
                 instance.start()
                 log.info("Start ApplicationService: ${instance::class.simpleName} Success!")
             } catch (e: Exception) {
-                log.info("Start ApplicationService: ${instance::class.simpleName} Error!", e)
+                log.error("Start ApplicationService: ${instance::class.simpleName} Error!", e)
                 throw e
             }
         }
@@ -69,7 +69,7 @@ class AsLoader : Loader {
                 instance.stop()
                 log.info("Stop ApplicationService: ${instance::class.simpleName} Success!")
             } catch (e: Exception) {
-                log.info("Stop ApplicationService: ${instance::class.simpleName} Error!", e)
+                log.error("Stop ApplicationService: ${instance::class.simpleName} Error!", e)
                 throw e
             }
         }
