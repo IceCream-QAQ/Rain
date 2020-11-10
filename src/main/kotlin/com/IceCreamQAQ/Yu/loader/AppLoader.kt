@@ -106,7 +106,7 @@ class AppLoader {
 //            addLoadItem(loadClass, loadBy, loadBy, loadItemsMap)
 //        }
         searchClass.getAnnotation(LoadBy::class.java)?.let {
-            if (it.mastBean) if (!searchClass.isBean()) return@let
+            if (it.mastBean) if (!loadClass.isBean()) return@let
             addLoadItem(loadClass, it, it, loadItemsMap)
         }
 
@@ -114,7 +114,7 @@ class AppLoader {
         for (annotationInstance in annotationInstances) {
             val annotationClass = annotationInstance::class.java.interfaces[0]
             annotationClass.getAnnotation(LoadBy::class.java)?.let {
-                if (it.mastBean) if (!searchClass.isBean()) return@let
+                if (it.mastBean) if (!loadClass.isBean()) return@let
                 addLoadItem(loadClass, annotationInstance, it, loadItemsMap)
             }
 
