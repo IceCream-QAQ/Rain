@@ -6,6 +6,7 @@ import com.IceCreamQAQ.Yu.annotation.LoadBy
 import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.hook.YuHook
+import com.IceCreamQAQ.Yu.isBean
 import java.io.File
 import java.io.IOException
 import java.net.JarURLConnection
@@ -100,16 +101,23 @@ class AppLoader {
 
     fun searchLoadBy(loadClass: Class<*>, searchClass: Class<*>, loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, MutableMap<String, LoadItem>>>) {
 //        if (!loadClass.isBean()) return
-        val loadBy = searchClass.getAnnotation(LoadBy::class.java)
-        if (loadBy != null) {
-            addLoadItem(loadClass, loadBy, loadBy, loadItemsMap)
+//        val loadBy =
+//        if (loadBy != null) {
+//            addLoadItem(loadClass, loadBy, loadBy, loadItemsMap)
+//        }
+        searchClass.getAnnotation(LoadBy::class.java)?.let {
+            if (it.mastBean) if (!searchClass.isBean()) return@let
+            addLoadItem(loadClass, it, it, loadItemsMap)
         }
 
         val annotationInstances = searchClass.annotations
         for (annotationInstance in annotationInstances) {
             val annotationClass = annotationInstance::class.java.interfaces[0]
-            addLoadItem(loadClass, annotationInstance, annotationClass.getAnnotation(LoadBy::class.java)
-                    ?: continue, loadItemsMap)
+            annotationClass.getAnnotation(LoadBy::class.java)?.let {
+                if (it.mastBean) if (!searchClass.isBean()) return@let
+                addLoadItem(loadClass, annotationInstance, it, loadItemsMap)
+            }
+
 //            return
         }
 

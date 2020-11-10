@@ -8,7 +8,7 @@ annotation class MultiInstance
 
 
 annotation class With(val value: Array<KClass<*>>)
-annotation class LoadBy(val value: KClass<out Loader>)
+annotation class LoadBy(val value: KClass<out Loader>, val mastBean: Boolean = true)
 
 annotation class Synonym(val value: Array<String>)
 annotation class Path(val value: String)
