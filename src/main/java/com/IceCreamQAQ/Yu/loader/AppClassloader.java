@@ -101,6 +101,10 @@ public class AppClassloader extends ClassLoader {
         return defineClass(name, bytes, 0, bytes.length);
     }
 
+    public Class<?> define(String name, byte[] data) {
+        return defineClass(name, data, 0, data.length);
+    }
+
     public boolean isBlackListClass(String name) {
         val b = name.startsWith("java.")
                 || name.startsWith("javax.")
@@ -113,6 +117,7 @@ public class AppClassloader extends ClassLoader {
                 || name.startsWith("com.IceCreamQAQ.Yu.annotation.")
                 || name.startsWith("com.IceCreamQAQ.Yu.hook.")
                 || name.startsWith("com.IceCreamQAQ.Yu.loader.enchant.")
+                || name.startsWith("com.IceCreamQAQ.Yu.loader.AppClassloader")
                 || name.startsWith("ch.qos.logback.core.")
                 || name.startsWith("org.xml")
                 || name.startsWith("org.slf4j.")
