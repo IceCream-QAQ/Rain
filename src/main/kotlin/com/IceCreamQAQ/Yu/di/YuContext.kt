@@ -7,13 +7,10 @@ import com.IceCreamQAQ.Yu.annotation.Default
 import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.isBean
 import com.IceCreamQAQ.Yu.loader.ClassRegister
-import com.alibaba.fastjson.JSONObject
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
-import java.lang.reflect.Modifier
 import java.lang.reflect.ParameterizedType
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.collections.ArrayList
@@ -168,6 +165,16 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
                 )
                 field[obj] = b
             }
+        }
+
+
+        try {
+            obj::class.java.getMethod("init")
+        } catch (e: NoSuchMethodException) {
+            null
+        }?.let {
+            it.getAnnotation(Inject::class.java) ?: return@let
+            it.invoke(obj)
         }
     }
 
