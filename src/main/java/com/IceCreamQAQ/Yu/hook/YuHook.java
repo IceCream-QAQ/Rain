@@ -84,6 +84,21 @@ public class YuHook {
         }
     }
 
+    static class NewMethod {
+        public String name;
+        public String desc;
+        public MethodNode method;
+
+        public NewMethod() {
+        }
+
+        public NewMethod(String name, String desc, MethodNode method) {
+            this.name = name;
+            this.desc = desc;
+            this.method = method;
+        }
+    }
+
     public static byte[] checkClass(String name, byte[] bytes) {
         val ch = his.get(name);
 
@@ -92,7 +107,7 @@ public class YuHook {
         reader.accept(node, 0);
 
 
-        val newMethods = new HashMap<String, MethodNode>();
+        val newMethods = new ArrayList<NewMethod>();
 
         for (val method : (List<MethodNode>) node.methods) {
             if (isSysMethod(method.name)) continue;
@@ -129,7 +144,7 @@ public class YuHook {
             }
 
             if (h || mh || ah) {
-                newMethods.put(method.name, method);
+                newMethods.add(new NewMethod(method.name, method.desc, method));
                 method.name += "_IceCreamQAQ_YuHook";
             }
         }
@@ -142,8 +157,9 @@ public class YuHook {
         val cName = name.replace(".", "/");
 
 
-        for (String mn : newMethods.keySet()) {
-            val method = newMethods.get(mn);
+        for (val nm : newMethods) {
+            val mn = nm.name;
+            val method = nm.method;
             val a = method.desc.split("\\)");
             val ap = a[0].substring(1);
 
@@ -402,10 +418,9 @@ public class YuHook {
         ClassNode nn = new ClassNode();
         nr.accept(nn, 0);
 
-        for (
-                String mn : newMethods.keySet()) {
-            val m = ((List<MethodNode>) nn.methods).stream().filter(s -> s.name.equals(mn)).findFirst().get();
-            val mh = ((List<MethodNode>) nn.methods).stream().filter(s -> s.name.equals(mn + "_IceCreamQAQ_YuHook")).findFirst().get();
+        for (val nm : newMethods) {
+            val m = nn.methods.stream().filter(s -> s.name.equals(nm.name) && s.desc.equals(nm.desc)).findFirst().get();
+            val mh = nn.methods.stream().filter(s -> s.name.equals(nm.name + "_IceCreamQAQ_YuHook") && s.desc.equals(nm.desc)).findFirst().get();
 
             m.visibleAnnotations = mh.visibleAnnotations;
             mh.visibleAnnotations = null;
@@ -420,10 +435,8 @@ public class YuHook {
         ClassWriter ncw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
         nn.accept(ncw);
 
-        val nbs = ncw.toByteArray();
 
-
-        return nbs;
+        return ncw.toByteArray();
     }
 
     private static String getTyped(String type) {
