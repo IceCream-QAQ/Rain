@@ -7,6 +7,7 @@ import java.lang.reflect.Modifier
 
 fun Class<*>.isBean()= !(this.isInterface || Modifier.isAbstract(this.modifiers))
 
+inline fun <reified T> String.toObject(): T = this.toObject(T::class.java)
 fun <T> String.toObject(clazz: Class<T>) = JSON.parseObject(this,clazz)
 fun String.toJSONObject() = JSON.parseObject(this)
 fun Any.toJSONString() = JSON.toJSONString(this)
