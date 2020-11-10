@@ -2,6 +2,7 @@ package com.IceCreamQAQ.Yu.job
 
 import com.IceCreamQAQ.Yu.annotation.Cron
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.isBean
 import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.Yu.loader.Loader
 import org.slf4j.LoggerFactory
@@ -19,6 +20,7 @@ class JobLoader : Loader {
     override fun load(items: Map<String, LoadItem>) {
         val jobs = ArrayList<Job>()
         for (item in items.values) {
+            if (!item.type.isBean()) continue
             log.info("Register JobCenter: ${item.type.name}.")
             val instance = context[item.type] ?: continue
             val methods = item.type.methods

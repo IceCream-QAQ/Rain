@@ -2,6 +2,7 @@ package com.IceCreamQAQ.Yu.controller.router
 
 import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.controller.NewActionContext
+import com.IceCreamQAQ.Yu.toLowerCaseFirstOne
 import java.lang.reflect.Method
 import java.util.regex.Pattern
 import javax.inject.Named
@@ -118,11 +119,6 @@ open class NewActionInvoker(level: Int, method: Method, instance: Any) : NewRout
         return true
     }
 
-    private fun String.toLowerCaseFirstOne(): String {
-        return if (Character.isLowerCase(this[0])) this
-        else (StringBuilder()).append(Character.toLowerCase(this[0])).append(this.substring(1)).toString();
-    }
-
 }
 
 open class NewReflectMethodInvoker(val method: Method, val instance: Any) : NewMethodInvoker {
@@ -172,9 +168,9 @@ open class NewReflectMethodInvoker(val method: Method, val instance: Any) : NewM
     )
 }
 
-class ReflectCatchInvoker(val type: Class<out Throwable>, method: Method, instance: Any):CatchInvoker {
+open class ReflectCatchInvoker(val type: Class<out Throwable>, val methodInvoker: NewMethodInvoker):CatchInvoker {
 
-    private val methodInvoker = NewReflectMethodInvoker(method, instance)
+//    private  = NewReflectMethodInvoker(method, instance)
 
     override fun invoke(context: NewActionContext, error: Throwable): Any? {
         if (!type.isAssignableFrom(error::class.java))return null

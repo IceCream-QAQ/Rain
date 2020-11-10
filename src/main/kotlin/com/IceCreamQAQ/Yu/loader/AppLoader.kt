@@ -6,7 +6,6 @@ import com.IceCreamQAQ.Yu.annotation.LoadBy
 import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.hook.YuHook
-import com.IceCreamQAQ.Yu.isBean
 import java.io.File
 import java.io.IOException
 import java.net.JarURLConnection
@@ -100,7 +99,7 @@ class AppLoader {
     }
 
     fun searchLoadBy(loadClass: Class<*>, searchClass: Class<*>, loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, MutableMap<String, LoadItem>>>) {
-        if (!loadClass.isBean()) return
+//        if (!loadClass.isBean()) return
         val loadBy = searchClass.getAnnotation(LoadBy::class.java)
         if (loadBy != null) {
             addLoadItem(loadClass, loadBy, loadBy, loadItemsMap)

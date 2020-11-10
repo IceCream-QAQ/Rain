@@ -1,5 +1,6 @@
 package com.IceCreamQAQ.Yu.di
 
+import com.IceCreamQAQ.Yu.isBean
 import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.Yu.loader.Loader
 import javax.inject.Inject
@@ -13,7 +14,7 @@ class BeanFactoryLoader :Loader {
 
     override fun load(items: Map<String, LoadItem>) {
         for (item in items.values) {
-            manager.registerFactory(item.type as Class<BeanFactory<*>>)
+            if (item.type.isBean()) manager.registerFactory(item.type as Class<BeanFactory<*>>)
         }
     }
 }

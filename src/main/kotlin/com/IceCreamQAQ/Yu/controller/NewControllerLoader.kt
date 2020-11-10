@@ -3,6 +3,7 @@ package com.IceCreamQAQ.Yu.controller
 import com.IceCreamQAQ.Yu.annotation.*
 import com.IceCreamQAQ.Yu.controller.router.*
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.isBean
 import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.Yu.loader.Loader
 import org.slf4j.LoggerFactory
@@ -22,7 +23,7 @@ abstract class NewControllerLoader : Loader {
     open val separationCharacter: Array<String> = arrayOf("/")
 
     protected abstract fun createMethodInvoker(instance: Any, method: Method): NewMethodInvoker
-    protected abstract fun createCatchMethodInvoker(instance: Any, method: Method, errorType: Class<out Throwable>): CatchInvoker
+    protected fun createCatchMethodInvoker(instance: Any, method: Method, errorType: Class<out Throwable>): CatchInvoker = ReflectCatchInvoker(errorType, createMethodInvoker(instance, method))
     protected abstract fun createActionInvoker(level: Int, actionMethod: Method, instance: Any): NewActionInvoker
 
     open class RootRouter {
@@ -39,6 +40,7 @@ abstract class NewControllerLoader : Loader {
     override fun load(items: Map<String, LoadItem>) {
         val rootRouters = HashMap<String, RootRouter>()
         for (item in items.values) {
+            if (!item.type.isBean()) continue
             val clazz = item.type
             val name = clazz.getAnnotation(Named::class.java)?.value
                     ?: item.loadBy::class.java.interfaces[0].getAnnotation(Named::class.java)?.value ?: continue
@@ -447,7 +449,6 @@ abstract class NewControllerLoader : Loader {
 
 open class NewControllerLoaderImpl : NewControllerLoader() {
     override fun createMethodInvoker(instance: Any, method: Method): NewMethodInvoker = NewReflectMethodInvoker(method, instance)
-    override fun createCatchMethodInvoker(instance: Any, method: Method, errorType: Class<out Throwable>) = ReflectCatchInvoker(errorType, method, instance)
 
     override fun createActionInvoker(level: Int, actionMethod: Method, instance: Any): NewActionInvoker = NewActionInvoker(level, actionMethod, instance)
 }

@@ -2,6 +2,7 @@ package com.IceCreamQAQ.Yu.event
 
 import com.IceCreamQAQ.Yu.AppLogger
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.isBean
 import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.Yu.loader.Loader
 import org.slf4j.LoggerFactory
@@ -24,6 +25,7 @@ class EventListenerLoader : Loader {
     override fun load(items: Map<String, LoadItem>) {
 
         for (item in items.values) {
+            if (!item.type.isBean()) continue
             log.info("Register EventListener: ${item.type.name}.")
             try {
                 eventBus.register(context.getBean(item.type, ""))

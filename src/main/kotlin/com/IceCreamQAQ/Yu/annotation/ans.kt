@@ -12,6 +12,7 @@ annotation class LoadBy(val value: KClass<out Loader>)
 
 annotation class Synonym(val value: Array<String>)
 annotation class Path(val value: String)
+annotation class RouterType(val value: String)
 
 @LoadBy(JobLoader::class)
 annotation class JobCenter
