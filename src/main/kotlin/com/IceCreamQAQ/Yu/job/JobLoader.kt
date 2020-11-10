@@ -18,7 +18,7 @@ class JobLoader : Loader {
     private lateinit var jobManager: JobManager
 
     override fun load(items: Map<String, LoadItem>) {
-        val jobs = ArrayList<Job>()
+        val jobs = jobManager.jobs
         for (item in items.values) {
             if (!item.type.isBean()) continue
             log.info("Register JobCenter: ${item.type.name}.")
@@ -26,7 +26,7 @@ class JobLoader : Loader {
             val methods = item.type.methods
             for (method in methods) {
                 val cron = method.getAnnotation(Cron::class.java) ?: continue
-                log.debug("Register Job: ${method.name}.")
+                log.trace("Register Job: ${method.name}.")
                 val timeStr = cron.value
                 val job = if (timeStr.startsWith("At::")) {
                     val tt = timeStr.split("::")
@@ -58,11 +58,10 @@ class JobLoader : Loader {
                     Job(time, cron.async, ReflectCronInvoker(instance, method), cron.runWithStart)
                 }
                 jobs.add(job)
-                log.debug("Register Job: ${method.name} Success!")
+                log.trace("Register Job: ${method.name} Success!")
             }
             log.info("Register JobCenter: ${item.type.name} Success!")
         }
-        jobManager.jobs = jobs
     }
 
 }
