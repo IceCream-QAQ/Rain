@@ -31,7 +31,7 @@ public class EventInvokerCreator {
     @Inject
     private SpawnClassLoader classLoader;
 
-    List<EventInvoker>[] register(Object o){
+    List<EventListenerInfo>[] register(Object o) {
         try {
             return registerEventListener(o);
         } catch (Exception e) {
@@ -63,14 +63,14 @@ public class EventInvokerCreator {
 //    }
 
 
-    private List<EventInvoker>[] registerEventListener(Object object) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    private List<EventListenerInfo>[] registerEventListener(Object object) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         Class<?> pluginEventClass = object.getClass();
 
-        List<EventInvoker> height = new ArrayList<>();
-        List<EventInvoker> normal = new ArrayList<>();
-        List<EventInvoker> low = new ArrayList<>();
+        List<EventListenerInfo> height = new ArrayList<>();
+        List<EventListenerInfo> normal = new ArrayList<>();
+        List<EventListenerInfo> low = new ArrayList<>();
 
-        List<EventInvoker>[] eventInvokers = new List[]{height,normal,low};
+        List<EventListenerInfo>[] eventInvokers = new List[]{height, normal, low};
         for (Method method : pluginEventClass.getMethods()) {
             val e = method.getAnnotation(com.IceCreamQAQ.Yu.annotation.Event.class);
             if (e == null) continue;
@@ -82,19 +82,20 @@ public class EventInvokerCreator {
             else
                 invoker = (EventInvoker) createEventHandlerInvokerClass(method).getConstructor(Object.class).newInstance(object);
 
+            val eli = new EventListenerInfo(pluginEventClass, method, e.weight(), invoker, object);
             switch (e.weight()) {
                 case low:
                     if (low == null) low = new ArrayList<>();
-                    low.add(invoker);
+                    low.add(eli);
                     break;
                 case normal:
                     if (normal == null) normal = new ArrayList<>();
-                    normal.add(invoker);
+                    normal.add(eli);
                     break;
                 case height:
                 case high:
                     if (height == null) height = new ArrayList<>();
-                    height.add(invoker);
+                    height.add(eli);
                     break;
                 default:
                     break;
