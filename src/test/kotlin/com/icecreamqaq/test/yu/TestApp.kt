@@ -2,8 +2,8 @@ package com.icecreamqaq.test.yu
 
 import com.IceCreamQAQ.Yu.DefaultApp
 import com.IceCreamQAQ.Yu.annotation.NotSearch
-import com.IceCreamQAQ.Yu.controller.DefaultActionContextImpl
-import com.IceCreamQAQ.Yu.controller.router.Router
+import com.IceCreamQAQ.Yu.controller.DefaultActionContext
+import com.IceCreamQAQ.Yu.controller.Router
 //import com.IceCreamQAQ.Yu.controller.RoutersMap
 import com.IceCreamQAQ.Yu.di.YuContext
 import javax.inject.Inject
@@ -39,7 +39,7 @@ class TestApp : DefaultApp() {
 //        val rm = context.getBean(RoutersMap::class.java, "default")!!
         val newRouter = context.getBean(Router::class.java, "default")!!
 
-        val nac = DefaultActionContextImpl()
+        val nac = DefaultActionContext()
         nac.path = paths
         nac.saves = HashMap()
 

@@ -12,23 +12,3 @@ interface ActionContext {
 
 }
 
-class DefaultActionContextImpl : ActionContext {
-
-    override lateinit var path: Array<String>
-    var saves = HashMap<String, Any>()
-
-    var result: Any? = null
-
-    override fun get(name: String): Any? = saves[name]
-
-    override fun set(name: String, obj: Any) {
-        saves[name] = obj
-    }
-
-    override fun onError(e: Throwable): Throwable = e
-
-    override fun onSuccess(result: Any?): Any? {
-        this.result = result
-        return null
-    }
-}

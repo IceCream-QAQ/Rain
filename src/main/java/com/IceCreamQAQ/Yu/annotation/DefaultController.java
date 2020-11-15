@@ -1,6 +1,6 @@
 package com.IceCreamQAQ.Yu.annotation;
 
-import com.IceCreamQAQ.Yu.controller.ControllerLoaderImpl;
+import com.IceCreamQAQ.Yu.controller.DefaultControllerLoaderImpl;
 import com.IceCreamQAQ.Yu.loader.enchant.MethodParaNamedEnchanter;
 
 import javax.inject.Named;
@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Named("default")
-@LoadBy(ControllerLoaderImpl.class)
+@LoadBy(DefaultControllerLoaderImpl.class)
 @EnchantBy(MethodParaNamedEnchanter.class)
 public @interface DefaultController {
 }

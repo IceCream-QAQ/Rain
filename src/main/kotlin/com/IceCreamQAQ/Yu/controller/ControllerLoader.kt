@@ -1,7 +1,6 @@
 package com.IceCreamQAQ.Yu.controller
 
 import com.IceCreamQAQ.Yu.annotation.*
-import com.IceCreamQAQ.Yu.controller.router.*
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.isBean
 import com.IceCreamQAQ.Yu.loader.LoadItem
@@ -447,8 +446,3 @@ abstract class ControllerLoader : Loader {
 
 }
 
-open class ControllerLoaderImpl : ControllerLoader() {
-    override fun createMethodInvoker(instance: Any, method: Method): MethodInvoker = ReflectMethodInvoker(method, instance)
-
-    override fun createActionInvoker(level: Int, actionMethod: Method, instance: Any): ActionInvokerImpl = ActionInvokerImpl(level, actionMethod, instance)
-}
