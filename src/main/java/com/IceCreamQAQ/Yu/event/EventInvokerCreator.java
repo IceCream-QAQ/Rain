@@ -170,7 +170,7 @@ public class EventInvokerCreator {
 
     private String getUniqueName(Method callback) {
         return String.format("YuQ_EventHandlerClass_%d_%s_%s_%s_IceCreamQAQ_OpenSource_YuFramework",
-                num,
+                num++,
                 callback.getDeclaringClass().getSimpleName(),
                 callback.getName(),
                 callback.getParameterTypes()[0].getSimpleName());
