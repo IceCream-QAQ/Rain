@@ -13,23 +13,23 @@ import javax.inject.Inject
 import javax.inject.Named
 
 
-abstract class NewControllerLoader : Loader {
+abstract class ControllerLoader : Loader {
 
-    private val logger = LoggerFactory.getLogger(NewControllerLoader::class.java)
+    private val logger = LoggerFactory.getLogger(ControllerLoader::class.java)
 
     @Inject
     private lateinit var context: YuContext
 
     open val separationCharacter: Array<String> = arrayOf("/")
 
-    protected abstract fun createMethodInvoker(instance: Any, method: Method): NewMethodInvoker
+    protected abstract fun createMethodInvoker(instance: Any, method: Method): MethodInvoker
     protected fun createCatchMethodInvoker(instance: Any, method: Method, errorType: Class<out Throwable>): CatchInvoker = ReflectCatchInvoker(errorType, createMethodInvoker(instance, method))
-    protected abstract fun createActionInvoker(level: Int, actionMethod: Method, instance: Any): NewActionInvoker
+    protected abstract fun createActionInvoker(level: Int, actionMethod: Method, instance: Any): ActionInvokerImpl
 
     open class RootRouter {
-        val router: NewRouter = NewRouterImpl(1)
-        var globalBefores: MutableList<NewMethodInvoker> = ArrayList()
-        var globalAfters: MutableList<NewMethodInvoker> = ArrayList()
+        val router: Router = RouterImpl(1)
+        var globalBefores: MutableList<MethodInvoker> = ArrayList()
+        var globalAfters: MutableList<MethodInvoker> = ArrayList()
         var globalCatchs: MutableList<CatchInvoker> = ArrayList()
 
         val globalBeforeList: MutableList<DoMethod> = ArrayList()
@@ -102,7 +102,7 @@ abstract class NewControllerLoader : Loader {
         }
 
         for ((k, v) in rootRouters) {
-            context.putBean(NewRouter::class.java, k, v.router)
+            context.putBean(Router::class.java, k, v.router)
         }
     }
 
@@ -112,7 +112,7 @@ abstract class NewControllerLoader : Loader {
         getMethods(methods, clazz.superclass ?: return)
     }
 
-    data class DoMethod(val annotation: Annotation, val invoker: NewMethodInvoker)
+    data class DoMethod(val annotation: Annotation, val invoker: MethodInvoker)
     data class DoCatch(val catch: Catch, val invoker: CatchInvoker)
     data class ActionMap(val action: Action, val method: Method, val weight: Int = action.loadWeight)
 
@@ -122,7 +122,7 @@ abstract class NewControllerLoader : Loader {
 
 
     open fun controllerToRouter(instance: Any, rootRouterData: RootRouter) {
-        val rootRouter = rootRouterData.router as NewRouterImpl
+        val rootRouter = rootRouterData.router as RouterImpl
         val globalBeforeList = rootRouterData.globalBeforeList
         val globalAfterList = rootRouterData.globalAfterList
         val globalCatchList = rootRouterData.globalCatchList
@@ -230,7 +230,7 @@ abstract class NewControllerLoader : Loader {
 //                val methodInvoker = createMethodInvoker(instance, method)
 //                actionInvoker.invoker = methodInvoker
 
-            val abs = ArrayList<NewMethodInvoker>()
+            val abs = ArrayList<MethodInvoker>()
             w@ for ((before, invoker) in befores) {
                 before as Before
                 if (before.except.size != 1 || before.except[0] != "") for (s in before.except) {
@@ -241,7 +241,7 @@ abstract class NewControllerLoader : Loader {
                 }
                 abs.add(invoker)
             }
-            val aas = ArrayList<NewMethodInvoker>()
+            val aas = ArrayList<MethodInvoker>()
             w@ for ((after, invoker) in afters) {
                 after as After
                 if (after.except.size != 1 || after.except[0] != "") for (s in after.except) {
@@ -291,7 +291,7 @@ abstract class NewControllerLoader : Loader {
 
     }
 
-    fun getMatchItem(pathString: String, nextRouter: NewRouterImpl): MatchItem? {
+    fun getMatchItem(pathString: String, nextRouter: RouterImpl): MatchItem? {
         return if (pathString.startsWith("\\") && pathString.endsWith("\\"))
             MatchItem(
                     false,
@@ -381,9 +381,9 @@ abstract class NewControllerLoader : Loader {
         }
     }
 
-    data class ActionRouterAndPath(val router: NewRouterImpl, val path: String)
+    data class ActionRouterAndPath(val router: RouterImpl, val path: String)
 
-    fun getActionInvoker(path: String, controllerRouter: NewRouterImpl, rootRouter: NewRouterImpl, method: Method, instance: Any): NewActionInvoker {
+    fun getActionInvoker(path: String, controllerRouter: RouterImpl, rootRouter: RouterImpl, method: Method, instance: Any): ActionInvokerImpl {
         val aa = getActionRouter(path, controllerRouter, rootRouter)
         val actionRootRouter = aa.router
         val actionPath = aa.path
@@ -404,7 +404,7 @@ abstract class NewControllerLoader : Loader {
         return actionInvoker
     }
 
-    fun getActionRouter(pathString: String, controllerRouter: NewRouterImpl, rootRouter: NewRouterImpl): ActionRouterAndPath {
+    fun getActionRouter(pathString: String, controllerRouter: RouterImpl, rootRouter: RouterImpl): ActionRouterAndPath {
         var path = pathString
         val router = if (path[0] == '/') {
             path = path.substring(1)
@@ -417,14 +417,14 @@ abstract class NewControllerLoader : Loader {
         else getRouterByPathString(router, a, 1)
     }
 
-    fun getRouter(router: NewRouterImpl, name: String): NewRouterImpl {
+    fun getRouter(router: RouterImpl, name: String): RouterImpl {
         val level = router.level + 1
-        var nextRouter = NewRouterImpl(level)
+        var nextRouter = RouterImpl(level)
         val mi = getMatchItem(name, nextRouter)
 
         if (mi == null) {
             val r = router.noMatch[name]
-            if (r !is NewRouterImpl) router.noMatch[name] = nextRouter
+            if (r !is RouterImpl) router.noMatch[name] = nextRouter
             else nextRouter = r
         } else {
             router.needMath.add(mi)
@@ -433,7 +433,7 @@ abstract class NewControllerLoader : Loader {
         return nextRouter
     }
 
-    fun getRouterByPathString(router: NewRouterImpl, paths: List<String>?, lessLevel: Int): ActionRouterAndPath {
+    fun getRouterByPathString(router: RouterImpl, paths: List<String>?, lessLevel: Int): ActionRouterAndPath {
         if (paths == null) return ActionRouterAndPath(router, "")
 //        val paths = pathString.split(*separationCharacter)
         var finishRouter = router
@@ -447,8 +447,8 @@ abstract class NewControllerLoader : Loader {
 
 }
 
-open class NewControllerLoaderImpl : NewControllerLoader() {
-    override fun createMethodInvoker(instance: Any, method: Method): NewMethodInvoker = NewReflectMethodInvoker(method, instance)
+open class ControllerLoaderImpl : ControllerLoader() {
+    override fun createMethodInvoker(instance: Any, method: Method): MethodInvoker = ReflectMethodInvoker(method, instance)
 
-    override fun createActionInvoker(level: Int, actionMethod: Method, instance: Any): NewActionInvoker = NewActionInvoker(level, actionMethod, instance)
+    override fun createActionInvoker(level: Int, actionMethod: Method, instance: Any): ActionInvokerImpl = ActionInvokerImpl(level, actionMethod, instance)
 }

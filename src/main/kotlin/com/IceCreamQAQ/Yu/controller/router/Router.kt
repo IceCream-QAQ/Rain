@@ -1,7 +1,7 @@
 package com.IceCreamQAQ.Yu.controller.router
 
 import com.IceCreamQAQ.Yu.annotation.AutoBind
-import com.IceCreamQAQ.Yu.controller.NewActionContext
+import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.Yu.toLowerCaseFirstOne
 import java.lang.reflect.Method
 import java.util.regex.Pattern
@@ -11,38 +11,38 @@ open class MatchItem(
         val needSave: Boolean,
         matchString: String,
         val matchNames: Array<String>?,
-        val router: NewRouter
+        val router: Router
 ) {
     val p: Pattern = Pattern.compile(matchString)
 
-    fun invoke(path: String, context: NewActionContext): Boolean {
+    fun invoke(path: String, context: ActionContext): Boolean {
         return router.invoke(path, context)
     }
 }
 
 @AutoBind
-interface NewRouter {
-    operator fun invoke(path: String, context: NewActionContext): Boolean
+interface Router {
+    operator fun invoke(path: String, context: ActionContext): Boolean
 }
 
-interface NewMethodInvoker {
+interface MethodInvoker {
     @Throws(Exception::class)
-    fun invoke(context: NewActionContext): Any?
+    fun invoke(context: ActionContext): Any?
 }
 
 interface CatchInvoker {
     @Throws(Exception::class)
-    fun invoke(context: NewActionContext, error: Throwable): Any?
+    fun invoke(context: ActionContext, error: Throwable): Any?
 }
 
-interface ActionInvoker : NewRouter
+interface ActionInvoker : Router
 
-open class NewRouterImpl(val level: Int) : NewRouter {
+open class RouterImpl(val level: Int) : Router {
 
     val needMath = ArrayList<MatchItem>()
-    val noMatch = HashMap<String, NewRouterImpl>()
+    val noMatch = HashMap<String, RouterImpl>()
 
-    override fun invoke(path: String, context: NewActionContext): Boolean {
+    override fun invoke(path: String, context: ActionContext): Boolean {
         val cps = context.path.size
         val nextPath = when {
             level > cps -> return false
@@ -67,19 +67,19 @@ open class NewRouterImpl(val level: Int) : NewRouter {
 
 }
 
-open class NewActionInvoker(level: Int, method: Method, instance: Any) : NewRouterImpl(level) {
+open class ActionInvokerImpl(level: Int, method: Method, instance: Any) : RouterImpl(level), ActionInvoker {
 
-    open lateinit var globalBefores:MutableList<NewMethodInvoker>
-    open lateinit var globalAfters:MutableList<NewMethodInvoker>
-    open lateinit var globalCatchs:MutableList<CatchInvoker>
+    open lateinit var globalBefores: MutableList<MethodInvoker>
+    open lateinit var globalAfters: MutableList<MethodInvoker>
+    open lateinit var globalCatchs: MutableList<CatchInvoker>
 
 
-    open lateinit var befores: Array<NewMethodInvoker>
-    open val invoker: NewMethodInvoker = NewReflectMethodInvoker(method, instance)
-    open lateinit var afters: Array<NewMethodInvoker>
+    open lateinit var befores: Array<MethodInvoker>
+    open val invoker: MethodInvoker = ReflectMethodInvoker(method, instance)
+    open lateinit var afters: Array<MethodInvoker>
     open lateinit var catchs: Array<CatchInvoker>
 
-    override fun invoke(path: String, context: NewActionContext): Boolean {
+    override fun invoke(path: String, context: ActionContext): Boolean {
         if (super.invoke(path, context)) return true
         try {
             for (before in globalBefores) {
@@ -101,18 +101,18 @@ open class NewActionInvoker(level: Int, method: Method, instance: Any) : NewRout
                 if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
             }
         } catch (e: Exception) {
-            val er= context.onError(e) ?: return true
+            val er = context.onError(e) ?: return true
             context["exception"] = er
             try {
                 for (catch in globalCatchs) {
-                    val o=catch.invoke(context,er)
+                    val o = catch.invoke(context, er)
                     if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
                 }
                 for (catch in catchs) {
-                    val o=catch.invoke(context,er)
+                    val o = catch.invoke(context, er)
                     if (o != null) context[o::class.java.simpleName.toLowerCaseFirstOne()] = o
                 }
-            }catch (ee : Exception){
+            } catch (ee: Exception) {
                 throw context.onError(ee) ?: return true
             }
         }
@@ -121,7 +121,7 @@ open class NewActionInvoker(level: Int, method: Method, instance: Any) : NewRout
 
 }
 
-open class NewReflectMethodInvoker(val method: Method, val instance: Any) : NewMethodInvoker {
+open class ReflectMethodInvoker(val method: Method, val instance: Any) : MethodInvoker {
 
     var returnFlag: Boolean = false
     var mps: Array<MethodPara?>? = null
@@ -141,7 +141,7 @@ open class NewReflectMethodInvoker(val method: Method, val instance: Any) : NewM
         this.mps = mps
     }
 
-    override fun invoke(context: NewActionContext): Any? {
+    override fun invoke(context: ActionContext): Any? {
         val mps = mps!!
         val paras = arrayOfNulls<Any>(mps.size)
 
@@ -168,12 +168,12 @@ open class NewReflectMethodInvoker(val method: Method, val instance: Any) : NewM
     )
 }
 
-open class ReflectCatchInvoker(val type: Class<out Throwable>, val methodInvoker: NewMethodInvoker):CatchInvoker {
+open class ReflectCatchInvoker(val type: Class<out Throwable>, val methodInvoker: MethodInvoker) : CatchInvoker {
 
 //    private  = NewReflectMethodInvoker(method, instance)
 
-    override fun invoke(context: NewActionContext, error: Throwable): Any? {
-        if (!type.isAssignableFrom(error::class.java))return null
+    override fun invoke(context: ActionContext, error: Throwable): Any? {
+        if (!type.isAssignableFrom(error::class.java)) return null
         return methodInvoker.invoke(context)
     }
 }

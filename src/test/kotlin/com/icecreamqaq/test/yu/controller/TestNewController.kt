@@ -2,7 +2,7 @@ package com.icecreamqaq.test.yu.controller
 
 import com.IceCreamQAQ.Yu.annotation.*
 
-@NewDefaultController
+@DefaultController
 class TestNewController {
 
     @Action("menu")
@@ -50,7 +50,7 @@ class TestNewController {
 }
 
 @Path("11")
-@NewDefaultController
+@DefaultController
 class TestNewController2 {
 
     @Action("menu/{ddd}")

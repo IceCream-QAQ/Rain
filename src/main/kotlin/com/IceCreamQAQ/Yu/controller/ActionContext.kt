@@ -1,8 +1,6 @@
 package com.IceCreamQAQ.Yu.controller
 
-import com.IceCreamQAQ.Yu.entity.Result
-
-interface NewActionContext {
+interface ActionContext {
 
     var path: Array<String>
 
@@ -14,7 +12,7 @@ interface NewActionContext {
 
 }
 
-class NewActionContextImpl : NewActionContext {
+class DefaultActionContextImpl : ActionContext {
 
     override lateinit var path: Array<String>
     var saves = HashMap<String, Any>()
