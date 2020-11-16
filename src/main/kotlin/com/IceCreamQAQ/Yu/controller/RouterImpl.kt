@@ -5,6 +5,15 @@ open class RouterImpl(val level: Int) : Router {
     val needMath = ArrayList<MatchItem>()
     val noMatch = HashMap<String, RouterImpl>()
 
+    override fun init(rootRouter: RootRouter) {
+        for (router in noMatch.values) {
+            router.init(rootRouter)
+        }
+        for (item in needMath) {
+            item.router.init(rootRouter)
+        }
+    }
+
     override fun invoke(path: String, context: ActionContext): Boolean {
         val cps = context.path.size
         val nextPath = when {

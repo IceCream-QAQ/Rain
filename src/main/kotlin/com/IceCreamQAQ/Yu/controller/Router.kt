@@ -9,6 +9,9 @@ import javax.inject.Named
 
 @AutoBind
 interface Router {
+
+    fun init(rootRouter: RootRouter)
+
     operator fun invoke(path: String, context: ActionContext): Boolean
 }
 
