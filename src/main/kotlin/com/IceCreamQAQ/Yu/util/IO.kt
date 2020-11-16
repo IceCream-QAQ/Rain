@@ -41,6 +41,18 @@ class IO {
         }
 
         @JvmStatic
+        @JvmOverloads
+        fun writeFile(inputStream: InputStream, outFile: File = tmpFile(), append: Boolean = false, close: Boolean = true): File {
+            val outputStream = FileOutputStream(outFile, append)
+            inputStream.copyTo(outputStream)
+            if (close) {
+                inputStream.close()
+                outputStream.close()
+            }
+            return outFile
+        }
+
+        @JvmStatic
         fun tmpFile() = File(tmpLocation, UUID.randomUUID().toString())
 
         @JvmStatic
@@ -49,8 +61,9 @@ class IO {
         }
 
         @JvmStatic
-        fun writeFile(file: File, byteArray: ByteArray) {
-            val o = FileOutputStream(file)
+        @JvmOverloads
+        fun writeFile(file: File, byteArray: ByteArray, append: Boolean = false) {
+            val o = FileOutputStream(file, append)
             o.write(byteArray)
             o.close()
         }

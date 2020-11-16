@@ -42,6 +42,24 @@ class WebConfig {
 
 }
 
+class Header(val key: String, val value: String)
+
+
+object HeaderBuilder {
+    infix fun String.to(that: String) = Header(this, that)
+
+    fun headerOf(
+            ua: String? = null,
+            referer: String? = null,
+            vararg headers: Header
+    ): List<Header> = arrayListOf<Header>().run {
+        ua?.let { add("User-Agent" to it) }
+        referer?.let { add("Referer" to it) }
+        addAll(headers)
+        this
+    }
+}
+
 interface Web {
 
     fun saveCookie(
@@ -56,13 +74,29 @@ interface Web {
 
     fun init()
 
-    fun get(url: String): String
-    fun post(url: String, para: Map<String, String>): String
-    fun postJSON(url: String, json: String): String
-    fun postJSON(url: String, obj: Any) = postJSON(url, obj.toJSONString())
+    fun get(url: String) = get(url, null)
+    fun get(url: String, headers: HeaderBuilder.() -> List<Header>?) = get(url, headers(HeaderBuilder))
+    fun get(url: String, headers: List<Header>?): String
 
-    fun download(url: String): InputStream
-    fun download(url: String, file: File? = null) = IO.copy(download(url), FileOutputStream(file ?: IO.tmpFile()))
+    fun post(url: String, para: Map<String, String>) = post(url, para, null)
+    fun post(url: String, para: Map<String, String>, headers: HeaderBuilder.() -> List<Header>?) = post(url, para, headers(HeaderBuilder))
+    fun post(url: String, para: Map<String, String>, headers: List<Header>?): String
+
+    fun postJSON(url: String, json: String) = postJSON(url, json, null)
+    fun postJSON(url: String, json: String, headers: HeaderBuilder.() -> List<Header>?) = postJSON(url, json, headers(HeaderBuilder))
+    fun postJSON(url: String, json: String, headers: List<Header>?): String
+
+    fun postJSON(url: String, obj: Any) = postJSON(url, obj.toJSONString(), null)
+    fun postJSON(url: String, obj: Any, headers: HeaderBuilder.() -> List<Header>?) = postJSON(url, obj.toJSONString(), headers(HeaderBuilder))
+    fun postJSON(url: String, obj: Any, headers: List<Header>?) = postJSON(url, obj.toJSONString(), headers)
+
+    //    fun download(url: String): InputStream
+    fun download(url: String) = download(url, headers = null)
+    fun download(url: String, headers: HeaderBuilder.() -> List<Header>?) = download(url, headers(HeaderBuilder))
+    fun download(url: String, headers: List<Header>?): InputStream
+
+
+    fun download(url: String, file: File? = null) = IO.writeFile(download(url), file ?: IO.tmpFile())
     fun download(url: String, saveLocation: String) = download(url, File(saveLocation))
 
     fun stop()
@@ -79,7 +113,6 @@ class WebHelperBeanFactory : BeanFactory<Web> {
 
     private var web: Web? = null
 
-
     @Inject
     fun init() {
         val clazz = Class.forName(implClass)
@@ -95,7 +128,7 @@ class WebHelperBeanFactory : BeanFactory<Web> {
 class OkHttpWebImpl : Web {
 
     lateinit var client: OkHttpClient
-    lateinit var ua:String
+    lateinit var ua: String
 
     val domainMap = ConcurrentHashMap<String, MutableMap<String, Cookie>>()
 
@@ -167,7 +200,7 @@ class OkHttpWebImpl : Web {
             this.config = wc
             wc
         }()
-        ua = config.ua?: "Rain/$userAgent"
+        ua = config.ua ?: "Rain/$userAgent"
 
         val proxy = config.proxy
         if (proxy != null) {
@@ -205,37 +238,43 @@ class OkHttpWebImpl : Web {
         getDomainCookies(domain)[name] = cb.build()
     }
 
-    override fun get(url: String) = client.newCall(createRequest(url)).execute().body!!.string()
+    //    override fun get(url: String) =
+    override fun get(url: String, headers: List<Header>?) = client.newCall(createRequest(url,headers)).execute().body!!.string()
 
-    override fun post(url: String, para: Map<String, String>): String {
+    override fun post(url: String, para: Map<String, String>, headers: List<Header>?): String {
         val fbBuilder = FormBody.Builder()
         for (s in para.keys) {
             fbBuilder.add(s, para[s] ?: "")
         }
         val formBody = fbBuilder.build()
 //        val request = Request.Builder().post(formBody).url(url).build()
-        val call = client.newCall(createRequest(url, formBody))
+        val call = client.newCall(createRequest(url, headers, formBody))
         val response = call.execute()
         return response.body!!.string()
     }
 
-    override fun postJSON(url: String, json: String): String {
+    override fun postJSON(url: String, json: String, headers: List<Header>?): String {
         val mediaType = "application/json".toMediaTypeOrNull()
         val requestBody = json.toRequestBody(mediaType)
 //        val request = Request.Builder().post(requestBody).url(url).build()
-        val call = client.newCall(createRequest(url, requestBody))
+        val call = client.newCall(createRequest(url, headers, requestBody))
         val response = call.execute()
         return response.body!!.string()
     }
 
-    fun createRequest(url: String, requestBody: RequestBody? = null): Request {
+    fun createRequest(url: String, headers: List<Header>? = null, requestBody: RequestBody? = null): Request {
         val rb = Request.Builder().url(url)
         if (requestBody != null) rb.post(requestBody)
         rb.header("User-Agent", ua)
+        headers?.let {
+            for (header in headers) {
+                rb.header(header.key, header.value)
+            }
+        }
         return rb.build()
     }
 
-    override fun download(url: String) = client.newCall(createRequest(url)).execute().body!!.byteStream()
+    override fun download(url: String, headers: List<Header>?) = client.newCall(createRequest(url, headers)).execute().body!!.byteStream()
     override fun stop() {
 
     }
