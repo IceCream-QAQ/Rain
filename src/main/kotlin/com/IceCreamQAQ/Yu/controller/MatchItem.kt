@@ -10,7 +10,7 @@ open class MatchItem(
 ) {
     val p: Pattern = Pattern.compile(matchString)
 
-    fun invoke(path: String, context: ActionContext): Boolean {
+    suspend fun invoke(path: String, context: ActionContext): Boolean {
         return router.invoke(path, context)
     }
 }

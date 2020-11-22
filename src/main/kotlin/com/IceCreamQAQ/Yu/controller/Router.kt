@@ -12,7 +12,7 @@ interface Router {
 
     fun init(rootRouter: RootRouter)
 
-    operator fun invoke(path: String, context: ActionContext): Boolean
+    suspend operator fun invoke(path: String, context: ActionContext): Boolean
 }
 
 

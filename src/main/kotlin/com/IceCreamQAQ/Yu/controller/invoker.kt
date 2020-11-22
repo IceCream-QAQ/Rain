@@ -6,12 +6,12 @@ import javax.inject.Named
 
 interface MethodInvoker {
     @Throws(Exception::class)
-    fun invoke(context: ActionContext): Any?
+    suspend fun invoke(context: ActionContext): Any?
 }
 
 interface CatchInvoker {
     @Throws(Exception::class)
-    fun invoke(context: ActionContext, error: Throwable): Any?
+    suspend fun invoke(context: ActionContext, error: Throwable): Any?
 }
 
 open class ReflectMethodInvoker(val method: Method, val instance: Any) : MethodInvoker {
@@ -34,7 +34,7 @@ open class ReflectMethodInvoker(val method: Method, val instance: Any) : MethodI
         this.mps = mps
     }
 
-    override fun invoke(context: ActionContext): Any? {
+    override suspend fun invoke(context: ActionContext): Any? {
         val mps = mps!!
         val paras = arrayOfNulls<Any>(mps.size)
 
@@ -65,7 +65,7 @@ open class ReflectCatchInvoker(val type: Class<out Throwable>, val methodInvoker
 
 //    private  = NewReflectMethodInvoker(method, instance)
 
-    override fun invoke(context: ActionContext, error: Throwable): Any? {
+    override suspend fun invoke(context: ActionContext, error: Throwable): Any? {
         if (!type.isAssignableFrom(error::class.java)) return null
         return methodInvoker.invoke(context)
     }

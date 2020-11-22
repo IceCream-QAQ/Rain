@@ -14,7 +14,7 @@ open class RouterImpl(val level: Int) : Router {
         }
     }
 
-    override fun invoke(path: String, context: ActionContext): Boolean {
+    override suspend fun invoke(path: String, context: ActionContext): Boolean {
         val cps = context.path.size
         val nextPath = when {
             level > cps -> return false

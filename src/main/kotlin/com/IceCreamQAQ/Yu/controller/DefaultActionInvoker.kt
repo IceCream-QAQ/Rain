@@ -78,7 +78,7 @@ open class DefaultActionInvoker(level: Int, val method: Method, val instance: An
         return a as Array<I>
     }
 
-    override fun invoke(path: String, context: ActionContext): Boolean {
+    override suspend fun invoke(path: String, context: ActionContext): Boolean {
         if (super.invoke(path, context)) return true
         try {
 //            for (before in globalBefores) {
