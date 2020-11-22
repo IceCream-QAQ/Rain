@@ -115,7 +115,13 @@ abstract class DefaultControllerLoader : Loader {
 
         val controllerClass = instance::class.java
 
-        val controllerRouter = getRouterByPathString(rootRouter, controllerClass.getAnnotation(Path::class.java)?.value?.split(*separationCharacter), 0).router
+        val controllerRouter = getRouterByPathString(
+                rootRouter,
+                controllerClass.getAnnotation(PathBy::class.java)?.let {
+                    context[it.value.java]?.run { getPath(controllerClass, instance)?.split(*separationCharacter) }
+                } ?: controllerClass.getAnnotation(Path::class.java)?.value?.split(*separationCharacter),
+                0
+        ).router
 
         val allMethods = ArrayList<Method>()
         getMethods(allMethods, controllerClass)
@@ -153,7 +159,6 @@ abstract class DefaultControllerLoader : Loader {
                 else catchs.add(dm)
             }
         }
-
 
 
         val interceptorInfo = InterceptorInfo(befores, afters, catchs)
