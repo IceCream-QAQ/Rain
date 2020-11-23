@@ -13,9 +13,9 @@ class DefaultActionContext : ActionContext {
         saves[name] = obj
     }
 
-    override fun onError(e: Throwable): Throwable = e
+    override suspend fun onError(e: Throwable): Throwable = e
 
-    override fun onSuccess(result: Any?): Any? {
+    override suspend fun onSuccess(result: Any?): Any? {
         this.result = result
         return null
     }

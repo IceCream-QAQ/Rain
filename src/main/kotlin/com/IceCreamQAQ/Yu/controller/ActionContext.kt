@@ -7,8 +7,8 @@ interface ActionContext {
     operator fun get(name: String): Any?
     operator fun set(name: String, obj: Any)
 
-    fun onError(e: Throwable): Throwable?
-    fun onSuccess(result: Any?): Any?
+    suspend fun onError(e: Throwable): Throwable?
+    suspend fun onSuccess(result: Any?): Any?
 
 }
 
