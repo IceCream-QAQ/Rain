@@ -1,6 +1,8 @@
 package com.IceCreamQAQ.Yu.annotation
 
+import com.IceCreamQAQ.Yu.controller.ActionManager
 import com.IceCreamQAQ.Yu.controller.PathManager
+import com.IceCreamQAQ.Yu.controller.SynonymManager
 import com.IceCreamQAQ.Yu.job.JobLoader
 import com.IceCreamQAQ.Yu.loader.Loader
 import kotlin.reflect.KClass
@@ -14,7 +16,10 @@ annotation class LoadBy(val value: KClass<out Loader>, val mastBean: Boolean = t
 annotation class Synonym(val value: Array<String>)
 annotation class Path(val value: String)
 annotation class RouterType(val value: String)
+
 annotation class PathBy(val value: KClass<out PathManager>)
+annotation class ActionBy(val value: KClass<out ActionManager>)
+annotation class SynonymBy(val value: KClass<out SynonymManager>)
 
 @LoadBy(JobLoader::class)
 annotation class JobCenter

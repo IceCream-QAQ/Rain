@@ -217,7 +217,8 @@ abstract class DefaultControllerLoader : Loader {
             val action = am.action
 //            val actionMethodName = method.name
 
-            val path = action.value
+            val path = method.getAnnotation(ActionBy::class.java)?.let { context[it.value.java]?.getPath(controllerClass, method, instance) }
+                    ?: action.value
 //                val aa = getActionRouter(path, controllerRouter, rootRouter)
 //                val actionRootRouter = aa.router
 //                val actionPath = aa.path
@@ -271,7 +272,10 @@ abstract class DefaultControllerLoader : Loader {
 //            actionInvoker.catchs = acs.toTypedArray()
 
             val synonym = method.getAnnotation(Synonym::class.java) ?: continue
-            for (s in synonym.value) {
+            for (s in
+                method.getAnnotation(SynonymBy::class.java)?.let { context[it.value.java]?.getPath(controllerClass, method, instance) }
+                    ?: synonym.value
+            ) {
                 val sai = getActionInvoker(s, controllerRouter, rootRouter, method, instance)
 
                 sai.interceptorInfo = interceptorInfo
