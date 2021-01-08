@@ -16,12 +16,14 @@ import java.util.List;
 @Slf4j
 public class AppClassloader extends ClassLoader {
 
+//    private static AppClassloader instance;
+
     private final List<ClassTransformer> transformers = new ArrayList<>();
     private static File classOutLocation;
 
     static {
-        classOutLocation = new File(IO.getTmpLocation(),"classOutput");
-        if (classOutLocation.exists())classOutLocation.delete();
+        classOutLocation = new File(IO.getTmpLocation(), "classOutput");
+        if (classOutLocation.exists()) classOutLocation.delete();
         classOutLocation.mkdirs();
     }
 
@@ -43,8 +45,12 @@ public class AppClassloader extends ClassLoader {
         blackList.addAll(packageName);
     }
 
-    public static void registerTransformerList(String packageName) {
-        transformerList.add(packageName);
+    public static void registerTransformerList(String className) {
+        transformerList.add(className);
+    }
+
+    public void registerTransformer(String className) throws IllegalAccessException, InstantiationException {
+        transformers.add((ClassTransformer) loadClass(className, true, false).newInstance());
     }
 
     @SneakyThrows
@@ -79,7 +85,7 @@ public class AppClassloader extends ClassLoader {
         val in = this.getParent().getResourceAsStream(path);
         if (in == null) throw new ClassNotFoundException(name);
 
-        byte[] oldBytes = IO.read(in,true);
+        byte[] oldBytes = IO.read(in, true);
         byte[] bytes = oldBytes;
 
 //        if (name.equals("com.icecreamqaq.test.yu.bf.TestFactory")){
@@ -94,8 +100,8 @@ public class AppClassloader extends ClassLoader {
 
         bytes = YuHook.checkClass(name, bytes);
 
-        if (oldBytes != bytes){
-            IO.writeFile(new File(classOutLocation,name + ".class"), bytes);
+        if (oldBytes != bytes) {
+            IO.writeFile(new File(classOutLocation, name + ".class"), bytes);
         }
 
         return defineClass(name, bytes, 0, bytes.length);

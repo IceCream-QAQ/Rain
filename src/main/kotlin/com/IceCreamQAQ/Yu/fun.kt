@@ -19,6 +19,26 @@ fun Any.toJSONString() = JSON.toJSONString(this)
 
 fun paraError(text: String) = YuParaValueException(text)
 
+val Throwable.stackTraceString:String get() {
+    val sb = StringBuilder(this::class.java.name).append(": ").append(message).append("\n")
+    getStackTraceString(sb)
+    return sb.toString()
+}
+
+private fun Throwable.getStackTraceString(sb:StringBuilder){
+    for (element in stackTrace) {
+        sb.append("    at ${element.className}.${element.methodName}(${element.fileName}:${element.lineNumber})\n")
+    }
+    cause?.let {
+        sb.append("Caused by: ").append(it::class.java.name).append(": ").append(it.message).append("\n")
+        it.getStackTraceString(sb)
+    }
+}
+
+fun String.toUpperCaseFirstOne(): String {
+    return if (Character.isUpperCase(this[0])) this
+    else (StringBuilder()).append(Character.toUpperCase(this[0])).append(this.substring(1)).toString();
+}
 fun String.toLowerCaseFirstOne(): String {
     return if (Character.isLowerCase(this[0])) this
     else (StringBuilder()).append(Character.toLowerCase(this[0])).append(this.substring(1)).toString();

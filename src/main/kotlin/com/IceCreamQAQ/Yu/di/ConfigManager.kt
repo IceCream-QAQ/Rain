@@ -270,6 +270,7 @@ class ConfigManager(val classloader: ClassLoader, private val logger: AppLogger,
         return when (name) {
             "yu.scanPackages" -> "yu.[scanPackages"
             "yu.classRegister" -> "yu.[classRegister"
+            "yu.modules" -> "yu.[modules"
             else -> name
         }
     }

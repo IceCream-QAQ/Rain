@@ -1,7 +1,6 @@
-package com.icecreamqaq.yudb.jpa.compiler
+package com.IceCreamQAQ.Yu.loader.compiler
 
 import com.IceCreamQAQ.Yu.error.InvokerClassCreateException
-import com.IceCreamQAQ.Yu.loader.AppClassloader
 import com.IceCreamQAQ.Yu.loader.SpawnClassLoader
 import org.eclipse.jdt.internal.compiler.CompilationResult
 import org.eclipse.jdt.internal.compiler.Compiler
@@ -18,7 +17,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
 import javax.inject.Inject
-import javax.inject.Named
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 

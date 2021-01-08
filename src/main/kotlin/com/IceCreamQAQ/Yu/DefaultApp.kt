@@ -7,11 +7,15 @@ import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.event.EventBus
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent
 import com.IceCreamQAQ.Yu.loader.AppLoader
+import com.IceCreamQAQ.Yu.module.ModuleManager
 import javax.inject.Inject
 import kotlin.system.exitProcess
 
 @NotSearch
 open class DefaultApp {
+
+    @Inject
+    lateinit var moduleManager: ModuleManager
 
     @Inject
     lateinit var loader: AppLoader
@@ -32,6 +36,11 @@ open class DefaultApp {
         context.putBean(ClassLoader::class.java, "appClassLoader", appClassloader)
 
         context.injectBean(this)
+    }
+
+    @Inject
+    fun init(){
+        moduleManager.loadModule()
     }
 
     fun start(){
