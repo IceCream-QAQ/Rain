@@ -5,8 +5,7 @@ import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.annotation.Default
 import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.di.BeanFactory
-import com.IceCreamQAQ.Yu.di.ClassContext
-import com.IceCreamQAQ.Yu.di.ConfigManager
+import com.IceCreamQAQ.Yu.di.ConfigManagerDefaultImpl
 import com.IceCreamQAQ.Yu.di.YuContext
 import net.sf.ehcache.Cache
 import net.sf.ehcache.CacheManager
@@ -40,7 +39,7 @@ class EhcacheHelpFactory : BeanFactory<EhcacheHelp<*>?>, ApplicationService {
     private var cm: CacheManager? = null
 
     @Inject
-    private lateinit var configManager: ConfigManager
+    private lateinit var configManager: ConfigManagerDefaultImpl
 
     @Inject
     private lateinit var context: YuContext

@@ -2,14 +2,13 @@ package com.IceCreamQAQ.Yu
 
 import com.IceCreamQAQ.Yu.`as`.AsLoader
 import com.IceCreamQAQ.Yu.annotation.NotSearch
-import com.IceCreamQAQ.Yu.di.ConfigManager
+import com.IceCreamQAQ.Yu.di.ConfigManagerDefaultImpl
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.event.EventBus
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent
 import com.IceCreamQAQ.Yu.loader.AppLoader
 import com.IceCreamQAQ.Yu.module.ModuleManager
 import javax.inject.Inject
-import kotlin.system.exitProcess
 
 @NotSearch
 open class DefaultApp {
@@ -30,7 +29,7 @@ open class DefaultApp {
         val logger = PrintAppLog()
 
         val appClassloader = DefaultApp::class.java.classLoader
-        val configManager = ConfigManager(appClassloader, logger, System.getProperty("yu-runMode"))
+        val configManager = ConfigManagerDefaultImpl(appClassloader, logger, System.getProperty("yu-runMode"))
         val context = YuContext(configManager, logger)
 
         context.putBean(ClassLoader::class.java, "appClassLoader", appClassloader)

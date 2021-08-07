@@ -20,7 +20,7 @@ import javax.inject.Named
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-class AppLoader {
+open class AppLoader {
 
     @Inject
     lateinit var context: YuContext
@@ -38,7 +38,7 @@ class AppLoader {
     @Config("yu.classRegister")
     var classRegister: List<String> = listOf()
 
-    fun load() {
+    open fun load() {
         try {
             val rsList = ArrayList<ClassRegister>(classRegister.size)
             for (rs in classRegister) {

@@ -7,16 +7,18 @@ import com.IceCreamQAQ.Yu.annotation.Default
 import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.isBean
 import com.IceCreamQAQ.Yu.loader.ClassRegister
+import com.IceCreamQAQ.Yu.toUpperCaseFirstOne
+import com.IceCreamQAQ.Yu.util.error
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.ParameterizedType
-import java.util.*
+import java.lang.reflect.WildcardType
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-class YuContext(private val configer: ConfigManager, private val logger: AppLogger) : ClassRegister {
+open class YuContext(private val configer: ConfigManager, private val logger: AppLogger) : ClassRegister {
 
     private val classContextMap = HashMap<String, ClassContext>()
 
@@ -24,11 +26,11 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
         register(clazz, false)
     }
 
-    fun register(context: ClassContext) {
+    open fun register(context: ClassContext) {
         classContextMap[context.name] = context
     }
 
-    fun register(clazz: Class<*>, force: Boolean) {
+    open fun register(clazz: Class<*>, force: Boolean) {
         if (classContextMap.containsKey(clazz.name)) return
         if (!force) if (clazz.getAnnotation(NotSearch::class.java) != null) return
 
@@ -48,14 +50,14 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
         }
     }
 
-    fun getClassContextOrRegister(clazz: Class<*>, force: Boolean): ClassContext {
+    open fun getClassContextOrRegister(clazz: Class<*>, force: Boolean): ClassContext {
         return classContextMap[clazz.name] ?: {
             register(clazz, force)
             classContextMap[clazz.name] ?: error("Cant Init Class: ${clazz.name}.")
         }()
     }
 
-    fun checkAutoBind(clazz: Class<*>, binds: ArrayList<Class<*>>) {
+    open fun checkAutoBind(clazz: Class<*>, binds: ArrayList<Class<*>>) {
         if (clazz.isInterface) if (clazz.getAnnotation(AutoBind::class.java) != null) binds.add(clazz)
         checkAutoBind(clazz.superclass ?: return, binds)
         for (iC in clazz.interfaces) {
@@ -63,38 +65,31 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
         }
     }
 
-    fun checkClassMulti(): Boolean = true
+    open fun checkClassMulti(): Boolean = true
 
     //    private val context: MutableMap<String, MutableMap<String, Any>> = ConcurrentHashMap()
-    private var factoryManager: BeanFactoryManager? = null
+    protected var factoryManager: BeanFactoryManager? = null
 
     init {
         putBean(this)
         putBean(configer)
         putBean(logger)
         factoryManager = newBean(BeanFactoryManager::class.java, save = true)
-                ?: throw RuntimeException("Yu Init Err! Cant new BeanFactoryManager!")
+            ?: throw RuntimeException("Yu Init Err! Cant new BeanFactoryManager!")
     }
 
-    operator fun <T> get(clazz: Class<T>): T? {
+    open operator fun <T> get(clazz: Class<T>): T? {
         return getBean(clazz)
     }
 
-    fun <T> getBean(clazz: Class<T>, name: String? = null): T? {
+    open fun <T> getBean(clazz: Class<T>, name: String? = null): T? {
         return getBean(clazz.name, name) as? T
     }
 
-    fun getBean(clazz: String, name: String? = null): Any? {
+    open fun getBean(clazz: String, name: String? = null): Any? {
         val context = classContextMap[clazz] ?: return newBean(Class.forName(clazz), name, save = true)
         val bean = if (name == null) context.defaultInstance else null
         if (bean != null) return bean
-
-        if (clazz == "com.icecreamqaq.test.yu.TestInterface") {
-            println("")
-        }
-        if (clazz == "com.icecreamqaq.test.yu.TestInterfaceImpl") {
-            println("")
-        }
 
         return context.getInstance(name) ?: {
             val bc = context.binds?.get(name ?: "")
@@ -103,26 +98,56 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
         }() ?: newBean(Class.forName(clazz), name, true)
     }
 
-    fun putBean(obj: Any, name: String = "") {
+    protected open fun getBeanByType(clazz: String, name: String? = null, type: String = "bean"): Any? {
+        return when (type) {
+            "list" -> {
+                val context = classContextMap[clazz] ?: return null
+//                context.
+                if (context.binds == null)
+                    return if (context.defaultInstance != null) listOf(context.defaultInstance)
+                    else listOf()
+                val list = ArrayList<Any>()
+                for (b in context.binds!!.values) {
+                    list.add(b.defaultInstance ?: getBean(b.name, "") ?: error("在试图构建 List 容器时遇到无法响应的 Bean：${b.name}。"))
+                }
+                list
+            }
+            "map" -> {
+                val context = classContextMap[clazz] ?: return null
+                if (context.binds == null)
+                    return if (context.defaultInstance != null) mapOf("" to context.defaultInstance)
+                    else mapOf()
+                val map = HashMap<String, Any>()
+                for ((n, b) in context.binds!!) {
+                    map[n] = b.defaultInstance ?: getBean(b.name, "") ?: error("在试图构建 Map 容器时遇到无法响应的 Bean：${b.name}。")
+                }
+                map
+            }
+            "bean" -> getBean(clazz, name)
+            else -> null
+        }
+    }
+
+    open fun putBean(obj: Any, name: String = "") {
         putBean(obj::class.java, name, obj)
     }
 
-    fun putBean(clazz: Class<*>, name: String, obj: Any) {
+    open fun putBean(clazz: Class<*>, name: String, obj: Any) {
         val context = getClassContextOrRegister(clazz, false)
         context.putInstance(name, obj)
     }
 
-    private fun checkAutoBind(clazz: Class<*>?, name: String, obj: Any) {
+    protected open fun checkAutoBind(clazz: Class<*>?, name: String, obj: Any) {
         val autoBind = clazz?.getAnnotation(AutoBind::class.java)
         if (autoBind != null) putBean(clazz, name, obj)
     }
 
-    fun injectBean(obj: Any) {
+    open fun injectBean(obj: Any) {
         var clazz: Class<*>? = obj.javaClass
 
         val fields = ArrayList<Field>()
         while (clazz != null) {
-            fields.addAll(Arrays.asList(*clazz.declaredFields))
+            fields.addAll(clazz.declaredFields.asList())
             clazz = clazz.superclass
         }
 
@@ -142,14 +167,22 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
                 val type = field.type
 
                 val value = when {
-                    isList(type) -> configer.getArray(key, (field.genericType as ParameterizedType).actualTypeArguments[0] as Class<*>)
+                    isList(type) -> configer.getArray(
+                        key,
+                        (field.genericType as ParameterizedType).actualTypeArguments[0] as Class<*>
+                    )
                     isArray(type) -> configer.getArray(key, type.componentType)?.toTypedArray()
                     else -> configer.get(key, field.type)
                 } ?: field.getAnnotation(Default::class.java)?.value
 
                 if (value != null) {
-                    field.isAccessible = true
-                    field[obj] = value
+                    try {
+                        obj::class.java.getMethod("set${field.name.toUpperCaseFirstOne()}", field.type)
+                            .invoke(obj, value)
+                    } catch (e: Exception) {
+                        field.isAccessible = true
+                        field[obj] = value
+                    }
                 }
                 continue
             }
@@ -159,10 +192,39 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
                 val name = field.getAnnotation(Named::class.java)?.value
 
                 field.isAccessible = true
-                val b = getBean(field.type.name,
+                val ct = field.type
+                val st = when {
+//                    ct.isArray -> "array" to when (val a = (field.genericType as GenericArrayType).genericComponentType) {
+//                        is Class<*> -> a
+//                        is ParameterizedType -> a.rawType as Class<*>
+//                        else -> error("在尝试构建 List 时，遇到无法解析的类型，在 ${obj::class.java.name}.${field.name}，类型：$a。")
+//                    }
+                    List::class.java.isAssignableFrom(ct) ->
+                        "list" to when (val a = (field.genericType as ParameterizedType).actualTypeArguments[0]) {
+                            is Class<*> -> a
+                            is ParameterizedType -> a.rawType as Class<*>
+                            is WildcardType -> a.upperBounds[0] as Class<*>
+                            else -> error("在尝试构建 List 时，遇到无法解析的类型，在 ${obj::class.java.name}.${field.name}，类型：$a。")
+                        }
+                    Map::class.java.isAssignableFrom(ct) ->
+                        "map" to when (val a = (field.genericType as ParameterizedType).actualTypeArguments[1]) {
+                            is Class<*> -> a
+                            is ParameterizedType -> a.rawType as Class<*>
+                            is WildcardType -> a.upperBounds[0] as Class<*>
+                            else -> error("在尝试构建 Map 时，遇到无法解析的类型，在 ${obj::class.java.name}.${field.name}，类型：$a。")
+                        }
+                    else -> "bean" to ct
+                }
+                val b = kotlin.runCatching {
+                    getBeanByType(
+                        st.second.name,
                         if (name != null && name.startsWith("{")) name.substring(1).substring(0, name.length - 2)
-                        else name
-                )
+                        else name,
+                        st.first
+                    )
+                }.getOrElse {
+                    error("在获取 Bean 实例发生错误！在：${obj::class.java.name}.${field.name}。", it)
+                }
                 field[obj] = b
             }
         }
@@ -178,7 +240,7 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
         }
     }
 
-    fun <T> newBean(clazz: Class<T>, name: String? = null, save: Boolean = false, force: Boolean = false): T? {
+    open fun <T> newBean(clazz: Class<T>, name: String? = null, save: Boolean = false, force: Boolean = false): T? {
         val context = classContextMap[clazz.name] ?: getClassContextOrRegister(clazz, force)
 
         val bean = (context.factory as? BeanFactory<T>)?.createBean(clazz, name ?: "") ?: createBeanInstance(clazz)
@@ -199,7 +261,7 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
 //
 //    }
 
-    private fun <T> createBeanInstance(clazz: Class<T>): T? {
+    protected open fun <T> createBeanInstance(clazz: Class<T>): T? {
         if (!clazz.isBean()) return null;
         val constructorNum = clazz.constructors.size
         if (constructorNum < 1) return null
@@ -237,7 +299,7 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
         return inject.newInstance(*objs) as? T
     }
 
-    private fun isList(clazz: Class<*>): Boolean {
+    protected open fun isList(clazz: Class<*>): Boolean {
         if (clazz.name == List::class.java.name) return true
         val i = clazz.interfaces
         for (inf in i) {
@@ -247,7 +309,7 @@ class YuContext(private val configer: ConfigManager, private val logger: AppLogg
         return isList(s)
     }
 
-    private fun isArray(clazz: Class<*>): Boolean {
+    protected open fun isArray(clazz: Class<*>): Boolean {
         return clazz.componentType != null
     }
 

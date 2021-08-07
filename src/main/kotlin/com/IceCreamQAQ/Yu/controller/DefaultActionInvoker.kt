@@ -51,10 +51,10 @@ open class DefaultActionInvoker(level: Int, val method: Method, val instance: An
         for (m in list) {
             val (t, invoker) = m
             val except = exceptProp.get(t)
-            if (except.size != 1 || except[0] != "") for (s in except) if (s == name) continue
+            if (!(except.size == 1 && except[0] == "")) for (s in except) if (s == name) continue
 
             val only = onlyProp.get(t)
-            if (only.size != 1 || only[0] != "") for (s in only) if (s != name) continue
+            if (!(only.size == 1 && only[0] == "")) for (s in only) if (s != name) continue
 
             mis.add(m)
         }

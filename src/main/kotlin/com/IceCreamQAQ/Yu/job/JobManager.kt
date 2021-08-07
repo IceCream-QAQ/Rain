@@ -2,6 +2,8 @@ package com.IceCreamQAQ.Yu.job
 
 import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import com.IceCreamQAQ.Yu.util.DateUtil
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
@@ -77,7 +79,8 @@ class JobManager : ApplicationService {
         for (job in jobs) {
             val ft =
                     if (job.at == "") if(job.runWithStart)1000 else job.time
-                    else getTime(job.at)
+                    else getTime(job.apply { if (runWithStart) GlobalScope.launch { run() } }.at)
+
 
             if (job.async) asyncTimer?.schedule(job, ft, job.time)
             else {
@@ -88,7 +91,7 @@ class JobManager : ApplicationService {
         }
     }
 
-    fun getTime(time: String): Long {
+    private fun getTime(time: String): Long {
         val d = time.contains(":")
         val date = Date()
 
