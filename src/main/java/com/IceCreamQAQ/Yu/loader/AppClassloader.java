@@ -127,7 +127,7 @@ public class AppClassloader extends ClassLoader {
                 || name.startsWith("ch.qos.logback.core.")
                 || name.startsWith("org.xml")
                 || name.startsWith("org.slf4j.")
-                || name.startsWith("org.hibernate")
+//                || name.startsWith("org.hibernate")
                 || name.startsWith("org.jboss");
         if (b) return true;
         for (String s : blackList) {

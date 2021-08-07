@@ -22,7 +22,7 @@ class TestController {
 
     @Before
     fun testBefore(): String {
-        return "Test Before"
+        return "com.icecream.test.Test Before"
     }
 
     @Action("t1")
@@ -45,7 +45,7 @@ class TestController {
                    ccc: String) {
         val ddd = "123412"
         println("before = $aaa")
-        println("Test Action")
+        println("com.icecream.test.Test Action")
     }
 
 }

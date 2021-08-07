@@ -1,18 +1,15 @@
 package com.icecreamqaq.test.yu
 
-import com.IceCreamQAQ.Yu.hook.HookItem
-import com.IceCreamQAQ.Yu.hook.HookMethod
-import com.IceCreamQAQ.Yu.hook.HookRunnable
-import com.IceCreamQAQ.Yu.hook.YuHook
+import com.IceCreamQAQ.Yu.hook.*
 import com.IceCreamQAQ.Yu.loader.AppClassloader
 
 
 fun main(args: Array<String>) {
-    YuHook.put(HookItem("com.icecreamqaq.test.yu.Tb", "f", "com.icecreamqaq.test.yu.HookTa"))
+    YuHook.put(HookItem("com.icecream.test.Tc", "f", "com.icecreamqaq.test.yu.HookTa"))
 
     val appClassLoader = AppClassloader(TestStarter::class.java.classLoader)
 
-    val tac = appClassLoader.loadClass("com.icecreamqaq.test.yu.Tb")
+    val tac = appClassLoader.loadClass("com.icecream.test.Tc")
     val ta = tac.newInstance()
 
     val g = tac.getMethod("f")
@@ -36,8 +33,12 @@ class Tb:Ta() {
 
 
 class HookTa : HookRunnable {
+    override fun init(info: HookInfo) {
+        println(info.className + "." + info.methodName)
+    }
+
     override fun preRun(method: HookMethod): Boolean {
-        method.result = 3.toLong()
+        method.result = 3
 
         return true
     }

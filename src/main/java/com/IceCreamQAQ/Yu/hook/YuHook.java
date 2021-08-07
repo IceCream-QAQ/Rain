@@ -2,21 +2,19 @@ package com.IceCreamQAQ.Yu.hook;
 
 import com.IceCreamQAQ.Yu.annotation.HookBy;
 import com.IceCreamQAQ.Yu.loader.AppClassloader;
+import com.IceCreamQAQ.Yu.util.Array;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.val;
 import lombok.var;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.*;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -88,14 +86,16 @@ public class YuHook {
         public String name;
         public String desc;
         public MethodNode method;
+        public String paraName;
 
         public NewMethod() {
         }
 
-        public NewMethod(String name, String desc, MethodNode method) {
+        public NewMethod(String name, String desc, MethodNode method, String paraName) {
             this.name = name;
             this.desc = desc;
             this.method = method;
+            this.paraName = paraName;
         }
     }
 
@@ -108,8 +108,10 @@ public class YuHook {
 
 
         val newMethods = new ArrayList<NewMethod>();
+        MethodNode clInitNode = null;
 
         for (val method : (List<MethodNode>) node.methods) {
+            if (method.name.equals("<clinit>")) clInitNode = method;
             if (isSysMethod(method.name)) continue;
 
             boolean h = false;
@@ -144,18 +146,22 @@ public class YuHook {
             }
 
             if (h || mh || ah) {
-                newMethods.add(new NewMethod(method.name, method.desc, method));
+                newMethods.add(new NewMethod(method.name, method.desc, method, UUID.randomUUID().toString().replace("-", "")));
                 method.name += "_IceCreamQAQ_YuHook";
             }
         }
 
         if (newMethods.size() == 0) return bytes;
 
+        val cName = name.replace(".", "/");
+        val initFunName = UUID.randomUUID().toString().replace("-", "");
+
+        if (clInitNode != null) {
+            clInitNode.instructions.insert(new MethodInsnNode(INVOKESTATIC, cName, initFunName, "()V", false));
+        }
+
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
         node.accept(cw);
-
-        val cName = name.replace(".", "/");
-
 
         for (val nm : newMethods) {
             val mn = nm.name;
@@ -221,14 +227,16 @@ public class YuHook {
 
                 mv.visitLabel(setClassNameLabel);
                 mv.visitVarInsn(ALOAD, hookMethodStack);
-                mv.visitLdcInsn(name);
-                mv.visitFieldInsn(PUTFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "className", "Ljava/lang/String;");
+//                mv.visitLdcInsn(name);
+//                mv.visitFieldInsn(PUTFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "className", "Ljava/lang/String;");
+                mv.visitFieldInsn(GETSTATIC, cName, nm.paraName, "Lcom/IceCreamQAQ/Yu/hook/HookInfo;");
+                mv.visitFieldInsn(PUTFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "info", "Lcom/IceCreamQAQ/Yu/hook/HookInfo;");
 
-                val setMethodNameLabel = new Label();
-                mv.visitLabel(setMethodNameLabel);
-                mv.visitVarInsn(ALOAD, hookMethodStack);
-                mv.visitLdcInsn(mn);
-                mv.visitFieldInsn(PUTFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "methodName", "Ljava/lang/String;");
+//                val setMethodNameLabel = new Label();
+//                mv.visitLabel(setMethodNameLabel);
+//                mv.visitVarInsn(ALOAD, hookMethodStack);
+//                mv.visitLdcInsn(mn);
+//                mv.visitFieldInsn(PUTFIELD, "com/IceCreamQAQ/Yu/hook/HookMethod", "methodName", "Ljava/lang/String;");
 
                 // Paras
                 {
@@ -412,6 +420,52 @@ public class YuHook {
             mv.visitEnd();
         }
 
+
+        {   // init Function
+            val cmv = cw.visitMethod(ACC_PRIVATE | ACC_STATIC, initFunName, "()V", null, null);
+            cmv.visitCode();
+
+            for (NewMethod method : newMethods) {
+                val fv = cw.visitField(ACC_PRIVATE | ACC_STATIC, method.paraName, "Lcom/IceCreamQAQ/Yu/hook/HookInfo;", null, null);
+                fv.visitEnd();
+
+                val classType = Type.getType("L" + name.replace(".", "/") + ";");
+
+                cmv.visitLdcInsn(classType);
+                cmv.visitLdcInsn(method.name);
+
+                // ParaArraySize
+                val paras = toClassArray(method.desc);
+                cmv.visitIntInsn(BIPUSH, paras.size());
+                cmv.visitTypeInsn(ANEWARRAY, "java/lang/Class");
+
+                for (int i = 0; i < paras.size(); i++) {
+                    val para = paras.get(i);
+                    cmv.visitInsn(DUP);
+                    cmv.visitIntInsn(BIPUSH, i);
+                    if (para.simple) cmv.visitFieldInsn(GETSTATIC, para.type, "TYPE", "Ljava/lang/Class;");
+                    else cmv.visitLdcInsn(Type.getType(para.type));
+                    cmv.visitInsn(AASTORE);
+                }
+
+                cmv.visitMethodInsn(INVOKESTATIC, "com/IceCreamQAQ/Yu/hook/HookInfo", "create", "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Lcom/IceCreamQAQ/Yu/hook/HookInfo;", false);
+                cmv.visitFieldInsn(PUTSTATIC, name.replace(".", "/"), method.paraName, "Lcom/IceCreamQAQ/Yu/hook/HookInfo;");
+            }
+
+            cmv.visitInsn(RETURN);
+            cmv.visitMaxs(0, 0);
+            cmv.visitEnd();
+        }
+
+        if (clInitNode == null) {
+            val cmv = cw.visitMethod(ACC_STATIC, "<clinit>", "()V", null, null);
+            cmv.visitCode();
+            cmv.visitMethodInsn(INVOKESTATIC, cName, initFunName, "()V", false);
+            cmv.visitInsn(RETURN);
+            cmv.visitMaxs(0, 0);
+            cmv.visitEnd();
+        }
+
         val bs = cw.toByteArray();
 
         ClassReader nr = new ClassReader(bs);
@@ -437,6 +491,39 @@ public class YuHook {
 
 
         return ncw.toByteArray();
+    }
+
+    private static boolean haveClInit(ClassNode classNode) {
+//        classNode.methods
+        return true;
+    }
+
+    @Data
+    @AllArgsConstructor
+    private static class ParaType {
+        private String type;
+        private boolean simple;
+    }
+
+    private static List<ParaType> toClassArray(String desc) {
+        val list = new ArrayList<ParaType>();
+        var f = false;
+        var builder = new StringBuilder();
+        for (char c : desc.split("\\)")[0].substring(1).toCharArray()) {
+            if (!f) {
+                if (!(c == 'L' || c == '[')) {
+                    list.add(new ParaType(getTyped(String.valueOf(c)), true));
+                    continue;
+                } else f = true;
+            }
+            builder.append(c);
+            if (c == ';') {
+                list.add(new ParaType(builder.toString(), false));
+                builder = new StringBuilder();
+                f = false;
+            }
+        }
+        return list;
     }
 
     private static String getTyped(String type) {
