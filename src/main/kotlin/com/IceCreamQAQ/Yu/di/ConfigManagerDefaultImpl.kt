@@ -31,14 +31,14 @@ class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger:
         loadFolder("conf")
 
 
-        val mode = runMode ?: {
+        val mode = runMode ?: run {
             var m: String? = null
             for (v in config.values) {
                 m = get("yu.config.runMode", String::class.java, v as JSONObject)
                 if (m != null) break
             }
             m ?: "dev"
-        }()
+        }
 
         log.info("ConfigManager Config Mode: $mode.")
 //        logger.logDebug("ConfigManager", "Config Mode: $mode")
