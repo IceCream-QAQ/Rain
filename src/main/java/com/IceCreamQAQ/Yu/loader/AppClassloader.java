@@ -113,6 +113,7 @@ public class AppClassloader extends ClassLoader {
 
     public boolean isBlackListClass(String name) {
         val b = name.startsWith("java.")
+                || name.startsWith("jdk.")
                 || name.startsWith("javax.")
                 || name.startsWith("kotlin")
                 || name.startsWith("com.google.")
