@@ -17,8 +17,38 @@ import javax.inject.Inject
 import javax.inject.Named
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 open class YuContext(private val configer: ConfigManager, private val logger: AppLogger) : ClassRegister {
+
+    companion object {
+
+        var context: YuContext? = null
+
+        class ValueObj<T>(var obj: T) : ReadWriteProperty<Any, T> {
+            override fun getValue(thisRef: Any, property: KProperty<*>) = obj
+
+            override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
+                obj = value
+            }
+        }
+
+        class MultiModeNotSupport<T> : ReadWriteProperty<Any, T> {
+            override fun getValue(thisRef: Any, property: KProperty<*>): T {
+                error("当 YuContext 不处于 single 模式时，不允许 Kotlin inject 方式注入！")
+            }
+
+            override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
+                error("当 YuContext 不处于 single 模式时，不允许 Kotlin inject 方式注入！")
+            }
+
+        }
+
+        inline fun <reified T> inject(name: String = ""): ReadWriteProperty<Any, T> =
+            if (context == null) MultiModeNotSupport()
+            else ValueObj(context!!.getBean(T::class.java, name)!!)
+    }
 
     private val classContextMap = HashMap<String, ClassContext>()
 
@@ -71,6 +101,7 @@ open class YuContext(private val configer: ConfigManager, private val logger: Ap
     protected var factoryManager: BeanFactoryManager? = null
 
     init {
+        if (configer.get("yu.context.mode", String::class.java) == "single") context = this
         putBean(this)
         putBean(configer)
         putBean(logger)

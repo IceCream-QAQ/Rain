@@ -3,6 +3,7 @@ package com.icecreamqaq.test.yu.job
 import com.IceCreamQAQ.Yu.annotation.Cron
 import com.IceCreamQAQ.Yu.annotation.JobCenter
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
+import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.util.DateUtil
 import javax.inject.Inject
 import javax.inject.Named
@@ -17,9 +18,12 @@ class TestJob {
     @field:Named("testCache2")
     private lateinit var c: EhcacheHelp<Int>
 
+    val d by YuContext.inject<YuContext>()
+
     @Cron("60s", runWithStart = true)
     fun c1() {
         println("时间：${dateUtil.formatDateTimeSSS()}，c1 定时任务触发。")
+        println(d)
 //        c["ccc"] = (c["ccc"] ?: 0) + 1
     }
 
