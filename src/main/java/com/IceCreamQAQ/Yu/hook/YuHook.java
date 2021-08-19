@@ -2,7 +2,6 @@ package com.IceCreamQAQ.Yu.hook;
 
 import com.IceCreamQAQ.Yu.annotation.HookBy;
 import com.IceCreamQAQ.Yu.loader.AppClassloader;
-import com.IceCreamQAQ.Yu.util.Array;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.val;
