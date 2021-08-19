@@ -18,10 +18,11 @@ open class DefaultActionInvoker(level: Int, val method: Method, val instance: An
     var interceptorInfo: InterceptorInfo? = null
 
     override lateinit var befores: Array<MethodInvoker>
-    override val invoker: MethodInvoker = ReflectMethodInvoker(method, instance)
+    override lateinit var invoker: MethodInvoker
     override lateinit var afters: Array<MethodInvoker>
     override lateinit var catchs: Array<CatchInvoker>
 
+    open fun createMethodInvoker(method: Method, instance: Any): MethodInvoker = ReflectMethodInvoker(method, instance)
 
     override fun init(rootRouter: RootRouter) {
         super.init(rootRouter)
@@ -38,17 +39,19 @@ open class DefaultActionInvoker(level: Int, val method: Method, val instance: An
 
         }
         interceptorInfo = null
+
+        invoker = createMethodInvoker(method, instance)
     }
 
     private inline fun <T : Annotation, reified I> makeInvokers(
-            list: List<DoMethod<T, I>>,
-            exceptProp: KProperty1<T, Array<String>>,
-            onlyProp: KProperty1<T, Array<String>>,
-            wightProp: KProperty1<T, Int>,
+        list: List<DoMethod<T, I>>,
+        exceptProp: KProperty1<T, Array<String>>,
+        onlyProp: KProperty1<T, Array<String>>,
+        wightProp: KProperty1<T, Int>,
     ): Array<I> {
         val name = method.name
         val mis = ArrayList<DoMethod<T, I>>()
-        o@for (m in list) {
+        o@ for (m in list) {
             val (t, invoker) = m
             val except = exceptProp.get(t)
             if (!(except.size == 1 && except[0] == "")) for (s in except) if (s == name) continue@o
@@ -74,7 +77,7 @@ open class DefaultActionInvoker(level: Int, val method: Method, val instance: An
         }
 
         val a = arrayOfNulls<I>(mis.size)
-        for (n in 0 until mis.size) a[n]= mis[n].invoker
+        for (n in 0 until mis.size) a[n] = mis[n].invoker
         return a as Array<I>
     }
 
