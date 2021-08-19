@@ -5,7 +5,6 @@ import com.IceCreamQAQ.Yu.loader.AppClassloader;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.val;
-import lombok.var;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -68,7 +67,7 @@ public class YuHook {
     }
 
     private static HookRunnable getOrNewRunnable(String className) {
-        var runnable = hs.get(className);
+        HookRunnable runnable = hs.get(className);
         if (runnable != null) return runnable;
         try {
             runnable = (HookRunnable) Class.forName(className, true, classloader).newInstance();
@@ -506,8 +505,8 @@ public class YuHook {
 
     private static List<ParaType> toClassArray(String desc) {
         val list = new ArrayList<ParaType>();
-        var f = false;
-        var builder = new StringBuilder();
+        boolean f = false;
+        StringBuilder builder = new StringBuilder();
         for (char c : desc.split("\\)")[0].substring(1).toCharArray()) {
             if (!f) {
                 if (!(c == 'L' || c == '[')) {
@@ -665,7 +664,7 @@ public class YuHook {
                 }
             } else {
                 if (c == ';') {
-                    var p = sb.toString();
+                    String p = sb.toString();
                     sb = null;
                     if (p.startsWith("[")) p += ";";
 //                    paraList.add(p);
