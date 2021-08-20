@@ -19,8 +19,9 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
+import kotlin.reflect.full.isSubclassOf
 
-open class YuContext(private val configer: ConfigManager, private val logger: AppLogger) : ClassRegister {
+open class YuContext(val configer: ConfigManager, private val logger: AppLogger) : ClassRegister {
 
     private val classContextMap = HashMap<String, ClassContext>()
 
@@ -343,3 +344,11 @@ class MultiModeNotSupport<T> : ReadWriteProperty<Any, T> {
 inline fun <reified T> inject(name: String = ""): ReadWriteProperty<Any, T> =
     if (context == null) MultiModeNotSupport()
     else ValueObj(context!!.getBean(T::class.java, name)!!)
+
+inline fun <reified T> config(name: String): ReadWriteProperty<Any, T> =
+    if (context == null) MultiModeNotSupport()
+    else ValueObj(context!!.configer.get(name, T::class.java)!!)
+
+inline fun <reified T> configArray(name: String): ReadWriteProperty<Any, List<T>> =
+    if (context == null) MultiModeNotSupport()
+    else ValueObj(context!!.configer.getArray(name, T::class.java)!!)

@@ -4,6 +4,8 @@ import com.IceCreamQAQ.Yu.annotation.Cron
 import com.IceCreamQAQ.Yu.annotation.JobCenter
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.di.config
+import com.IceCreamQAQ.Yu.di.configArray
 import com.IceCreamQAQ.Yu.di.inject
 import com.IceCreamQAQ.Yu.util.DateUtil
 import javax.inject.Inject
@@ -20,11 +22,13 @@ class TestJob {
     private lateinit var c: EhcacheHelp<Int>
 
     private val context by inject<YuContext>()
+    private val scanPackage by configArray<String>("yu.scanPackages")
 
     @Cron("60s", runWithStart = true)
     fun c1() {
         println("时间：${dateUtil.formatDateTimeSSS()}，c1 定时任务触发。")
         println(context)
+        println(scanPackage)
 //        c["ccc"] = (c["ccc"] ?: 0) + 1
     }
 
