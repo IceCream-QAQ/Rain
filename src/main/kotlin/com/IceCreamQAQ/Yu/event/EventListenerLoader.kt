@@ -28,7 +28,7 @@ class EventListenerLoader : Loader {
             if (!item.type.isBean()) continue
             log.debug("Register EventListener: ${item.type.name}.")
             try {
-                eventBus.register(context.getBean(item.type, ""))
+                eventBus.register(context.getBean(item.type, "")!!)
                 log.info("Register EventListener: ${item.type.name} Success!")
             } catch (e: Exception) {
                 e.printStackTrace()

@@ -11,7 +11,7 @@ public @interface Event {
 
     Weight weight() default Weight.normal;
 
-    public static enum Weight{
-        low,normal,@Deprecated height,high
+    public static enum Weight {
+        lowest, low, normal, high, highest, record
     }
 }

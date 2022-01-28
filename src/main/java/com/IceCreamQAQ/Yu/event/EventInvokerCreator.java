@@ -66,11 +66,15 @@ public class EventInvokerCreator {
     private List<EventListenerInfo>[] registerEventListener(Object object) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         Class<?> pluginEventClass = object.getClass();
 
-        List<EventListenerInfo> height = new ArrayList<>();
+        List<EventListenerInfo> record = new ArrayList<>();
+        List<EventListenerInfo> highest = new ArrayList<>();
+        List<EventListenerInfo> high = new ArrayList<>();
         List<EventListenerInfo> normal = new ArrayList<>();
         List<EventListenerInfo> low = new ArrayList<>();
+        List<EventListenerInfo> lowest = new ArrayList<>();
 
-        List<EventListenerInfo>[] eventInvokers = new List[]{height, normal, low};
+
+        List<EventListenerInfo>[] eventInvokers = new List[]{record, highest, high, normal, low, lowest};
         for (Method method : pluginEventClass.getMethods()) {
             val e = method.getAnnotation(com.IceCreamQAQ.Yu.annotation.Event.class);
             if (e == null) continue;
@@ -84,18 +88,23 @@ public class EventInvokerCreator {
 
             val eli = new EventListenerInfo(pluginEventClass, method, e.weight(), invoker, object);
             switch (e.weight()) {
+                case lowest:
+                    lowest.add(eli);
+                    break;
                 case low:
-                    if (low == null) low = new ArrayList<>();
                     low.add(eli);
                     break;
                 case normal:
-                    if (normal == null) normal = new ArrayList<>();
                     normal.add(eli);
                     break;
-                case height:
                 case high:
-                    if (height == null) height = new ArrayList<>();
-                    height.add(eli);
+                    high.add(eli);
+                    break;
+                case highest:
+                    highest.add(eli);
+                    break;
+                case record:
+                    record.add(eli);
                     break;
                 default:
                     break;

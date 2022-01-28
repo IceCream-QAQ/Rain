@@ -52,6 +52,7 @@ val Method.fullName: String
             nameBuilder.append(clazz.simpleName)
             if (i < max) nameBuilder.append(", ")
         }
+        nameBuilder.append(")")
         return nameBuilder.toString()
     }
 
