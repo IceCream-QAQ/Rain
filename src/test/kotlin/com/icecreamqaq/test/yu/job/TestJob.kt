@@ -4,9 +4,6 @@ import com.IceCreamQAQ.Yu.annotation.Cron
 import com.IceCreamQAQ.Yu.annotation.JobCenter
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.IceCreamQAQ.Yu.di.YuContext
-import com.IceCreamQAQ.Yu.di.config
-import com.IceCreamQAQ.Yu.di.configArray
-import com.IceCreamQAQ.Yu.di.inject
 import com.IceCreamQAQ.Yu.util.DateUtil
 import javax.inject.Inject
 import javax.inject.Named

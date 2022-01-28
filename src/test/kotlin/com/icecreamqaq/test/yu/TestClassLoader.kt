@@ -12,10 +12,10 @@ fun main(args: Array<String>) {
     val tac = appClassLoader.loadClass("com.icecream.test.Tc")
     val ta = tac.newInstance()
 
-    val g = tac.getMethod("f")
+    val g = tac.getMethod("f", Long::class.javaPrimitiveType, Long::class.javaPrimitiveType, Array<Int>::class.java)
 //    val g = tac.getMethod("g", Int::class.java, Int::class.java)
 
-    println(g.invoke(ta))
+    println(g.invoke(ta, 0, 0, arrayOf(0)))
 }
 
 open class Ta {
@@ -23,22 +23,17 @@ open class Ta {
 //        @JvmStatic
 //
 //    }
-    fun g() = 2.toLong()
-}
-
-class Tb:Ta() {
-
-    fun f() = super.g()
+    fun f(group: Long, qq: Long, times: Array<Int>) = arrayListOf(1, 2, 3, 4)
 }
 
 
 class HookTa : HookRunnable {
     override fun init(info: HookInfo) {
-        println(info.className + "." + info.methodName)
+//        println(info.className + "." + info.methodName)
     }
 
     override fun preRun(method: HookMethod): Boolean {
-        method.result = 3
+        method.result = arrayListOf(5, 6, 7, 8)
 
         return true
     }

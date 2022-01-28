@@ -1,11 +1,12 @@
 package com.icecream.test;
 
-public class Tc {
+import java.util.ArrayList;
+import java.util.List;
 
-    public static String a = "";
+public class Tc{
 
-    public int f(){
-        return 0;
+    public List<Integer> f(long group, long qq, Integer[] times){
+        return new ArrayList<>();
     }
 
 }

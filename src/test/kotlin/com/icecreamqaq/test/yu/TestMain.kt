@@ -3,6 +3,7 @@ package com.icecreamqaq.test.yu
 fun main(args: Array<String>) {
 //    YuHook.put(HookItem("com.icecreamqaq.test.yu.controller.TestNewController", "mb", "com.icecreamqaq.test.yu.HookMb"))
     TestStarter.start(args)
+    Thread.sleep(5 * 60 * 1000)
 }
 
 //class HookMb : HookRunnable {
