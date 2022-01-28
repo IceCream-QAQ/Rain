@@ -6,6 +6,7 @@ import com.IceCreamQAQ.Yu.annotation.EventListener
 import com.IceCreamQAQ.Yu.event.EventBus
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent
 import com.IceCreamQAQ.Yu.event.events.EventListenerRunExceptionEvent
+import com.IceCreamQAQ.Yu.event.events.JobRunExceptionEvent
 import com.IceCreamQAQ.Yu.fullName
 import com.IceCreamQAQ.Yu.job.JobManager
 import com.IceCreamQAQ.Yu.job.JobManagerImpl
@@ -34,6 +35,9 @@ class TestEvent {
     @Event
     fun onStart(e: AppStartEvent) {
         eventBus.post(CustomEvent())
+        jobManager.registerTimer(1000) {
+            error("Test Job Error!")
+        }
     }
 
     @Event(weight = Event.Weight.record)
@@ -70,6 +74,11 @@ class TestEvent {
     @Event
     fun onEventListenerError(e: EventListenerRunExceptionEvent) {
         println("${e.listenerInfo.method.fullName} 产生异常: ${e.throwable::class.java.name}: ${e.throwable.message}.")
+    }
+
+    @Event
+    fun onJobError(e: JobRunExceptionEvent) {
+        println("${e.jobInfo.name} 产生异常: ${e.throwable::class.java.name}: ${e.throwable.message}.")
     }
 
 }

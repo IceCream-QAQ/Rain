@@ -4,6 +4,8 @@ import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.annotation.Cron
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.event.EventBus
+import com.IceCreamQAQ.Yu.event.events.JobRunExceptionEvent
 import com.IceCreamQAQ.Yu.fullName
 import com.IceCreamQAQ.Yu.isBean
 import com.IceCreamQAQ.Yu.loader.LoadItem
@@ -65,6 +67,11 @@ class JobManagerImpl : ApplicationService, Loader, JobManager {
 
     @Inject
     private lateinit var context: YuContext
+
+    @Inject
+    private lateinit var eventBus: EventBus
+
+    val errorCallback: (JobInfo, Throwable) -> Unit = { j, e -> eventBus.post(JobRunExceptionEvent(j, e)) }
 
     private fun getFirstTime(time: String): Long {
         val d = !time.startsWith(":")
@@ -139,7 +146,8 @@ class JobManagerImpl : ApplicationService, Loader, JobManager {
                             cron.async,
                             cron.runWithStart,
                             makeInvoker(instance, method),
-                            scope
+                            scope,
+                            errorCallback
                         )
                     }
                 jobs[uuid()] = (job)
@@ -192,7 +200,8 @@ class JobManagerImpl : ApplicationService, Loader, JobManager {
             async = false,
             runWithStart = false,
             invoker = DslCronInvoker(function),
-            scope = scope
+            scope = scope,
+            errorCallback
         ) {
             jobs.remove(id)
         }.apply { start() }
@@ -210,7 +219,8 @@ class JobManagerImpl : ApplicationService, Loader, JobManager {
                 async = false,
                 runWithStart = false,
                 invoker = DslCronInvoker(function),
-                scope = scope
+                scope = scope,
+                errorCallback
             ) {
                 jobs.remove(id)
             }
