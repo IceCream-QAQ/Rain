@@ -35,6 +35,7 @@ class JobInfo(
             if (runWithStart) invoke()
             var next = firstTime
             while (next > 0){
+                delay(next)
                 val start = System.currentTimeMillis()
                 invoke()
                 val end = System.currentTimeMillis()
