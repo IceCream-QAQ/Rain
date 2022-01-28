@@ -4,6 +4,8 @@ import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.annotation.Event
 import com.IceCreamQAQ.Yu.annotation.EventListener
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent
+import com.IceCreamQAQ.Yu.event.events.EventListenerRunExceptionEvent
+import com.IceCreamQAQ.Yu.fullName
 import com.IceCreamQAQ.Yu.job.JobManager
 import com.IceCreamQAQ.Yu.job.JobManagerImpl
 import com.IceCreamQAQ.Yu.util.Web
@@ -24,11 +26,12 @@ class TestEvent {
 
     @Event
     fun onStart(e: AppStartEvent) {
+        error("Test Event Error!")
+    }
 
-        jobManager.registerTimer(1000){
-            error("TestError!")
-        }
-
+    @Event
+    fun onEventListenerError(e: EventListenerRunExceptionEvent){
+        println("${e.listenerInfo.method.fullName} 产生异常: ${e.throwable::class.java.name}: ${e.throwable.message}.")
     }
 
 }

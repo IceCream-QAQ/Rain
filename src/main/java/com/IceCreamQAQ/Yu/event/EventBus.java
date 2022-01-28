@@ -1,6 +1,7 @@
 package com.IceCreamQAQ.Yu.event;
 
 import com.IceCreamQAQ.Yu.event.events.Event;
+import com.IceCreamQAQ.Yu.event.events.EventListenerRunExceptionEvent;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.slf4j.Logger;
@@ -44,6 +45,7 @@ public class EventBus {
                     }
                     errorMessageBuilder.append(")");
                     log.error(errorMessageBuilder.toString(), throwable);
+                    if(!(event instanceof EventListenerRunExceptionEvent)) post(new EventListenerRunExceptionEvent(eventInvoker, throwable));
                 }
                 if (event.cancelAble() && event.cancel) return true;
             }
