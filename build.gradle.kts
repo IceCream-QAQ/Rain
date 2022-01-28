@@ -1,61 +1,12 @@
-import okhttp3.OkHttpClient
-import okhttp3.Request
-
 plugins {
     java
-    kotlin("jvm") version "1.4.20"
+    kotlin("jvm") version "1.6.10"
     `java-library`
     `maven-publish`
 }
 
-buildscript {
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven("https://maven.icecreamqaq.com/repository/maven-public/")
-    }
-
-    dependencies {
-        classpath("com.squareup.okhttp3:okhttp:4.9.0")
-    }
-}
-val baseVersion = "0.2.0.0"
-
-fun makeVersion(): String {
-    val branch = exec("git rev-parse --abbrev-ref HEAD")
-    if (branch == "master") return baseVersion
-    val buildVersion = getNextBuildVersion(group.toString(), name, baseVersion, branch, "")
-    return "$baseVersion-$branch$buildVersion"
-}
-
-fun getNextBuildVersion(groupId: String, artifact: String, baseVersion: String, branch: String, opcode: String) =
-    OkHttpClient()
-        .newCall(
-            Request.Builder()
-                .url(
-                    "http://127.0.0.1:5557/" +
-                            "qptVersion/" +
-                            "nextVersion?" +
-                            "groupId=$groupId&" +
-                            "artifact=$artifact&" +
-                            "baseVersion=$baseVersion&" +
-                            "branch=$branch&" +
-                            "opcode=$opcode"
-                ).build()
-        ).execute()
-        .body!!
-        .string()
-
-
-fun exec(cmd: String): String {
-    val r = Runtime.getRuntime().exec(cmd)
-    r.waitFor()
-    return r.inputStream.reader().readText()
-}
-
 group = "com.IceCreamQAQ"
-version = "0.2.0.0-DEV13"
+version = "0.2.0.0-DEV15"
 
 repositories {
     mavenLocal()
@@ -66,32 +17,40 @@ repositories {
 dependencies {
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.0")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
 
-    api("com.squareup.okhttp3:okhttp:4.9.0")
-    api("ch.qos.logback:logback-classic:1.2.3")
-    api("com.alibaba:fastjson:1.2.78")
-    api("org.eclipse.jdt:ecj:3.26.0")
+    api("com.squareup.okhttp3:okhttp:4.9.3")
+    api("ch.qos.logback:logback-classic:1.2.10")
+    api("com.alibaba:fastjson:1.2.79")
+    api("org.eclipse.jdt:ecj:3.22.0")
     api("net.sf.ehcache:ehcache:2.10.9.2")
 
     api("org.ow2.asm:asm-commons:9.2")
 
     api("javax.inject:javax.inject:1")
 
-    compileOnly("org.projectlombok:lombok:1.18.20")
-    annotationProcessor("org.projectlombok:lombok:1.18.20")
+    compileOnly("org.projectlombok:lombok:1.18.22")
+    annotationProcessor("org.projectlombok:lombok:1.18.22")
 }
 
 tasks {
     withType<JavaCompile> {
+        options.encoding = "UTF-8"
+        sourceCompatibility = "1.8"
+        targetCompatibility = "1.8"
+    }
 
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>{
+        kotlinOptions{
+            jvmTarget = "1.8"
+        }
     }
 }
 
 publishing {
 
     publications {
-        create<MavenPublication>("maven") {
+        create<MavenPublication>("Yu-Core") {
             groupId = group.toString()
             artifactId = name
             version = project.version.toString()
@@ -140,4 +99,17 @@ publishing {
 
 }
 fun readMavenUserInfo(id: String) =
-    file("${System.getProperty("user.home")}/.m2/mvnInfo-$id.txt").readText().split("|")
+    fileOr(
+        "mavenInfo.txt",
+        "${System.getProperty("user.home")}/.m2/mvnInfo-$id.txt"
+    )?.readText()?.split("|") ?: arrayListOf("", "")
+
+
+fun File.check() = if (this.exists()) this else null
+fun fileOr(vararg file: String): File? {
+    for (s in file) {
+        val f = file(s)
+        if (f.exists()) return f
+    }
+    return null
+}
