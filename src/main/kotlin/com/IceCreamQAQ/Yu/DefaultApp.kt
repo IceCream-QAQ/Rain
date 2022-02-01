@@ -5,6 +5,7 @@ import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.di.ConfigManagerDefaultImpl
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.event.EventBus
+import com.IceCreamQAQ.Yu.event.EventBusImpl
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent
 import com.IceCreamQAQ.Yu.event.events.AppStopEvent
 import com.IceCreamQAQ.Yu.loader.AppLoader
@@ -23,7 +24,8 @@ open class DefaultApp {
     @Inject
     lateinit var asLoader: AsLoader
 
-    @Inject
+    val context:YuContext
+
     lateinit var eventBus: EventBus
 
     init {
@@ -31,7 +33,7 @@ open class DefaultApp {
 
         val appClassloader = DefaultApp::class.java.classLoader
         val configManager = ConfigManagerDefaultImpl(appClassloader, logger, System.getProperty("yu-runMode"))
-        val context = YuContext(configManager, logger)
+        context = YuContext(configManager, logger)
 
         context.putBean(ClassLoader::class.java, "appClassLoader", appClassloader)
 
@@ -46,6 +48,8 @@ open class DefaultApp {
     fun start(){
         loader.load()
         asLoader.start()
+
+        eventBus = context[EventBus::class.java]!!
         eventBus.post(AppStartEvent())
 
         Runtime.getRuntime().addShutdownHook(Thread { stop() })

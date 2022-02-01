@@ -7,9 +7,9 @@ import java.lang.reflect.Method
 data class EventListenerInfo(
     var clazz: Class<*>?,
     val method: Method,
-    val weight: Weight ,
+    val weight: Weight,
     val invoker: EventInvoker,
     val instance: Any? = null,
-){
+) {
     val methodFullName = method.fullName
 }

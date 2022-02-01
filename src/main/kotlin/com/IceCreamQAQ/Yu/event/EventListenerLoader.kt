@@ -1,6 +1,8 @@
 package com.IceCreamQAQ.Yu.event
 
 import com.IceCreamQAQ.Yu.AppLogger
+import com.IceCreamQAQ.Yu.annotation
+import com.IceCreamQAQ.Yu.annotation.Event
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.isBean
 import com.IceCreamQAQ.Yu.loader.LoadItem
@@ -28,11 +30,33 @@ class EventListenerLoader : Loader {
             if (!item.type.isBean()) continue
             log.debug("Register EventListener: ${item.type.name}.")
             try {
-                eventBus.register(context.getBean(item.type, "")!!)
+                register(item.type, context.getBean(item.type, "")!!)
                 log.info("Register EventListener: ${item.type.name} Success!")
             } catch (e: Exception) {
                 e.printStackTrace()
                 log.error("Register EventListener: ${item.type.name} Fail!", e)
+            }
+        }
+    }
+
+    @Inject
+    private lateinit var creator: EventInvokerCreator
+
+    fun register(clazz: Class<*>, instance: Any) {
+        clazz.methods.forEach {
+            it.annotation<Event> {
+                eventBus.register(
+                    EventListenerInfo(
+                        clazz = clazz,
+                        method = it,
+                        weight = weight,
+                        instance = instance,
+                        invoker = creator
+                            .createEventHandlerInvokerClass(it)
+                            .run { getConstructor(Any::class.java).newInstance(instance) }
+                                as EventInvoker
+                    )
+                )
             }
         }
     }

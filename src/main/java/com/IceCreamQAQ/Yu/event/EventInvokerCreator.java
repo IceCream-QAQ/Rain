@@ -113,7 +113,7 @@ public class EventInvokerCreator {
         return eventInvokers;
     }
 
-    private Class<?> createEventHandlerInvokerClass(Method method) {
+    public Class<?> createEventHandlerInvokerClass(Method method) {
         ClassWriter cw = new ClassWriter(0);
         MethodVisitor mv;
 
@@ -178,7 +178,7 @@ public class EventInvokerCreator {
 
 
     private String getUniqueName(Method callback) {
-        return String.format("YuQ_EventHandlerClass_%d_%s_%s_%s_IceCreamQAQ_OpenSource_YuFramework",
+        return String.format("Yu_EventHandlerClass_%d_%s_%s_%s_IceCreamQAQ_OpenSource_YuFramework",
                 num++,
                 callback.getDeclaringClass().getSimpleName(),
                 callback.getName(),

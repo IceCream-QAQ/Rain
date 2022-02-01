@@ -1,22 +1,26 @@
 package com.IceCreamQAQ.Yu.event
 
+import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.event.events.Event
 import com.IceCreamQAQ.Yu.annotation.Event.Weight
 import com.IceCreamQAQ.Yu.event.events.EventListenerRunExceptionEvent
-import com.IceCreamQAQ.Yu.fullName
 import org.slf4j.LoggerFactory
 import java.util.*
-import javax.inject.Inject
 
-class EventBus {
+@AutoBind
+interface EventBus {
+    fun post(event: Event): Boolean
+    fun register(info: EventListenerInfo)
+    fun unregister(info: EventListenerInfo)
+}
+
+class EventBusImpl : EventBus {
 
     companion object {
         private val log = LoggerFactory.getLogger(EventBus::class.java)
     }
 
-    @Inject
-    private val creator: EventInvokerCreator? = null
-    private val eventInvokersLists: Map<Weight, MutableList<EventListenerInfo>> =
+    private val eis: Map<Weight, MutableList<EventListenerInfo>> =
         hashMapOf(
             Weight.record to arrayListOf(),
             Weight.highest to arrayListOf(),
@@ -28,7 +32,7 @@ class EventBus {
 
     val ss = arrayOf(Weight.highest, Weight.high, Weight.normal, Weight.low, Weight.lowest)
 
-    fun post(event: Event): Boolean {
+    override fun post(event: Event): Boolean {
         operator fun EventListenerInfo.invoke(): Boolean {
             try {
                 invoker.invoke(event)
@@ -39,23 +43,23 @@ class EventBus {
             }
             return event.cancelAble() && event.cancel
         }
-        eventInvokersLists[Weight.record]!!.forEach { it() }
+        eis[Weight.record]!!.forEach { it() }
         event.cancel = false
         for (i in 0..4) {
             val width = ss[i]
-            for (eventInvoker in eventInvokersLists[width]!!) {
+            for (eventInvoker in eis[width]!!) {
                 if (eventInvoker()) return true
             }
         }
         return false
     }
 
-    fun register(instance: Any) {
-        val eventInvokersLists = creator!!.register(instance)
-        this.eventInvokersLists[Weight.record]!!.addAll(eventInvokersLists[0])
-        for (i in 0..4) {
-            val width = ss[i]
-            this.eventInvokersLists[width]!!.addAll(eventInvokersLists[i + 1])
-        }
+    override fun register(info: EventListenerInfo) {
+        eis[info.weight]!!.add(info)
     }
+
+    override fun unregister(info: EventListenerInfo) {
+        eis[info.weight]!!.remove(info)
+    }
+
 }

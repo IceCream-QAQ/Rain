@@ -16,9 +16,6 @@ import kotlin.collections.HashMap
 @NotSearch
 class TestApp : DefaultApp() {
 
-    @Inject
-    lateinit var context: YuContext
-
     fun test() {
 //        val test = this.context.getBean(TestUtil::class.java, "123")
 //        println(test)
