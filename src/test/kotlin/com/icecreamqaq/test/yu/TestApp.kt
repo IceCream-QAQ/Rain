@@ -99,7 +99,7 @@ class TestApp : DefaultApp() {
 
 class HookStartEvent : HookRunnable {
 
-    override fun preRun(method: HookMethod?): Boolean {
+    override fun preRun(method: HookMethod): Boolean {
         println("Hook StartEvent PerRun")
         return false
     }
