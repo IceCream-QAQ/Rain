@@ -10,18 +10,17 @@ import com.IceCreamQAQ.Yu.loader.Loader
 import org.slf4j.LoggerFactory
 import javax.inject.Inject
 
-class EventListenerLoader : Loader {
+open class EventListenerLoader : Loader {
 
-    private val log = LoggerFactory.getLogger(EventListenerLoader::class.java)
-
-    @Inject
-    private lateinit var logger: AppLogger
-
-    @Inject
-    private lateinit var eventBus: EventBus
+    companion object {
+        private val log = LoggerFactory.getLogger(EventListenerLoader::class.java)
+    }
 
     @Inject
-    private lateinit var context: YuContext
+    lateinit var eventBus: EventBus
+
+    @Inject
+    lateinit var context: YuContext
 
 
     override fun load(items: Map<String, LoadItem>) {
@@ -40,9 +39,9 @@ class EventListenerLoader : Loader {
     }
 
     @Inject
-    private lateinit var creator: EventInvokerCreator
+    lateinit var creator: EventInvokerCreator
 
-    fun register(clazz: Class<*>, instance: Any) {
+    open fun register(clazz: Class<*>, instance: Any) {
         clazz.methods.forEach {
             it.annotation<Event> {
                 eventBus.register(
