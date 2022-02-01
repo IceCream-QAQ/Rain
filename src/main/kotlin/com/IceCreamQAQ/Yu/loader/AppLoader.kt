@@ -7,6 +7,7 @@ import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.hook.YuHook
 import com.IceCreamQAQ.Yu.isBean
+import com.IceCreamQAQ.Yu.mapOf
 import java.io.File
 import java.io.IOException
 import java.net.JarURLConnection
@@ -38,18 +39,22 @@ open class AppLoader {
     @Config("yu.classRegister")
     var classRegister: List<String> = listOf()
 
+    val loaderRewrite: MutableMap<Class<out Loader>, Class<out Loader>> = HashMap()
+
     open fun load() {
         try {
             val rsList = ArrayList<ClassRegister>(classRegister.size)
             for (rs in classRegister) {
-                rsList.add(context.getBean(rs, "") as ClassRegister?
-                        ?: error("Can't Create ClassRegister: $rs Instance."))
+                rsList.add(
+                    context.getBean(rs, "") as ClassRegister?
+                        ?: error("Can't Create ClassRegister: $rs Instance.")
+                )
             }
             val classes = HashMap<String, Class<*>>()
             for (s in scanPackages) {
                 classes.putAll(getClasses(s))
             }
-            val loadItemsMap = HashMap<Class<out Loader>, MutableMap<String, MutableMap<String, LoadItem>>>()
+            var loadItemsMap = HashMap<Class<out Loader>, MutableMap<String, MutableMap<String, LoadItem>>>()
 
             for (clazz in classes.values) {
                 for (register in rsList) {
@@ -63,6 +68,8 @@ open class AppLoader {
 //            bfl.load(beanFactories)
 //            loadItemsMap.remove(BeanFactoryLoader::class.java)
             val loaders = ArrayList<Loader>()
+
+            loadItemsMap = loadItemsMap.mapOf { k, v -> loaderRewrite.getOrDefault(k, k) to v }
 
             for (loader in loadItemsMap.keys) {
                 loaders.add(context[loader] ?: continue)
@@ -99,7 +106,11 @@ open class AppLoader {
         }
     }
 
-    fun searchLoadBy(loadClass: Class<*>, searchClass: Class<*>, loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, MutableMap<String, LoadItem>>>) {
+    fun searchLoadBy(
+        loadClass: Class<*>,
+        searchClass: Class<*>,
+        loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, MutableMap<String, LoadItem>>>
+    ) {
 //        if (!loadClass.isBean()) return
 //        val loadBy =
 //        if (loadBy != null) {
@@ -130,7 +141,12 @@ open class AppLoader {
         }
     }
 
-    fun addLoadItem(loadClass: Class<*>, annotationInstance: Annotation, loadBy: LoadBy, loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, MutableMap<String, LoadItem>>>) {
+    fun addLoadItem(
+        loadClass: Class<*>,
+        annotationInstance: Annotation,
+        loadBy: LoadBy,
+        loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, MutableMap<String, LoadItem>>>
+    ) {
         val loader = Class.forName(loadBy.value.java.name) as Class<out Loader>
         val loadItems = loadItemsMap[loader] ?: {
             val l = HashMap<String, MutableMap<String, LoadItem>>()
@@ -206,7 +222,12 @@ open class AppLoader {
         return classes
     }
 
-    fun findAndAddClassesInPackageByFile(packageName: String, packagePath: String?, recursive: Boolean, classes: MutableMap<String, Class<*>>) {
+    fun findAndAddClassesInPackageByFile(
+        packageName: String,
+        packagePath: String?,
+        recursive: Boolean,
+        classes: MutableMap<String, Class<*>>
+    ) {
         val dir = File(packagePath)
         if (!dir.exists() || !dir.isDirectory) {
             return

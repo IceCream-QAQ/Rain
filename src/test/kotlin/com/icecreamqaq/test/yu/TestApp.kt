@@ -4,6 +4,7 @@ import com.IceCreamQAQ.Yu.DefaultApp
 import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.controller.DefaultActionContext
 import com.IceCreamQAQ.Yu.controller.Router
+import com.IceCreamQAQ.Yu.event.EventListenerLoader
 //import com.IceCreamQAQ.Yu.controller.RoutersMap
 import com.IceCreamQAQ.Yu.hook.HookItem
 import com.IceCreamQAQ.Yu.hook.HookMethod
@@ -14,6 +15,11 @@ import kotlin.collections.HashMap
 
 @NotSearch
 class TestApp : DefaultApp() {
+
+    override fun start() {
+        loader.loaderRewrite[EventListenerLoader::class.java] = TestRewriteEventListenerLoader::class.java
+        super.start()
+    }
 
     fun test() {
 //        val test = this.context.getBean(TestUtil::class.java, "123")

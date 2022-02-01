@@ -19,6 +19,9 @@ fun Any.toJSONString() = JSON.toJSONString(this)
 
 fun paraError(text: String) = YuParaValueException(text)
 
+fun <K, V> Map<K, V>.mapOf(body: (K, V) -> Pair<K, V>?): HashMap<K, V> =
+    HashMap<K, V>().also { this.forEach { (k, v) -> body(k, v)?.let { (nk, nv) -> it[nk] = nv } } }
+
 val Throwable.stackTraceString: String
     get() {
         val sb = StringBuilder(this::class.java.name).append(": ").append(message).append("\n")
