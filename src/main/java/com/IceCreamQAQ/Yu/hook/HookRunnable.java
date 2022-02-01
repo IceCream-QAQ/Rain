@@ -2,10 +2,19 @@ package com.IceCreamQAQ.Yu.hook;
 
 public interface HookRunnable {
 
-    void init(HookInfo info);
+    default void init(HookInfo info) {
+    }
 
-    boolean preRun(HookMethod method);
-    void postRun(HookMethod method);
-    boolean onError(HookMethod method);
+    default boolean preRun(HookMethod method){
+        return false;
+    }
+
+    default void postRun(HookMethod method){
+
+    }
+
+    default boolean onError(HookMethod method){
+        return false;
+    }
 
 }

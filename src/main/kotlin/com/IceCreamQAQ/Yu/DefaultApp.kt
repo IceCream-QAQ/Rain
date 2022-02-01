@@ -41,11 +41,11 @@ open class DefaultApp {
     }
 
     @Inject
-    fun init(){
+    open fun init(){
         moduleManager.loadModule()
     }
 
-    fun start(){
+    open fun start(){
         loader.load()
         asLoader.start()
 
@@ -55,7 +55,7 @@ open class DefaultApp {
         Runtime.getRuntime().addShutdownHook(Thread { stop() })
     }
 
-    fun stop(){
+    open fun stop(){
         eventBus.post(AppStopEvent())
         asLoader.stop()
     }

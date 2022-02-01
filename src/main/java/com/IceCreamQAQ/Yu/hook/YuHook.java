@@ -19,21 +19,15 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class YuHook {
 
-    private static List<HookItem> hooks = new ArrayList();
+//    private static final List<HookItem> hooks = new ArrayList();
 
     public static void put(HookItem item) {
-        hooks.add(item);
+        getInvoker(item.getClassName(), item.getMethodName()).put(getOrNewRunnable(item.getRunnable()));
     }
-
-    public static List<HookItem> getHooks() {
-        return hooks;
-    }
-
-    public static HookRunnable[] r;
 
     private static final Map<String, HookRunnable> hs = new HashMap<>();
     private static final Map<String, Map<String, HookInvokerRunnable>> his = new HashMap<>();
-    private static final Map<Pattern, String> mhi = new HashMap<Pattern, String>();
+    private static final Map<Pattern, String> mhi = new HashMap<>();
 
     private static AppClassloader classloader;
 
@@ -55,10 +49,6 @@ public class YuHook {
 
     public static void init(AppClassloader classloader) {
         YuHook.classloader = classloader;
-
-        for (HookItem hook : hooks) {
-            getInvoker(hook.getClassName(), hook.getMethodName()).put(getOrNewRunnable(hook.getRunnable()));
-        }
     }
 
     public static HookInvokerRunnable getInvoker(String className, String methodName) {
@@ -108,7 +98,7 @@ public class YuHook {
         val newMethods = new ArrayList<NewMethod>();
         MethodNode clInitNode = null;
 
-        for (val method : (List<MethodNode>) node.methods) {
+        for (val method : node.methods) {
             if (method.name.equals("<clinit>")) clInitNode = method;
             if (isSysMethod(method.name)) continue;
 

@@ -5,12 +5,11 @@ import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.controller.DefaultActionContext
 import com.IceCreamQAQ.Yu.controller.Router
 //import com.IceCreamQAQ.Yu.controller.RoutersMap
-import com.IceCreamQAQ.Yu.di.YuContext
-import com.IceCreamQAQ.Yu.md5
-import com.IceCreamQAQ.Yu.util.Web
+import com.IceCreamQAQ.Yu.hook.HookItem
+import com.IceCreamQAQ.Yu.hook.HookMethod
+import com.IceCreamQAQ.Yu.hook.HookRunnable
+import com.IceCreamQAQ.Yu.hook.YuHook
 import kotlinx.coroutines.runBlocking
-import java.util.*
-import javax.inject.Inject
 import kotlin.collections.HashMap
 
 @NotSearch
@@ -95,5 +94,13 @@ class TestApp : DefaultApp() {
             nac.result = null
             nac.saves = HashMap()
         }
+    }
+}
+
+class HookStartEvent : HookRunnable {
+
+    override fun preRun(method: HookMethod?): Boolean {
+        println("Hook StartEvent PerRun")
+        return false
     }
 }
