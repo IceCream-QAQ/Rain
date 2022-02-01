@@ -33,6 +33,10 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.22")
 }
 
+java {
+    withSourcesJar()
+}
+
 tasks {
     withType<JavaCompile> {
         options.encoding = "UTF-8"
@@ -40,8 +44,8 @@ tasks {
         targetCompatibility = "1.8"
     }
 
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>{
-        kotlinOptions{
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions {
             jvmTarget = "1.8"
         }
     }
