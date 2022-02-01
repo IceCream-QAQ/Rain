@@ -46,7 +46,7 @@ fun String.toLowerCaseFirstOne(): String {
     else (StringBuilder()).append(Character.toLowerCase(this[0])).append(this.substring(1)).toString();
 }
 
-inline fun <reified T : Annotation> Method.annotation(body: T.() -> Unit) = getAnnotation(T::class.java).apply(body)
+inline fun <reified T : Annotation> Method.annotation(body: T.() -> Unit) = getAnnotation(T::class.java)?.apply(body)
 
 val Method.fullName: String
     get() {
