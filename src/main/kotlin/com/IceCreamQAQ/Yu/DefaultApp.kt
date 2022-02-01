@@ -6,6 +6,7 @@ import com.IceCreamQAQ.Yu.di.ConfigManagerDefaultImpl
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.event.EventBus
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent
+import com.IceCreamQAQ.Yu.event.events.AppStopEvent
 import com.IceCreamQAQ.Yu.loader.AppLoader
 import com.IceCreamQAQ.Yu.module.ModuleManager
 import javax.inject.Inject
@@ -47,10 +48,11 @@ open class DefaultApp {
         asLoader.start()
         eventBus.post(AppStartEvent())
 
-        Runtime.getRuntime().addShutdownHook(Thread { asLoader.stop() })
+        Runtime.getRuntime().addShutdownHook(Thread { stop() })
     }
 
     fun stop(){
+        eventBus.post(AppStopEvent())
         asLoader.stop()
     }
 

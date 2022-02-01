@@ -5,6 +5,7 @@ import com.IceCreamQAQ.Yu.annotation.Event
 import com.IceCreamQAQ.Yu.annotation.EventListener
 import com.IceCreamQAQ.Yu.event.EventBus
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent
+import com.IceCreamQAQ.Yu.event.events.AppStopEvent
 import com.IceCreamQAQ.Yu.event.events.EventListenerRunExceptionEvent
 import com.IceCreamQAQ.Yu.event.events.JobRunExceptionEvent
 import com.IceCreamQAQ.Yu.fullName
@@ -38,6 +39,11 @@ class TestEvent {
         jobManager.registerTimer(1000) {
             error("Test Job Error!")
         }
+    }
+
+    @Event
+    fun onClose(e: AppStopEvent) {
+        println("AppStopEvent")
     }
 
     @Event(weight = Event.Weight.record)
