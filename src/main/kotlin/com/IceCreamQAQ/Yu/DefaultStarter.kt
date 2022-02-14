@@ -24,6 +24,7 @@ class DefaultStarter {
         @JvmStatic
         fun start() {
             val appClassLoader = AppClassloader(DefaultStarter::class.java.classLoader)
+            Thread.currentThread().contextClassLoader = appClassLoader
 
             val appClass = appClassLoader.loadClass("com.IceCreamQAQ.Yu.DefaultApp")
             val startMethod = appClass.getMethod("start")
