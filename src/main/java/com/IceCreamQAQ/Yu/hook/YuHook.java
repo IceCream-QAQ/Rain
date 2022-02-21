@@ -76,16 +76,18 @@ public class YuHook {
 
         public String name;
         public String desc;
-        public MethodNode method;
+        public MethodNode newNode;
+        public MethodNode oldNode;
         public String paraName;
 
         public MethodInfo() {
         }
 
-        public MethodInfo(String name, String desc, MethodNode method, String paraName) {
+        public MethodInfo(String name, String desc, MethodNode newNode, MethodNode oldNode, String paraName) {
             this.name = name;
             this.desc = desc;
-            this.method = method;
+            this.newNode = newNode;
+            this.oldNode = oldNode;
             this.paraName = paraName;
         }
     }
@@ -153,7 +155,7 @@ public class YuHook {
                 nmn.visibleParameterAnnotations = method.visibleParameterAnnotations;
                 method.visibleParameterAnnotations = null;
 
-                val mi = new MethodInfo(method.name, method.desc, nmn, mpn);
+                val mi = new MethodInfo(method.name, method.desc, nmn, method, mpn);
                 newMethods.add(mi);
 
                 method.name += "_IceCreamQAQ_YuHook";
@@ -448,6 +450,7 @@ public class YuHook {
 
             cmv.visitLdcInsn(classType);
             cmv.visitLdcInsn(method.name);
+            cmv.visitLdcInsn(method.oldNode.name);
 
             // ParaArraySize
             val paras = toClassArray(method.desc);
@@ -463,10 +466,10 @@ public class YuHook {
                 cmv.visitInsn(AASTORE);
             }
 
-            cmv.visitMethodInsn(INVOKESTATIC, "com/IceCreamQAQ/Yu/hook/HookInfo", "create", "(Ljava/lang/Class;Ljava/lang/String;[Ljava/lang/Class;)Lcom/IceCreamQAQ/Yu/hook/HookInfo;", false);
+            cmv.visitMethodInsn(INVOKESTATIC, "com/IceCreamQAQ/Yu/hook/HookInfo", "create", "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Class;)Lcom/IceCreamQAQ/Yu/hook/HookInfo;", false);
             cmv.visitFieldInsn(PUTSTATIC, name.replace(".", "/"), method.paraName, "Lcom/IceCreamQAQ/Yu/hook/HookInfo;");
 
-            node.methods.add(method.method);
+            node.methods.add(method.newNode);
         }
 
         cmv.visitInsn(RETURN);
