@@ -153,10 +153,10 @@ public class YuHook {
                 nmn.visibleParameterAnnotations = method.visibleParameterAnnotations;
                 method.visibleParameterAnnotations = null;
 
-                method.name += "_IceCreamQAQ_YuHook";
-
                 val mi = new MethodInfo(method.name, method.desc, nmn, mpn);
                 newMethods.add(mi);
+
+                method.name += "_IceCreamQAQ_YuHook";
             }
         }
 
@@ -166,7 +166,7 @@ public class YuHook {
             clInitNode.instructions.insert(new MethodInsnNode(INVOKESTATIC, cName, initFunName, "()V", false));
         }
 
-        node.methods.add(createInitMethod(node,newMethods,name,initFunName));
+        node.methods.add(createInitMethod(node, newMethods, name, initFunName));
 
         if (clInitNode == null) node.methods.add(createClInit(cName, initFunName));
 
