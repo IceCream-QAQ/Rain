@@ -19,10 +19,11 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class YuHook {
 
-//    private static final List<HookItem> hooks = new ArrayList();
+    private static final List<HookItem> hooks = new ArrayList();
 
     public static void put(HookItem item) {
-        getInvoker(item.getClassName(), item.getMethodName()).put(getOrNewRunnable(item.getRunnable()));
+        if (!isInit) hooks.add(item);
+        else getInvoker(item.getClassName(), item.getMethodName()).put(getOrNewRunnable(item.getRunnable()));
     }
 
     private static final Map<String, HookRunnable> hs = new HashMap<>();
@@ -47,8 +48,11 @@ public class YuHook {
         }};
     }
 
+    private static boolean isInit = false;
     public static void init(AppClassloader classloader) {
+        isInit = true;
         YuHook.classloader = classloader;
+        hooks.forEach(item -> getInvoker(item.getClassName(), item.getMethodName()).put(getOrNewRunnable(item.getRunnable())));
     }
 
     public static HookInvokerRunnable getInvoker(String className, String methodName) {
