@@ -158,7 +158,7 @@ public class YuHook {
                 val mi = new MethodInfo(method.name, method.desc, nmn, method, mpn);
                 newMethods.add(mi);
 
-                method.name += "_IceCreamQAQ_YuHook";
+                method.name += "_IceCreamQAQ_YuHook_" + mpn;
             }
         }
 
