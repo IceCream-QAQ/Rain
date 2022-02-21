@@ -297,9 +297,11 @@ public class YuHook {
             val getHookRunnableLabel = new Label();
             mv.visitLabel(getHookRunnableLabel);
 
-            mv.visitLdcInsn(name);
-            mv.visitLdcInsn(mn);
-            mv.visitMethodInsn(INVOKESTATIC, "com/IceCreamQAQ/Yu/hook/YuHook", "getInvoker", "(Ljava/lang/String;Ljava/lang/String;)Lcom/IceCreamQAQ/Yu/hook/HookInvokerRunnable;", false);
+            mv.visitFieldInsn(GETSTATIC, cName, paraName, "Lcom/IceCreamQAQ/Yu/hook/HookInfo;");
+            mv.visitFieldInsn(GETFIELD, "com/IceCreamQAQ/Yu/hook/HookInfo", "runnable", "Lcom/IceCreamQAQ/Yu/hook/HookInvokerRunnable;");
+//            mv.visitLdcInsn(name);
+//            mv.visitLdcInsn(mn);
+//            mv.visitMethodInsn(INVOKESTATIC, "com/IceCreamQAQ/Yu/hook/YuHook", "getInvoker", "(Ljava/lang/String;Ljava/lang/String;)Lcom/IceCreamQAQ/Yu/hook/HookInvokerRunnable;", false);
             mv.visitVarInsn(ASTORE, ++stack);
 
             hookRunnableStack = stack;
