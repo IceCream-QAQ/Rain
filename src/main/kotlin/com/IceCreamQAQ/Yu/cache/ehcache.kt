@@ -15,7 +15,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 @NotSearch
-class EhcacheHelp<T>(private val cache: Cache) {
+class EhcacheHelp<T>(private val cache: Cache) : Iterable<Map.Entry<String, T>> {
 
     operator fun get(key: String): T? {
         return cache.get(key)?.objectValue as? T?
@@ -41,6 +41,20 @@ class EhcacheHelp<T>(private val cache: Cache) {
 
     fun remove(key: String) {
         cache.remove(key)
+    }
+
+    override fun iterator(): Iterator<Map.Entry<String, T>> {
+        return object : Iterator<Map.Entry<String, T>> {
+            //            val iter =
+            val keys = cache.keys.iterator()
+
+            inner class Entry<T>(override val key: String, override val value: T) : Map.Entry<String, T>
+
+            override fun hasNext(): Boolean = keys.hasNext()
+
+            override fun next() = keys.next()!!.let { Entry(it as String, get(it)!!) }
+
+        }
     }
 
 }
