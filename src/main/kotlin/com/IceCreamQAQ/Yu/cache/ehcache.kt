@@ -21,9 +21,23 @@ class EhcacheHelp<T>(private val cache: Cache) {
         return cache.get(key)?.objectValue as? T?
     }
 
-    operator fun set(key: String, value: T) {
+    operator fun set(key: String, value: T): T {
         cache.put(Element(key, value))
+        return value
     }
+
+    fun getOrDefault(key: String, defaultValue: T): T =
+        cache.get(key)?.objectValue as? T? ?: defaultValue
+
+    fun getOrDefault(key: String, defaultValue: () -> T): T =
+        cache.get(key)?.objectValue as? T? ?: defaultValue()
+
+    fun getOrPut(key: String, value: T): T =
+        cache.get(key)?.objectValue as? T? ?: set(key, value)
+
+    fun getOrPut(key: String, value: () -> T): T =
+        cache.get(key)?.objectValue as? T? ?: set(key, value())
+
 
     fun remove(key: String) {
         cache.remove(key)
