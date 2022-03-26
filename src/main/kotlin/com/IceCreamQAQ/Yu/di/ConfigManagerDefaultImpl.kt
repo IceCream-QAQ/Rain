@@ -123,7 +123,7 @@ class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger:
 
     private fun loadConfigByProperties(jo: JSONObject, inputStream: InputStream) {
         val prop = Properties()
-        prop.load(inputStream)
+        prop.load(InputStreamReader(inputStream, "UTF-8"))
 
         val o = JSONObject()
         for (oo in prop.keys) {
