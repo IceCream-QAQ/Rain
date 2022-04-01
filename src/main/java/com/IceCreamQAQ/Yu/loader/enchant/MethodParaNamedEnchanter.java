@@ -13,7 +13,7 @@ public class MethodParaNamedEnchanter implements Enchanter {
 
     @Override
     public void enchantClass(ClassNode cn) {
-        for (MethodNode method : (List<MethodNode>) cn.methods) {
+        for (MethodNode method : cn.methods) {
             if (method.name.equals("<init>")) continue;
 
             if (method.localVariables.size() < 2) continue;
@@ -22,7 +22,7 @@ public class MethodParaNamedEnchanter implements Enchanter {
 
             LocalVariableNode thisNode = null;
 
-            for (LocalVariableNode localVariable : (List<LocalVariableNode>) method.localVariables) {
+            for (LocalVariableNode localVariable : method.localVariables) {
                 if (localVariable.name.equals("this")) {
                     thisNode = localVariable;
                     break;
@@ -31,7 +31,7 @@ public class MethodParaNamedEnchanter implements Enchanter {
 
             if (thisNode == null) return;
 
-            for (LocalVariableNode localVariable : (List<LocalVariableNode>) method.localVariables) {
+            for (LocalVariableNode localVariable : method.localVariables) {
                 if (localVariable.name.equals("this")) continue;
 
                 if (thisNode.start == localVariable.start && thisNode.end == localVariable.end)
