@@ -1,6 +1,5 @@
 package com.IceCreamQAQ.Yu.di
 
-import com.IceCreamQAQ.Yu.AppLogger
 import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.annotation.Default
@@ -14,16 +13,6 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.WildcardType
 import javax.inject.Inject
 import javax.inject.Named
-
-open class ContextImpl : YuContext, ClassRegister {
-
-    private val contextMap = HashMap<Class<*>, ClassContext>()
-
-    override fun register(clazz: Class<*>) {
-
-    }
-
-}
 
 open class ContextOldImpl(val configer: ConfigManager) : ClassRegister {
 
@@ -78,7 +67,7 @@ open class ContextOldImpl(val configer: ConfigManager) : ClassRegister {
     protected var factoryManager: BeanFactoryManager? = null
 
     init {
-        if (configer.get("yu.context.mode", String::class.java) == "single") context = this
+//        if (configer.get("yu.context.mode", String::class.java) == "single") context = this
         putBean(this)
         putBean(configer)
         factoryManager = newBean(BeanFactoryManager::class.java, save = true)

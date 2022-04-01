@@ -1,13 +1,16 @@
 package com.IceCreamQAQ.Yu
 
+import com.IceCreamQAQ.Yu.di.din
 import com.IceCreamQAQ.Yu.util.YuParaValueException
 import com.alibaba.fastjson.JSON
 import okhttp3.internal.and
+import java.lang.reflect.AnnotatedElement
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.nio.charset.Charset
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+import javax.inject.Named
 
 
 fun Class<*>.isBean() = !(this.isInterface || Modifier.isAbstract(this.modifiers))
@@ -85,3 +88,18 @@ val ByteArray.md5: String
         }
         return hexValue.toString()
     }
+
+
+val Class<*>.isAbstract get() = Modifier.isAbstract(modifiers)
+
+inline fun <reified T : Annotation> AnnotatedElement.annotation(): T? = getAnnotation(T::class.java)
+inline fun <reified T : Annotation> AnnotatedElement.annotation(body: T.() -> Unit): T? =
+    getAnnotation(T::class.java)?.apply(body)
+
+val AnnotatedElement.named get() = annotation<Named>()?.value ?: din
+
+inline fun <E, reified R> Collection<E>.arrayMap(body: (E) -> R): Array<R?> {
+    val array = arrayOfNulls<R>(size)
+    forEachIndexed { i, it -> array[i] = body(it) }
+    return array
+}

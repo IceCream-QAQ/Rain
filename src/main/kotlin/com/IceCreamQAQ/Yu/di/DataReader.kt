@@ -2,8 +2,7 @@ package com.IceCreamQAQ.Yu.di
 
 interface DataReader<T> {
 
-    val type: Class<T>
-    val name: String
-    operator fun invoke(context: YuContext): T?
+    operator fun invoke(): T
+    operator fun invoke(name: String): T
 
 }
