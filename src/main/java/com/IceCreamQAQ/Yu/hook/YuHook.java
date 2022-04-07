@@ -341,9 +341,10 @@ public class YuHook {
                 makeCast(mv, paras.get(i).type);
             }
 
-
-            if (isStatic) mv.visitMethodInsn(INVOKESTATIC, cName, mn + "_IceCreamQAQ_YuHook", mi.desc, false);
-            else mv.visitMethodInsn(INVOKEVIRTUAL, cName, mn + "_IceCreamQAQ_YuHook", mi.desc, false);
+            val nmn = mn + "_IceCreamQAQ_YuHook_" + paraName;
+            if (isStatic)
+                mv.visitMethodInsn(INVOKESTATIC, cName, nmn, mi.desc, false);
+            else mv.visitMethodInsn(INVOKEVIRTUAL, cName, nmn, mi.desc, false);
             if (returnFlag) {
                 if (returnType.length() == 1) {
                     val typed = getTyped(returnType);
