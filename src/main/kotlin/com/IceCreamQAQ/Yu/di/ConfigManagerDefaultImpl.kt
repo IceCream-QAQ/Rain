@@ -244,7 +244,7 @@ class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger:
                         if (oo is JSONObject) {
                             return oo.toJavaObject(type)
                         }
-                        return oo as T
+                        return co.getObject(n,type)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
