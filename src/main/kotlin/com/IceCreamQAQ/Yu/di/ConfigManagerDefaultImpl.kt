@@ -63,8 +63,6 @@ class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger:
 
 
     private fun loadFolder(folder: String): List<String> {
-
-        val classloader = this.javaClass.classLoader
         val dirs: Enumeration<URL> = classloader.getResources(folder)!!
 
         val configFiles = ArrayList<String>();
