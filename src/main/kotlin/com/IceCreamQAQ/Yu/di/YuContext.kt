@@ -32,7 +32,7 @@ interface YuContext {
 
     fun <T: Any> injectBean(bean: T): T
     fun registerClass(clazz: Class<*>)
-    fun registerClass(context: NewClassContext<*>)
+    fun registerClass(context: ClassContext<*>)
 
 }
 

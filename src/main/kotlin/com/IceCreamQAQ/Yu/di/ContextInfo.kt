@@ -3,7 +3,7 @@ package com.IceCreamQAQ.Yu.di
 
 class BeanFactoryClassContext<T>(
     val factory: BeanFactory<T>
-) : NewClassContext<T> {
+) : ClassContext<T> {
 
 
     override val clazz: Class<T> = factory.type
@@ -22,7 +22,7 @@ class BeanFactoryClassContext<T>(
         getBean(din)
 
     override fun getBean(name: String): T? = factory.createBean(name)
-    override fun putBinds(name: String, cc: NewClassContext<out T>) {
+    override fun putBinds(name: String, cc: ClassContext<out T>) {
         error("您无法向一个由 BeanFactory(${factory::class.java.name}) 管理的上下文 (${this.name}) 中提交绑定类。")
     }
 
@@ -31,13 +31,13 @@ class BeanFactoryClassContext<T>(
     }
 }
 
-abstract class BindableClassContext<T> : NewClassContext<T> {
+abstract class BindableClassContext<T> : ClassContext<T> {
     override val bindAble: Boolean
         get() = true
 
-    open val bindMap: MutableMap<String, NewClassContext<out T>> = HashMap()
+    open val bindMap: MutableMap<String, ClassContext<out T>> = HashMap()
 
-    override fun putBinds(name: String, cc: NewClassContext<out T>) {
+    override fun putBinds(name: String, cc: ClassContext<out T>) {
         bindMap[name] = cc
     }
 }

@@ -1,26 +1,26 @@
 package com.IceCreamQAQ.Yu.di
 
-data class ClassContext(
-        val name: String,
-        val clazz: Class<*>,
-        var multi: Boolean,
-        val factory: BeanFactory<*>? = null,
-        var defaultInstance: Any? = null,
-        val instances: MutableMap<String, Any> = HashMap(),
-        var bindTo : MutableList<ClassContext>? = null,
-        var binds: MutableMap<String, ClassContext>? = null
-) {
-    fun putBind(name: String, context: ClassContext) {
-        if (binds == null) binds = HashMap()
-        binds!![name] = context
-    }
+interface ClassContext<T> : DataReader<T> {
 
-    fun putInstance(name: String, instance: Any) {
-        if (name == "" || (defaultInstance == null && !instances.containsKey(""))) defaultInstance = instance
-        instances[name] = instance
-    }
+    val clazz: Class<T>
+    val name: String
+        get() = clazz.name
 
-    fun getInstance(name: String?): Any? {
-        return instances[name ?: return defaultInstance]
-    }
+    val multi: Boolean
+    val instanceAble: Boolean
+    val bindAble: Boolean
+
+    operator fun get(name: String): T? = getBean(name)
+    operator fun set(name: String, instance: T): T = putBean(name, instance)
+
+    fun newBean(): T
+    fun getBean(): T?
+    fun getBean(name: String = YuContext.defaultInstanceName): T?
+    fun putBean(name: String = YuContext.defaultInstanceName, instance: T): T
+
+    fun putBinds(name: String, cc: ClassContext<out T>)
+
+    override fun invoke(): T? = getBean()
+    override fun invoke(name: String): T? = getBean(name)
+
 }

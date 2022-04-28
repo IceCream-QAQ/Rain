@@ -13,12 +13,12 @@ open class ContextImpl(
     override val configManager: ConfigManager
 ) : YuContext {
 
-    open val contextMap: MutableMap<Class<*>, NewClassContext<*>> = HashMap()
+    open val contextMap: MutableMap<Class<*>, ClassContext<*>> = HashMap()
     open val beanCreatorMap: MutableMap<Class<*>, BeanCreator<*>> = HashMap()
     open val beanInjectorMap: MutableMap<Class<*>, BeanInjector<*>> = HashMap()
 
-    open fun <T> findContext(clazz: Class<T>): NewClassContext<T>? =
-        (contextMap[clazz] as? NewClassContext<T>)
+    open fun <T> findContext(clazz: Class<T>): ClassContext<T>? =
+        (contextMap[clazz] as? ClassContext<T>)
 
     override fun <T> getBean(clazz: Class<T>, instanceName: String): T? =
         findContext(clazz)?.getBean(instanceName)

@@ -5,6 +5,8 @@ import com.IceCreamQAQ.Yu.util.YuParaValueException
 import com.alibaba.fastjson.JSON
 import okhttp3.internal.and
 import java.lang.reflect.AnnotatedElement
+import java.lang.reflect.Executable
+import java.lang.reflect.Member
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.nio.charset.Charset
@@ -89,9 +91,11 @@ val ByteArray.md5: String
         return hexValue.toString()
     }
 
+val Member.isExecutable get() = !isStatic && !isAbstract
+val Member.isAbstract get() = Modifier.isAbstract(modifiers)
+val Member.isStatic get() = Modifier.isStatic(modifiers)
 
-val Class<*>.isAbstract get() = Modifier.isAbstract(modifiers)
-
+inline fun <reified T : Annotation> AnnotatedElement.hasAnnotation(): Boolean = getAnnotation(T::class.java)?.let { true } ?: false
 inline fun <reified T : Annotation> AnnotatedElement.annotation(): T? = getAnnotation(T::class.java)
 inline fun <reified T : Annotation> AnnotatedElement.annotation(body: T.() -> Unit): T? =
     getAnnotation(T::class.java)?.apply(body)
@@ -102,4 +106,8 @@ inline fun <E, reified R> Collection<E>.arrayMap(body: (E) -> R): Array<R?> {
     val array = arrayOfNulls<R>(size)
     forEachIndexed { i, it -> array[i] = body(it) }
     return array
+}
+
+inline fun <T, R> Iterable<T>.mutableMap(transform: (T) -> R): MutableList<R> {
+    return mapTo(ArrayList(if (this is Collection<*>) this.size else 10), transform)
 }

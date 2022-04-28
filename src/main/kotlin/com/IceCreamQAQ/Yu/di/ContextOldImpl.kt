@@ -16,13 +16,13 @@ import javax.inject.Named
 
 open class ContextOldImpl(val configer: ConfigManager) : ClassRegister {
 
-    private val classContextMap = HashMap<String, ClassContext>()
+    private val classContextMap = HashMap<String, OldClassContext>()
 
     override fun register(clazz: Class<*>) {
         register(clazz, false)
     }
 
-    open fun register(context: ClassContext) {
+    open fun register(context: OldClassContext) {
         classContextMap[context.name] = context
     }
 
@@ -30,7 +30,7 @@ open class ContextOldImpl(val configer: ConfigManager) : ClassRegister {
         if (classContextMap.containsKey(clazz.name)) return
         if (!force) if (clazz.getAnnotation(NotSearch::class.java) != null) return
 
-        val classContext = ClassContext(clazz.name, clazz, false)
+        val classContext = OldClassContext(clazz.name, clazz, false)
         classContextMap[clazz.name] = classContext
 
         val instanceName = clazz.getAnnotation(Named::class.java)?.value ?: ""
@@ -46,7 +46,7 @@ open class ContextOldImpl(val configer: ConfigManager) : ClassRegister {
         }
     }
 
-    open fun getClassContextOrRegister(clazz: Class<*>, force: Boolean): ClassContext {
+    open fun getClassContextOrRegister(clazz: Class<*>, force: Boolean): OldClassContext {
         return classContextMap[clazz.name] ?: {
             register(clazz, force)
             classContextMap[clazz.name] ?: error("Cant Init Class: ${clazz.name}.")
