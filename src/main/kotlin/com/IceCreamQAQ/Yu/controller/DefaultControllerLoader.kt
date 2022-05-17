@@ -23,7 +23,12 @@ abstract class DefaultControllerLoader : Loader {
     open val separationCharacter: Array<String> = arrayOf("/")
 
     protected abstract fun createMethodInvoker(instance: Any, method: Method): MethodInvoker
-    protected fun createCatchMethodInvoker(instance: Any, method: Method, errorType: Class<out Throwable>): CatchInvoker = ReflectCatchInvoker(errorType, createMethodInvoker(instance, method))
+    protected fun createCatchMethodInvoker(
+        instance: Any,
+        method: Method,
+        errorType: Class<out Throwable>
+    ): CatchInvoker = ReflectCatchInvoker(errorType, createMethodInvoker(instance, method))
+
     protected abstract fun createActionInvoker(level: Int, actionMethod: Method, instance: Any): DefaultActionInvoker
 
     override fun load(items: Map<String, LoadItem>) {
@@ -32,14 +37,10 @@ abstract class DefaultControllerLoader : Loader {
             if (!item.type.isBean()) continue
             val clazz = item.type
             val name = clazz.getAnnotation(Named::class.java)?.value
-                    ?: item.loadBy::class.java.interfaces[0].getAnnotation(Named::class.java)?.value ?: continue
-            val rootRouter = rootRouters[name] ?: {
-                val r = RootRouter()
-                rootRouters[name] = r
-                r
-            }()
+                ?: item.loadBy::class.java.interfaces[0].getAnnotation(Named::class.java)?.value ?: continue
+            val rootRouter = rootRouters.getOrPut(name) { RootRouter() }
 
-            controllerToRouter(context[clazz] ?: continue, rootRouter)
+            controllerToRouter(clazz, context[clazz] ?: continue, rootRouter)
         }
 
 //        for (rrd in rootRouters.values) {
@@ -107,20 +108,20 @@ abstract class DefaultControllerLoader : Loader {
 
 //    open
 
-    open fun controllerToRouter(instance: Any, rootRouterData: RootRouter) {
+    open fun controllerToRouter(controllerClass: Class<*>, instance: Any, rootRouterData: RootRouter) {
         val rootRouter = rootRouterData.router as RouterImpl
         val globalBeforeList = rootRouterData.interceptorInfo.befores
         val globalAfterList = rootRouterData.interceptorInfo.afters
         val globalCatchList = rootRouterData.interceptorInfo.catchs
 
-        val controllerClass = instance::class.java
+//        val controllerClass = instance::class.java
 
         val controllerRouter = getRouterByPathString(
-                rootRouter,
-                controllerClass.getAnnotation(PathBy::class.java)?.let {
-                    context[it.value.java]?.run { getPath(controllerClass, instance)?.split(*separationCharacter) }
-                } ?: controllerClass.getAnnotation(Path::class.java)?.value?.split(*separationCharacter),
-                0
+            rootRouter,
+            controllerClass.getAnnotation(PathBy::class.java)?.let {
+                context[it.value.java]?.run { getPath(controllerClass, instance)?.split(*separationCharacter) }
+            } ?: controllerClass.getAnnotation(Path::class.java)?.value?.split(*separationCharacter),
+            0
         ).router
 
         val allMethods = ArrayList<Method>()
@@ -217,8 +218,9 @@ abstract class DefaultControllerLoader : Loader {
             val action = am.action
 //            val actionMethodName = method.name
 
-            val path = method.getAnnotation(ActionBy::class.java)?.let { context[it.value.java]?.getPath(controllerClass, method, instance) }
-                    ?: action.value
+            val path = method.getAnnotation(ActionBy::class.java)
+                ?.let { context[it.value.java]?.getPath(controllerClass, method, instance) }
+                ?: action.value
 //                val aa = getActionRouter(path, controllerRouter, rootRouter)
 //                val actionRootRouter = aa.router
 //                val actionPath = aa.path
@@ -273,8 +275,9 @@ abstract class DefaultControllerLoader : Loader {
 
             val synonym = method.getAnnotation(Synonym::class.java) ?: continue
             for (s in
-                method.getAnnotation(SynonymBy::class.java)?.let { context[it.value.java]?.getPath(controllerClass, method, instance) }
-                    ?: synonym.value
+            method.getAnnotation(SynonymBy::class.java)
+                ?.let { context[it.value.java]?.getPath(controllerClass, method, instance) }
+                ?: synonym.value
             ) {
                 val sai = getActionInvoker(s, controllerRouter, rootRouter, method, instance)
 
@@ -295,10 +298,10 @@ abstract class DefaultControllerLoader : Loader {
     fun getMatchItem(pathString: String, nextRouter: RouterImpl): MatchItem? {
         return if (pathString.startsWith("\\") && pathString.endsWith("\\"))
             MatchItem(
-                    false,
-                    pathString.substring(1).substring(0, pathString.length - 2),
-                    null,
-                    nextRouter
+                false,
+                pathString.substring(1).substring(0, pathString.length - 2),
+                null,
+                nextRouter
             )
         else {
 //            val pvs = ArrayList<String>()
@@ -373,10 +376,10 @@ abstract class DefaultControllerLoader : Loader {
                 }
 
                 MatchItem(
-                        true,
-                        newPath.toString(),
-                        pvs.toTypedArray(),
-                        nextRouter
+                    true,
+                    newPath.toString(),
+                    pvs.toTypedArray(),
+                    nextRouter
                 )
             }
         }
@@ -384,7 +387,13 @@ abstract class DefaultControllerLoader : Loader {
 
     data class ActionRouterAndPath(val router: RouterImpl, val path: String)
 
-    fun getActionInvoker(path: String, controllerRouter: RouterImpl, rootRouter: RouterImpl, method: Method, instance: Any): DefaultActionInvoker {
+    fun getActionInvoker(
+        path: String,
+        controllerRouter: RouterImpl,
+        rootRouter: RouterImpl,
+        method: Method,
+        instance: Any
+    ): DefaultActionInvoker {
         val aa = getActionRouter(path, controllerRouter, rootRouter)
         val actionRootRouter = aa.router
         val actionPath = aa.path
