@@ -15,6 +15,7 @@ import com.IceCreamQAQ.Yu.util.uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.newFixedThreadPoolContext
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Method
 import java.util.*
@@ -58,7 +59,10 @@ class JobManagerImpl : ApplicationService, Loader, JobManager {
         private val log = LoggerFactory.getLogger(JobManager::class.java)
     }
 
-    private val scope = GlobalScope
+    private val scope = object : CoroutineScope {
+        override val coroutineContext = newFixedThreadPoolContext(Runtime.getRuntime().availableProcessors(), "Job")
+
+    }
 
     private var jobs: MutableMap<String, JobInfo> = HashMap()
 
