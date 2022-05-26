@@ -22,6 +22,7 @@ dependencies {
     api("com.squareup.okhttp3:okhttp:4.9.3")
     api("ch.qos.logback:logback-classic:1.2.11")
     api("com.alibaba:fastjson:1.2.83")
+    // ECJ 当前版本为最后支持 Java8 的版本，应停留在本版本。
     api("org.eclipse.jdt:ecj:3.26.0")
     api("net.sf.ehcache:ehcache:2.10.9.2")
 
