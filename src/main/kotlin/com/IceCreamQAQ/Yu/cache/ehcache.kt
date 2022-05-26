@@ -7,36 +7,35 @@ import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.di.BeanFactory
 import com.IceCreamQAQ.Yu.di.ConfigManagerDefaultImpl
 import com.IceCreamQAQ.Yu.di.YuContext
-import net.sf.ehcache.Cache
-import net.sf.ehcache.CacheManager
-import net.sf.ehcache.Element
+import org.ehcache.Cache
+import org.ehcache.CacheManager
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Named
 
 @NotSearch
-class EhcacheHelp<T>(private val cache: Cache) : Iterable<Map.Entry<String, T>> {
+class EhcacheHelp<T>(private val cache: Cache<String, Any>) : Iterable<Map.Entry<String, T>> {
 
     operator fun get(key: String): T? {
-        return cache.get(key)?.objectValue as? T?
+        return cache.get(key) as? T?
     }
 
     operator fun set(key: String, value: T): T {
-        cache.put(Element(key, value))
+        cache.put(key, value)
         return value
     }
 
     fun getOrDefault(key: String, defaultValue: T): T =
-        cache.get(key)?.objectValue as? T? ?: defaultValue
+        cache.get(key) as? T? ?: defaultValue
 
     fun getOrDefault(key: String, defaultValue: () -> T): T =
-        cache.get(key)?.objectValue as? T? ?: defaultValue()
+        cache.get(key) as? T? ?: defaultValue()
 
     fun getOrPut(key: String, value: T): T =
-        cache.get(key)?.objectValue as? T? ?: set(key, value)
+        cache.get(key) as? T? ?: set(key, value)
 
     fun getOrPut(key: String, value: () -> T): T =
-        cache.get(key)?.objectValue as? T? ?: set(key, value())
+        cache.get(key) as? T? ?: set(key, value())
 
 
     fun remove(key: String) {
@@ -46,13 +45,13 @@ class EhcacheHelp<T>(private val cache: Cache) : Iterable<Map.Entry<String, T>> 
     override fun iterator(): Iterator<Map.Entry<String, T>> {
         return object : Iterator<Map.Entry<String, T>> {
             //            val iter =
-            val keys = cache.keys.iterator()
+            val iterator = cache.iterator()
 
             inner class Entry<T>(override val key: String, override val value: T) : Map.Entry<String, T>
 
-            override fun hasNext(): Boolean = keys.hasNext()
+            override fun hasNext(): Boolean = iterator.hasNext()
 
-            override fun next() = keys.next()!!.let { Entry(it as String, get(it)!!) }
+            override fun next() = iterator.next()!!.let { Entry(it.key, it.value!! as T) }
 
         }
     }
