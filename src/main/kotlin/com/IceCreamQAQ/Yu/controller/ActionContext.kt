@@ -2,7 +2,7 @@ package com.IceCreamQAQ.Yu.controller
 
 interface ActionContext {
 
-    var path: Array<String>
+//    val method: String
 
     operator fun get(name: String): Any?
     operator fun set(name: String, obj: Any)

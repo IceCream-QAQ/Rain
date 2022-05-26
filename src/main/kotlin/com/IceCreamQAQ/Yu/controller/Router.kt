@@ -1,19 +1,26 @@
 package com.IceCreamQAQ.Yu.controller
 
-import com.IceCreamQAQ.Yu.annotation.AutoBind
-import com.IceCreamQAQ.Yu.controller.ActionContext
-import com.IceCreamQAQ.Yu.toLowerCaseFirstOne
-import java.lang.reflect.Method
-import java.util.regex.Pattern
-import javax.inject.Named
+typealias ParasMap = Map<String, Any>
 
-@AutoBind
 interface Router {
 
-    fun init(rootRouter: RootRouter)
+    fun init(rootRouter: RouterInfo)
+    suspend operator fun invoke(context: ActionContext, superParas: ParasMap): Boolean
 
-    suspend operator fun invoke(path: String, context: ActionContext): Boolean
 }
+
+//interface DefaultRouter : Router {
+//
+//    val staticRouterMap: HashMap<String, Router>
+//    val needMatchRouterMap: HashMap<String, Router>
+//
+////    val actionInvokerMap: HashMap<String, Router>
+//
+//    override suspend operator fun invoke(context: ActionContext): Boolean {
+//
+//    }
+//
+//}
 
 
 

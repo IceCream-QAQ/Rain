@@ -30,11 +30,16 @@ class TestController {
         c["aaa"] = conf
     }
 
-//    @Action("{t3.*}")
+    //    @Action("{t3.*}")
 //    @Synonym(["{t4.*}"])
 //    fun t3(actionContext: ActionContext) {
 //        println(actionContext.path[0])
 //    }
+    @Action(".st {para}")
+    fun testSkill(para: Map<String, Int>) = para
+
+    @Action(".st[para:{kv}]")
+    fun testAction(para: List<Map<String, Int>>) = para
 
     @Action("test")
     fun testAction(

@@ -266,7 +266,7 @@ open class YuContext(val configer: ConfigManager, private val logger: AppLogger)
 //    }
 
     protected open fun <T> createBeanInstance(clazz: Class<T>): T? {
-        if (!clazz.isBean()) return null;
+        if (!clazz.isBean()) return null
         val constructorNum = clazz.constructors.size
         if (constructorNum < 1) return null
         val constructors = clazz.constructors

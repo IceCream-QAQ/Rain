@@ -1,6 +1,3 @@
-import okhttp3.OkHttpClient
-import okhttp3.Request
-
 plugins {
     java
     kotlin("jvm") version "1.4.20"
@@ -8,54 +5,9 @@ plugins {
     `maven-publish`
 }
 
-buildscript {
-
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven("https://maven.icecreamqaq.com/repository/maven-public/")
-    }
-
-    dependencies {
-        classpath("com.squareup.okhttp3:okhttp:4.9.0")
-    }
-}
-val baseVersion = "0.2.0.0"
-
-fun makeVersion(): String {
-    val branch = exec("git rev-parse --abbrev-ref HEAD")
-    if (branch == "master") return baseVersion
-    val buildVersion = getNextBuildVersion(group.toString(), name, baseVersion, branch, "")
-    return "$baseVersion-$branch$buildVersion"
-}
-
-fun getNextBuildVersion(groupId: String, artifact: String, baseVersion: String, branch: String, opcode: String) =
-    OkHttpClient()
-        .newCall(
-            Request.Builder()
-                .url(
-                    "http://127.0.0.1:5557/" +
-                            "qptVersion/" +
-                            "nextVersion?" +
-                            "groupId=$groupId&" +
-                            "artifact=$artifact&" +
-                            "baseVersion=$baseVersion&" +
-                            "branch=$branch&" +
-                            "opcode=$opcode"
-                ).build()
-        ).execute()
-        .body!!
-        .string()
-
-
-fun exec(cmd: String): String {
-    val r = Runtime.getRuntime().exec(cmd)
-    r.waitFor()
-    return r.inputStream.reader().readText()
-}
 
 group = "com.IceCreamQAQ"
-version = "0.2.0.0-DEV13"
+version = "0.2.0.0-DEV16"
 
 repositories {
     mavenLocal()
@@ -82,16 +34,37 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.20")
 }
 
-tasks {
-    withType<JavaCompile> {
+java{
+    withSourcesJar()
+}
+//kotlin{
+//    withSou
+//}
 
-    }
+tasks {
+//    val sourcesJar by creating(Jar::class) {
+//        archiveClassifier.set("sources")
+//        from(sourceSets.main.get().allSource)
+//    }
+
+
+//    val javadocJar by creating(Jar::class) {
+//        dependsOn.add(javadoc)
+//        archiveClassifier.set("javadoc")
+//        from(javadoc)
+//    }
+
+//    artifacts {
+//        archives(sourcesJar)
+////        archives(javadocJar)
+//        archives(jar)
+//    }
 }
 
 publishing {
 
     publications {
-        create<MavenPublication>("maven") {
+        create<MavenPublication>("Yu-Core") {
             groupId = group.toString()
             artifactId = name
             version = project.version.toString()

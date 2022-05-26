@@ -11,7 +11,7 @@ data class DoCatch(val catch: Catch, val invoker: CatchInvoker)
 data class ActionMap(val action: Action, val method: Method, val weight: Int = action.loadWeight)
 
 data class InterceptorInfo(
-        val befores: MutableList<DoMethod<Before, MethodInvoker>>,
-        val afters: MutableList<DoMethod<After, MethodInvoker>>,
-        val catchs: MutableList<DoMethod<Catch, CatchInvoker>>
+    val befores: MutableList<DoMethod<Before, MethodInvoker>>,
+    val afters: MutableList<DoMethod<After, MethodInvoker>>,
+    val catchs: MutableList<DoMethod<Catch, CatchInvoker>>
 )

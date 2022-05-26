@@ -12,7 +12,11 @@ class AsLoader : Loader {
     private lateinit var context: YuContext
 
     private lateinit var instances: Array<ApplicationService>
-    private val log = LoggerFactory.getLogger(AsLoader::class.java)
+
+
+    companion object{
+        private val log = LoggerFactory.getLogger(AsLoader::class.java)
+    }
 
     override fun load(items: Map<String, LoadItem>) {
         val list = ArrayList<ApplicationService>()
