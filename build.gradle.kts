@@ -21,7 +21,8 @@ dependencies {
 
     api("com.squareup.okhttp3:okhttp:4.9.3")
     api("ch.qos.logback:logback-classic:1.2.11")
-    api("com.alibaba:fastjson:1.2.83")
+    api("com.alibaba.fastjson2:fastjson2:2.0.4.graal")
+    api("com.alibaba.fastjson2:fastjson2-kotlin:2.0.4")
     api("org.eclipse.jdt:ecj:3.26.0")
     api("net.sf.ehcache:ehcache:2.10.9.2")
 
