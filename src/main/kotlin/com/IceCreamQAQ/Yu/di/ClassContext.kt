@@ -10,6 +10,9 @@ interface ClassContext<T> : DataReader<T> {
     val instanceAble: Boolean
     val bindAble: Boolean
 
+    val creator: BeanCreator<T>
+    val injector: BeanInjector<T>
+
     operator fun get(name: String): T? = getBean(name)
     operator fun set(name: String, instance: T): T = putBean(name, instance)
 

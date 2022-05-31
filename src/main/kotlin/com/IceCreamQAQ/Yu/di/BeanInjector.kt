@@ -29,11 +29,11 @@ class ReflectBeanInject<T>(
                     if (setMethod == null) {
                         { instance: T ->
                             if (!it.isAccessible) it.isAccessible = true
-                            it.set(instance, dataReader.invoke())
+                            it.set(instance, dataReader())
                         }
                     } else {
                         { instance: T ->
-                            setMethod.invoke(instance, dataReader.invoke())
+                            setMethod.invoke(instance, dataReader())
                         }
                     }
                 } else {
@@ -41,11 +41,11 @@ class ReflectBeanInject<T>(
                     if (setMethod == null) {
                         { instance: T ->
                             if (!it.isAccessible) it.isAccessible = true
-                            it.set(instance, dataReader.invoke(name))
+                            it.set(instance, dataReader(name))
                         }
                     } else {
                         { instance: T ->
-                            setMethod.invoke(instance, dataReader.invoke(name))
+                            setMethod.invoke(instance, dataReader(name))
                         }
                     }
                 }
@@ -59,11 +59,11 @@ class ReflectBeanInject<T>(
 
                             if (named == null) {
                                 { instance: T ->
-                                    it.invoke(instance, dataReader.invoke())
+                                    it.invoke(instance, dataReader())
                                 }
                             } else {
                                 { instance: T ->
-                                    it.invoke(instance, dataReader.invoke(named.value))
+                                    it.invoke(instance, dataReader(named.value))
                                 }
                             }
                         }

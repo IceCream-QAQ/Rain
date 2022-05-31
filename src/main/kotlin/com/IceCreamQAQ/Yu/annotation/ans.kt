@@ -31,3 +31,5 @@ annotation class Cron(
 )
 
 annotation class NotSearch
+
+annotation class Configuration

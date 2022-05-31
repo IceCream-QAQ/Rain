@@ -14,7 +14,7 @@ import java.lang.reflect.WildcardType
 import javax.inject.Inject
 import javax.inject.Named
 
-open class ContextOldImpl(val configer: ConfigManager) : ClassRegister {
+open class ContextOldImpl(val configer: OldConfigManager) : ClassRegister {
 
     private val classContextMap = HashMap<String, OldClassContext>()
 

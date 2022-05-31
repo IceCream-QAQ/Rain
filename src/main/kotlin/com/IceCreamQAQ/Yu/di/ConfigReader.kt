@@ -1,4 +1,4 @@
 package com.IceCreamQAQ.Yu.di
 
-interface ConfigReader<T>:DataReader<T> {
+interface ConfigReader<T> : DataReader<T> {
 }

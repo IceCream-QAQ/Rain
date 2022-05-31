@@ -20,7 +20,7 @@ interface YuContext {
         operator fun <T> YuContext.get(clazz: Class<T>): T? = getBean(clazz)
     }
 
-    val configManager: ConfigManager
+    val configManager: OldConfigManager
 
     fun <T> getBean(clazz: Class<T>): T? = getBean(clazz, din)
     fun <T> getBean(clazz: Class<T>, instanceName: String): T?

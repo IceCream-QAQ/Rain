@@ -16,7 +16,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger: AppLogger, runMode: String?) :
-    ConfigManager {
+    OldConfigManager {
 
     private var config: JSONObject = JSONObject()
 

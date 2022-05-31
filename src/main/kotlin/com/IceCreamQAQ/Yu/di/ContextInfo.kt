@@ -13,6 +13,10 @@ class BeanFactoryClassContext<T>(
         get() = false
     override val bindAble: Boolean
         get() = false
+    override val creator: BeanCreator<T>
+        get() = error("您无法向一个由 BeanFactory(${factory::class.java.name}) 管理的上下文 ($name) 中要求 creator。")
+    override val injector: BeanInjector<T>
+        get() = error("您无法向一个由 BeanFactory(${factory::class.java.name}) 管理的上下文 ($name) 中要求 Injector。")
 
     override fun newBean(): T {
         error("您无法向一个由 BeanFactory(${factory::class.java.name}) 管理的上下文 ($name) 中要求新实例。")
@@ -48,6 +52,10 @@ open class NoInstanceClassContext<T>(override val clazz: Class<T>) : BindableCla
         get() = false
     override val instanceAble: Boolean
         get() = false
+    override val creator: BeanCreator<T>
+        get() = error("Class: $name, 没有 Creator！")
+    override val injector: BeanInjector<T>
+        get() = error("Class: $name, 没有 Injector！")
 
     override fun newBean(): T {
         error("Class: $name, 无法创建新实例！")
@@ -66,8 +74,8 @@ open class NoInstanceClassContext<T>(override val clazz: Class<T>) : BindableCla
 
 open class InstanceAbleClassContext<T>(
     override val clazz: Class<T>,
-    open val beanCreator: BeanCreator<T>,
-    open val beanInjector: BeanInjector<T>,
+    override val creator: BeanCreator<T>,
+    override val injector: BeanInjector<T>,
 ) : BindableClassContext<T>() {
 
     override val multi: Boolean
@@ -85,7 +93,7 @@ open class InstanceAbleClassContext<T>(
         if (name == din) defaultInstance else instanceMap[name]
 
     override fun newBean(): T =
-        beanInjector(beanCreator())
+        injector(creator())
 
     override fun putBean(name: String, instance: T): T {
         if (name == din) defaultInstance = instance

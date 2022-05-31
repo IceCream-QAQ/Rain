@@ -28,6 +28,6 @@ open class ObjectDataReaderFactory(context: ContextImpl, type: RelType<*>) : Dat
 
 }
 
-open class ListDataReaderFactory(context: ContextImpl, type: RelType<*>) : DataReaderFactory(context, type) {
-
-}
+//open class ListDataReaderFactory(context: ContextImpl, type: RelType<*>) : DataReaderFactory(context, type) {
+//
+//}

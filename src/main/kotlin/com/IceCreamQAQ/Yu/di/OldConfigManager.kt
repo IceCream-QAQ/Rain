@@ -1,13 +1,13 @@
 package com.IceCreamQAQ.Yu.di
 
-interface ConfigManager {
+interface OldConfigManager {
 
     companion object {
 
-        inline fun <reified T> ConfigManager.get(key: String): T? =
+        inline fun <reified T> OldConfigManager.get(key: String): T? =
             get(key, T::class.java)
 
-        inline fun <reified T> ConfigManager.array(key: String): List<T> =
+        inline fun <reified T> OldConfigManager.array(key: String): List<T> =
             getArray(key, T::class.java)
     }
 
