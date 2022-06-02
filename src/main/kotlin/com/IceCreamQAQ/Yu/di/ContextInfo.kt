@@ -1,29 +1,36 @@
 package com.IceCreamQAQ.Yu.di
 
 
-class BeanFactoryClassContext<T>(
-    val factory: BeanFactory<T>
+open class BeanFactoryClassContext<T>(
+    open val context: ContextImpl,
+    open val ctx: ClassContext<BeanFactory<T>>,
+    override val clazz: Class<T>
 ) : ClassContext<T> {
 
-
-    override val clazz: Class<T> = factory.type
     override val multi: Boolean
-        get() = factory.isMulti()
+        get() = false
     override val instanceAble: Boolean
         get() = false
     override val bindAble: Boolean
         get() = false
     override val creator: BeanCreator<T>
-        get() = error("您无法向一个由 BeanFactory(${factory::class.java.name}) 管理的上下文 ($name) 中要求 creator。")
+        get() = error("您无法向一个由 BeanFactory(${clazz.name}) 管理的上下文 ($name) 中要求 creator。")
     override val injector: BeanInjector<T>
-        get() = error("您无法向一个由 BeanFactory(${factory::class.java.name}) 管理的上下文 ($name) 中要求 Injector。")
+        get() = error("您无法向一个由 BeanFactory(${clazz.name}) 管理的上下文 ($name) 中要求 Injector。")
 
     override fun newBean(): T {
-        error("您无法向一个由 BeanFactory(${factory::class.java.name}) 管理的上下文 ($name) 中要求新实例。")
+        error("您无法向一个由 BeanFactory(${clazz.name}) 管理的上下文 ($name) 中要求新实例。")
     }
 
     override fun getBean(): T? =
         getBean(din)
+
+    private var _factory: BeanFactory<T>? = null
+    open fun recreateBeanFactory(): BeanFactory<T> {
+        return (ctx.newBean()).also { _factory = it }
+    }
+    private val factory: BeanFactory<T>
+        get() = _factory ?: recreateBeanFactory()
 
     override fun getBean(name: String): T? = factory.createBean(name)
     override fun putBinds(name: String, cc: ClassContext<out T>) {
@@ -39,7 +46,15 @@ abstract class BindableClassContext<T> : ClassContext<T> {
     override val bindAble: Boolean
         get() = true
 
-    open val bindMap: MutableMap<String, ClassContext<out T>> = HashMap()
+    companion object {
+        fun <T> BindableClassContext<T>.putBinds(binds: Map<String, ClassContext<*>>) {
+            (binds as Map<String, ClassContext<T>>).forEach { (named, ctx) ->
+                putBinds(named, ctx)
+            }
+        }
+    }
+
+    protected open val bindMap: MutableMap<String, ClassContext<out T>> = HashMap()
 
     override fun putBinds(name: String, cc: ClassContext<out T>) {
         bindMap[name] = cc
@@ -73,10 +88,25 @@ open class NoInstanceClassContext<T>(override val clazz: Class<T>) : BindableCla
 }
 
 open class InstanceAbleClassContext<T>(
-    override val clazz: Class<T>,
-    override val creator: BeanCreator<T>,
-    override val injector: BeanInjector<T>,
+    val context: ContextImpl,
+    override val clazz: Class<T>
 ) : BindableClassContext<T>() {
+
+    private var _creator: BeanCreator<T>? = null
+    open fun recreateBeanCreator(): BeanCreator<T> {
+        return (context.makeBeanCreator(clazz as Class<Any>) as BeanCreator<T>).also { _creator = it }
+    }
+
+    private var _injector: BeanInjector<T>? = null
+    open fun recreateBeanInjector(): BeanInjector<T> {
+        return (context.makeBeanInjector(clazz as Class<Any>) as BeanInjector<T>).also { _injector = it }
+    }
+
+    override val creator: BeanCreator<T>
+        get() = _creator ?: recreateBeanCreator()
+
+    override val injector: BeanInjector<T>
+        get() = _injector ?: recreateBeanInjector()
 
     override val multi: Boolean
         get() = false

@@ -30,7 +30,9 @@ interface YuContext {
 
     fun <T> newBean(clazz: Class<T>): T
 
-    fun <T: Any> injectBean(bean: T): T
+    fun <T : Any> injectBean(bean: T): T
+    fun <T : Any> forceInjectBean(bean: T): T
+
     fun registerClass(clazz: Class<*>)
     fun registerClass(context: ClassContext<*>)
 

@@ -24,7 +24,7 @@ abstract class DataReaderFactory(val context: ContextImpl, val type: RelType<*>)
 
 open class ObjectDataReaderFactory(context: ContextImpl, type: RelType<*>) : DataReaderFactory(context, type) {
 
-    override fun <T> localDataReader(type: RelType<T>): DataReader<T> = context.findContext(type.realClass)!!
+    override fun <T> localDataReader(type: RelType<T>): DataReader<T> = context.findContext(type.realClass)
 
 }
 

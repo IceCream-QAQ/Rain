@@ -18,11 +18,12 @@ open class ContextImpl(
     open val contextMap: MutableMap<Class<*>, ClassContext<*>> = HashMap()
     open val dataReaderFactory: DataReaderFactory = ObjectDataReaderFactory(this, RelType.create(Any::class.java))
 
+    open fun <T> findContextOrNull(clazz: Class<T>): ClassContext<T>? = contextMap[clazz] as? ClassContext<T>
     open fun <T> findContext(clazz: Class<T>): ClassContext<T> =
         contextMap.getOrPut(clazz) {
             if (clazz.isBean) {
                 clazz as Class<Any>
-                InstanceAbleClassContext(clazz, makeBeanCreator(clazz), makeBeanInjector(clazz))
+                InstanceAbleClassContext(this, clazz)
             } else NoInstanceClassContext(clazz)
         } as ClassContext<T>
 
@@ -37,6 +38,10 @@ open class ContextImpl(
 
     override fun <T : Any> injectBean(bean: T): T =
         getBeanInjector(bean.javaClass).invoke(bean)
+
+    override fun <T : Any> forceInjectBean(bean: T): T =
+        ((findContextOrNull(bean.javaClass) as? InstanceAbleClassContext<T>)?.run { recreateBeanInjector() }
+            ?: makeBeanInjector(bean.javaClass)).invoke(bean)
 
     override fun registerClass(clazz: Class<*>) {
         findContext(clazz)

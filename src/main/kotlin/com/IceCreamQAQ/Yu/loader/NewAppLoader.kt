@@ -1,20 +1,25 @@
 package com.IceCreamQAQ.Yu.loader
 
+import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.annotation.LoadBy
 import com.IceCreamQAQ.Yu.di.BeanFactory
+import com.IceCreamQAQ.Yu.di.BindableClassContext.Companion.putBinds
 import com.IceCreamQAQ.Yu.di.ContextImpl
-import com.IceCreamQAQ.Yu.di.YuContext
-import com.IceCreamQAQ.Yu.isAbstract
+import com.IceCreamQAQ.Yu.di.NoInstanceClassContext
+import com.IceCreamQAQ.Yu.di.isBean
 import com.IceCreamQAQ.Yu.isBean
+import com.IceCreamQAQ.Yu.mapMap
+import com.IceCreamQAQ.Yu.mapOf
+import com.IceCreamQAQ.Yu.named
 import com.IceCreamQAQ.Yu.util.findClassByPackage
 import com.IceCreamQAQ.Yu.util.getOrPut
-import java.lang.reflect.Modifier
+import com.IceCreamQAQ.Yu.util.type.RelType
 
 open class NewAppLoader(
-    val classLoader: ClassLoader,
-    val context: ContextImpl,
-    val scanPackages: List<String>,
-    val classRegister: List<String>,
+    open val classLoader: ClassLoader,
+    open val context: ContextImpl,
+    open val scanPackages: List<String>,
+    open val classRegister: List<String>,
 ) {
 
     open fun load() {
@@ -34,17 +39,44 @@ open class NewAppLoader(
 
         val registers = classRegister.map { context.getBean(Class.forName(it)) as ClassRegister }
 
-
+        val bindMap = HashMap<Class<*>, MutableMap<String, Class<*>>>()
+//        val beanFactoryList = ArrayList<Class<out BeanFactory<*>>>()
 
         classes.forEach { clazz ->
-            if (BeanFactory::class.java.isAssignableFrom(clazz)) {
 
-            } else {
-//                if (clazz.isInterface || clazz.isAbstract)
+            val binds = ArrayList<Class<*>>()
+            checkAutoBind(clazz, binds)
+            binds.forEach { if (clazz.isBean) bindMap.getOrPut(it, hashMapOf())[clazz.named] = clazz }
+
+            if (BeanFactory::class.java.isAssignableFrom(clazz)) {
+                // beanFactoryList.add(clazz as Class<out BeanFactory<*>>)
+                clazz.genericInterfaces.forEach {
+                    RelType.create(it).apply {
+                        if (realClass == BeanFactory::class.java) {
+                            generics?.let {  }
+                        }
+                    }
+                }
             }
 
             registers.forEach { it.register(clazz) }
             searchLoadBy(clazz, clazz, loadItemsMap)
+        }
+
+
+
+        bindMap.mapMap { (clazz, binds) ->
+            NoInstanceClassContext(clazz).also { context.registerClass(it) } to binds
+        }.forEach { (ctx, binds) ->
+            ctx.putBinds(binds.mapMap { (named, bindClass) -> named to context.findContext(bindClass) })
+        }
+    }
+
+    open fun checkAutoBind(clazz: Class<*>, binds: ArrayList<Class<*>>) {
+        if (clazz.isInterface) if (clazz.getAnnotation(AutoBind::class.java) != null) binds.add(clazz)
+        checkAutoBind(clazz.superclass ?: return, binds)
+        for (iC in clazz.interfaces) {
+            checkAutoBind(iC, binds)
         }
     }
 

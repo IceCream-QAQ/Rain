@@ -53,7 +53,7 @@ class ReflectBeanInject<T>(
                 addAll(
                     clazz.methods
                         .filter { it.name.startsWith("set") && it.hasAnnotation<Inject>() && it.parameters.size == 1 && it.isExecutable }
-                        .map {
+                        .mapMap {
                             val named = it.annotation<Named>()
                             val dataReader = context.getDataReader(it.parameters[0].parameterizedType)
 
