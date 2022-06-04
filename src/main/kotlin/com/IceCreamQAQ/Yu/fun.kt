@@ -109,6 +109,12 @@ inline fun <E, reified R> Collection<E>.arrayMap(body: (E) -> R): Array<R?> {
     return array
 }
 
+inline fun <E, reified R> Array<out E>.arrayMap(body: (E) -> R): Array<R> {
+    val array = arrayOfNulls<R>(size)
+    forEachIndexed { i, it -> array[i] = body(it) }
+    return array as Array<R>
+}
+
 inline fun <T, R> Iterable<T>.mutableMap(transform: (T) -> R): MutableList<R> {
     return mapTo(ArrayList(if (this is Collection<*>) this.size else 10), transform)
 }

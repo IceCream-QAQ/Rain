@@ -1,6 +1,9 @@
-package com.IceCreamQAQ.Yu.di
+package com.IceCreamQAQ.Yu.di.impl
 
 import com.IceCreamQAQ.Yu.annotation
+import com.IceCreamQAQ.Yu.di.*
+import com.IceCreamQAQ.Yu.di.config.ConfigManager
+import com.IceCreamQAQ.Yu.di.config.ConfigReader
 import com.IceCreamQAQ.Yu.hasAnnotation
 import com.IceCreamQAQ.Yu.util.type.RelType
 import java.lang.reflect.Constructor
@@ -12,11 +15,34 @@ import kotlin.reflect.jvm.javaConstructor
 
 open class ContextImpl(
     val classloader: ClassLoader,
-    override val configManager: OldConfigManager
+    override val configManager: ConfigManager
 ) : YuContext {
 
     open val contextMap: MutableMap<Class<*>, ClassContext<*>> = HashMap()
     open val dataReaderFactory: DataReaderFactory = ObjectDataReaderFactory(this, RelType.create(Any::class.java))
+
+    open fun init() {
+        contextMap[ClassLoader::class.java] = NoInstanceClassContext(ClassLoader::class.java)
+            .apply {
+                putBinds("appClassloader", LocalInstanceClassContext(classloader))
+            }
+
+        contextMap[YuContext::class.java] = NoInstanceClassContext(YuContext::class.java)
+            .apply {
+                putBinds(din, LocalInstanceClassContext(this@ContextImpl).apply {
+                    contextMap[ContextImpl::class.java] = this
+                })
+            }
+        contextMap[ConfigManager::class.java] = NoInstanceClassContext(ConfigManager::class.java)
+            .apply {
+                putBinds(din, LocalInstanceClassContext(configManager).apply {
+                    contextMap[configManager::class.java] = this
+                })
+            }
+
+//        contextMap[YuContext::class.java] = LocalInstanceClassContext(this)
+//        contextMap[ConfigManager::class.java] = LocalInstanceClassContext(configManager)
+    }
 
     open fun <T> findContextOrNull(clazz: Class<T>): ClassContext<T>? = contextMap[clazz] as? ClassContext<T>
     open fun <T> findContext(clazz: Class<T>): ClassContext<T> =

@@ -8,13 +8,11 @@ import com.IceCreamQAQ.Yu.event.EventBus
 import com.IceCreamQAQ.Yu.event.events.JobRunExceptionEvent
 import com.IceCreamQAQ.Yu.fullName
 import com.IceCreamQAQ.Yu.isBean
-import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.Yu.loader.Loader
 import com.IceCreamQAQ.Yu.util.DateUtil
 import com.IceCreamQAQ.Yu.util.uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.cancel
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Method
 import java.util.*

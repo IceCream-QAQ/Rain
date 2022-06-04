@@ -1,7 +1,6 @@
 package com.IceCreamQAQ.Yu.`as`
 
 import com.IceCreamQAQ.Yu.di.YuContext
-import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.Yu.loader.Loader
 import org.slf4j.LoggerFactory
 import javax.inject.Inject

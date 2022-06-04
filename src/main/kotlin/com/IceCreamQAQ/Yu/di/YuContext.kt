@@ -1,5 +1,7 @@
 package com.IceCreamQAQ.Yu.di
 
+import com.IceCreamQAQ.Yu.di.config.ConfigManager
+
 interface YuContext {
 
     companion object {
@@ -20,7 +22,7 @@ interface YuContext {
         operator fun <T> YuContext.get(clazz: Class<T>): T? = getBean(clazz)
     }
 
-    val configManager: OldConfigManager
+    val configManager: ConfigManager
 
     fun <T> getBean(clazz: Class<T>): T? = getBean(clazz, din)
     fun <T> getBean(clazz: Class<T>, instanceName: String): T?

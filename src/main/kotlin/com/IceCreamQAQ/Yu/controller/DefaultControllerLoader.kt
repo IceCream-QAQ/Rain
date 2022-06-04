@@ -3,14 +3,12 @@ package com.IceCreamQAQ.Yu.controller
 import com.IceCreamQAQ.Yu.annotation.*
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.isBean
-import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.Yu.loader.Loader
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Method
 import java.util.regex.Pattern
 import javax.inject.Inject
 import javax.inject.Named
-import kotlin.reflect.KProperty1
 
 
 abstract class DefaultControllerLoader : Loader {

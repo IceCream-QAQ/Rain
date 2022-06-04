@@ -1,11 +1,9 @@
 package com.IceCreamQAQ.Yu.event
 
-import com.IceCreamQAQ.Yu.AppLogger
 import com.IceCreamQAQ.Yu.annotation
 import com.IceCreamQAQ.Yu.annotation.Event
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.isBean
-import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.Yu.loader.Loader
 import org.slf4j.LoggerFactory
 import javax.inject.Inject

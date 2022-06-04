@@ -1,7 +1,8 @@
-package com.IceCreamQAQ.Yu.di
+package com.IceCreamQAQ.Yu.di.impl
 
+import com.IceCreamQAQ.Yu.di.DataReader
+import com.IceCreamQAQ.Yu.di.impl.ContextImpl
 import com.IceCreamQAQ.Yu.util.type.RelType
-import java.lang.reflect.Type
 
 abstract class DataReaderFactory(val context: ContextImpl, val type: RelType<*>) {
 

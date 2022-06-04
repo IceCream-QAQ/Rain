@@ -1,4 +1,6 @@
-package com.IceCreamQAQ.Yu.di
+package com.IceCreamQAQ.Yu.di.impl
+
+import com.IceCreamQAQ.Yu.di.*
 
 
 open class BeanFactoryClassContext<T>(
@@ -29,6 +31,7 @@ open class BeanFactoryClassContext<T>(
     open fun recreateBeanFactory(): BeanFactory<T> {
         return (ctx.newBean()).also { _factory = it }
     }
+
     private val factory: BeanFactory<T>
         get() = _factory ?: recreateBeanFactory()
 
@@ -131,4 +134,30 @@ open class InstanceAbleClassContext<T>(
         return instance
     }
 
+}
+
+open class LocalInstanceClassContext<T : Any>(
+    val instance: T
+) : ClassContext<T> {
+    override val clazz: Class<T> = instance.javaClass
+    override val multi: Boolean = false
+    override val instanceAble: Boolean = false
+    override val bindAble: Boolean = false
+    override val creator: BeanCreator<T>
+        get() = error("Local 实例 ${clazz.name} 无法提供 Creator!")
+    override val injector: BeanInjector<T>
+        get() = error("Local 实例无法提供 Injector!")
+
+    override fun newBean(): T = error("Local 实例 ${clazz.name} 无法创建新的 Bean!")
+
+    override fun getBean(): T? = instance
+
+    override fun getBean(name: String): T? =
+        if (name == din) instance else error("Local 实例 ${clazz.name} 无法提供名为 $name 的 Bean!")
+
+    override fun putBean(name: String, instance: T): T = error("Local 实例 ${clazz.name} 无法保存新的 Bean!")
+
+    override fun putBinds(name: String, cc: ClassContext<out T>) {
+        error("Local 实例 ${clazz.name} 无法关联类型 $name: ${cc.clazz.name}!")
+    }
 }

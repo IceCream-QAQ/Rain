@@ -1,6 +1,5 @@
 package com.icecreamqaq.test.yu
 
-import com.IceCreamQAQ.Yu.DefaultStarter
 import com.IceCreamQAQ.Yu.loader.AppClassloader
 
 class TestStarter {
