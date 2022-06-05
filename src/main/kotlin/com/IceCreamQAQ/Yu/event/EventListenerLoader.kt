@@ -4,6 +4,7 @@ import com.IceCreamQAQ.Yu.annotation
 import com.IceCreamQAQ.Yu.annotation.Event
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.isBean
+import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.Yu.loader.Loader
 import org.slf4j.LoggerFactory
 import javax.inject.Inject
@@ -24,14 +25,14 @@ open class EventListenerLoader : Loader {
     override fun load(items: Map<String, LoadItem>) {
 
         for (item in items.values) {
-            if (!item.type.isBean()) continue
-            log.debug("Register EventListener: ${item.type.name}.")
+            if (!item.clazz.isBean()) continue
+            log.debug("Register EventListener: ${item.clazz.name}.")
             try {
-                register(item.type, context.getBean(item.type, "")!!)
-                log.info("Register EventListener: ${item.type.name} Success!")
+                register(item.clazz, context.getBean(item.clazz, "")!!)
+                log.info("Register EventListener: ${item.clazz.name} Success!")
             } catch (e: Exception) {
                 e.printStackTrace()
-                log.error("Register EventListener: ${item.type.name} Fail!", e)
+                log.error("Register EventListener: ${item.clazz.name} Fail!", e)
             }
         }
     }

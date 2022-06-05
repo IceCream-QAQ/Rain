@@ -38,7 +38,7 @@ class EhcacheHelpFactory : BeanFactory<EhcacheHelp<*>?>, ApplicationService {
     private var cm: CacheManager? = null
 
     @Inject
-    private lateinit var configManager: ConfigManagerDefaultImpl
+    private lateinit var configManager: CacheManager
 
     @Inject
     private lateinit var context: YuContext

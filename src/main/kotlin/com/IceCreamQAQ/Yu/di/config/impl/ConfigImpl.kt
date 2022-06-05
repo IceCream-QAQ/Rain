@@ -8,6 +8,11 @@ class ConfigImpl(
     val runMode: String?,
     val launchPackage: String
 ) : ConfigManager {
+
+    fun init(): ConfigImpl {
+        return this
+    }
+
     override fun <T> getConfigReader(): ConfigReader<T> {
         TODO("Not yet implemented")
     }

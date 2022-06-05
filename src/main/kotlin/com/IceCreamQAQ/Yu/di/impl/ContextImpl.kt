@@ -1,6 +1,7 @@
 package com.IceCreamQAQ.Yu.di.impl
 
 import com.IceCreamQAQ.Yu.annotation
+import com.IceCreamQAQ.Yu.annotation.CreateByPrimaryConstructor
 import com.IceCreamQAQ.Yu.di.*
 import com.IceCreamQAQ.Yu.di.config.ConfigManager
 import com.IceCreamQAQ.Yu.di.config.ConfigReader
@@ -21,7 +22,7 @@ open class ContextImpl(
     open val contextMap: MutableMap<Class<*>, ClassContext<*>> = HashMap()
     open val dataReaderFactory: DataReaderFactory = ObjectDataReaderFactory(this, RelType.create(Any::class.java))
 
-    open fun init() {
+    open fun init(): ContextImpl {
         contextMap[ClassLoader::class.java] = NoInstanceClassContext(ClassLoader::class.java)
             .apply {
                 putBinds("appClassloader", LocalInstanceClassContext(classloader))
@@ -42,6 +43,7 @@ open class ContextImpl(
 
 //        contextMap[YuContext::class.java] = LocalInstanceClassContext(this)
 //        contextMap[ConfigManager::class.java] = LocalInstanceClassContext(configManager)
+        return this
     }
 
     open fun <T> findContextOrNull(clazz: Class<T>): ClassContext<T>? = contextMap[clazz] as? ClassContext<T>
@@ -92,11 +94,11 @@ open class ContextImpl(
         findContext(clazz).injector
 
     open fun <T : Any> makeBeanCreator(clazz: Class<T>): BeanCreator<T> {
-        val hasInjectOnClass = clazz.hasAnnotation<Inject>()
+        val createByPrimaryConstructor = clazz.hasAnnotation<CreateByPrimaryConstructor>()
         val isKClass = clazz.hasAnnotation<Metadata>()
 
         var constructor: Constructor<T>? = null
-        if (hasInjectOnClass && isKClass)
+        if (createByPrimaryConstructor && isKClass)
             constructor = clazz.kotlin
                 .primaryConstructor
                 ?.let { if (it.visibility == KVisibility.PUBLIC) it else null }

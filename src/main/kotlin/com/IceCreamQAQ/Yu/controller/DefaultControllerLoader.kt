@@ -2,7 +2,9 @@ package com.IceCreamQAQ.Yu.controller
 
 import com.IceCreamQAQ.Yu.annotation.*
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.di.YuContext.Companion.get
 import com.IceCreamQAQ.Yu.isBean
+import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.Yu.loader.Loader
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Method
@@ -27,10 +29,10 @@ abstract class DefaultControllerLoader : Loader {
     override fun load(items: Map<String, LoadItem>) {
         val rootRouters = HashMap<String, RootRouter>()
         for (item in items.values) {
-            if (!item.type.isBean()) continue
-            val clazz = item.type
+            if (!item.clazz.isBean()) continue
+            val clazz = item.clazz
             val name = clazz.getAnnotation(Named::class.java)?.value
-                    ?: item.loadBy::class.java.interfaces[0].getAnnotation(Named::class.java)?.value ?: continue
+                    ?: item.annotation?.javaClass?.let { it.interfaces[0].getAnnotation(Named::class.java)?.value } ?: continue
             val rootRouter = rootRouters[name] ?: {
                 val r = RootRouter()
                 rootRouters[name] = r

@@ -1,6 +1,8 @@
 package com.IceCreamQAQ.Yu.`as`
 
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.di.YuContext.Companion.get
+import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.Yu.loader.Loader
 import org.slf4j.LoggerFactory
 import javax.inject.Inject
@@ -16,7 +18,7 @@ class AsLoader : Loader {
     override fun load(items: Map<String, LoadItem>) {
         val list = ArrayList<ApplicationService>()
         for (item in items.values) {
-            val a = context[item.type] as? ApplicationService ?: continue
+            val a = context[item.clazz] as? ApplicationService ?: continue
             list.add(a)
         }
         val instances = list.toTypedArray()

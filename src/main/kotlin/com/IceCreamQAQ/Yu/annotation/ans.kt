@@ -8,6 +8,7 @@ import com.IceCreamQAQ.Yu.loader.Loader
 import kotlin.reflect.KClass
 
 annotation class MultiInstance
+annotation class CreateByPrimaryConstructor
 
 
 annotation class With(val value: Array<KClass<*>>)
