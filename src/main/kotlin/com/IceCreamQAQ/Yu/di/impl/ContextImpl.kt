@@ -2,6 +2,7 @@ package com.IceCreamQAQ.Yu.di.impl
 
 import com.IceCreamQAQ.Yu.annotation
 import com.IceCreamQAQ.Yu.annotation.CreateByPrimaryConstructor
+import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.di.*
 import com.IceCreamQAQ.Yu.di.config.ConfigManager
 import com.IceCreamQAQ.Yu.di.config.ConfigReader
@@ -94,7 +95,7 @@ open class ContextImpl(
         findContext(clazz).injector
 
     open fun <T : Any> makeBeanCreator(clazz: Class<T>): BeanCreator<T> {
-        val createByPrimaryConstructor = clazz.hasAnnotation<CreateByPrimaryConstructor>()
+        val createByPrimaryConstructor = !clazz.hasAnnotation<NotSearch>()
         val isKClass = clazz.hasAnnotation<Metadata>()
 
         var constructor: Constructor<T>? = null

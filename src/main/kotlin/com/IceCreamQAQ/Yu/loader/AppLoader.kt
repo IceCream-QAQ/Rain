@@ -17,7 +17,7 @@ import com.IceCreamQAQ.Yu.util.type.RelType
 import javax.inject.Inject
 import javax.inject.Named
 
-open class AppLoader @Inject constructor(
+open class AppLoader(
     @Named("appClassloader")
     open val classLoader: ClassLoader,
     open val context: ContextImpl,
@@ -31,7 +31,7 @@ open class AppLoader @Inject constructor(
 
     open fun load() {
         modules.forEach {
-            context.getBean(Class.forName(it,true,classLoader) as Class<out Module>)!!.onLoad()
+            context.getBean(Class.forName(it, true, classLoader) as Class<out Module>)!!.onLoad()
         }
 
         val classes = HashSet<Class<*>>()
