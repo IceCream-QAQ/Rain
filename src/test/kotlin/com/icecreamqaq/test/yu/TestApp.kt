@@ -3,6 +3,7 @@ package com.icecreamqaq.test.yu
 import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.controller.DefaultActionContext
 import com.IceCreamQAQ.Yu.controller.Router
+import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.event.EventListenerLoader
 //import com.IceCreamQAQ.Yu.controller.RoutersMap
 import com.IceCreamQAQ.Yu.hook.HookMethod
@@ -11,12 +12,14 @@ import kotlinx.coroutines.runBlocking
 import kotlin.collections.HashMap
 
 @NotSearch
-class TestApp : DefaultApp() {
+class TestApp {
 
-    override fun start() {
-        loader.loaderRewrite[EventListenerLoader::class.java] = TestRewriteEventListenerLoader::class.java
-        super.start()
-    }
+//    override fun start() {
+//        loader.loaderRewrite[EventListenerLoader::class.java] = TestRewriteEventListenerLoader::class.java
+//        super.start()
+//    }
+
+    private lateinit var context:YuContext
 
     fun test() {
 //        val test = this.context.getBean(TestUtil::class.java, "123")
