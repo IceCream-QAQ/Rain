@@ -235,7 +235,10 @@ open class YuContext(val manager: ConfigManager, logger: AppLogger) : ClassRegis
      *
      * @param bean 具体的bean
      */
-    open fun populateBean(bean: Any) {
+    fun populateBean(bean: Any) = injectBean(bean)
+
+    @Deprecated("过时方法，使用populateBean代替", replaceWith = ReplaceWith("populateBean(bean)"))
+    protected fun injectBean(bean: Any) {
         var clazz: Class<*>? = bean.javaClass
 
         val fields = mutableListOf<Field>()
