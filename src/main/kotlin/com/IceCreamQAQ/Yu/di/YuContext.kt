@@ -227,6 +227,7 @@ open class YuContext(val manager: ConfigManager, logger: AppLogger) : ClassRegis
 
     protected open fun checkAutoBind(clazz: Class<*>?, name: String, obj: Any) {
         val autoBind = clazz?.getAnnotation(AutoBind::class.java)
+        populateBean("te")
         if (autoBind != null) putBean(clazz, name, obj)
     }
 
@@ -235,7 +236,10 @@ open class YuContext(val manager: ConfigManager, logger: AppLogger) : ClassRegis
      *
      * @param bean 具体的bean
      */
-    open fun populateBean(bean: Any) {
+    fun populateBean(bean: Any) = injectBean(bean)
+
+    @Deprecated("过时方法，使用populateBean代替", replaceWith = ReplaceWith("populateBean(bean)"))
+    protected fun injectBean(bean: Any) {
         var clazz: Class<*>? = bean.javaClass
 
         val fields = mutableListOf<Field>()
