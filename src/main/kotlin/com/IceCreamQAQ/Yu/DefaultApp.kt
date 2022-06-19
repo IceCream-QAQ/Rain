@@ -5,7 +5,6 @@ import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.di.ConfigManagerDefaultImpl
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.event.EventBus
-import com.IceCreamQAQ.Yu.event.EventBusImpl
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent
 import com.IceCreamQAQ.Yu.event.events.AppStopEvent
 import com.IceCreamQAQ.Yu.loader.AppLoader
@@ -24,7 +23,7 @@ open class DefaultApp {
     @Inject
     lateinit var asLoader: AsLoader
 
-    val context:YuContext
+    val context: YuContext
 
     lateinit var eventBus: EventBus
 
@@ -37,15 +36,15 @@ open class DefaultApp {
 
         context.putBean(ClassLoader::class.java, "appClassLoader", appClassloader)
 
-        context.injectBean(this)
+        context.populateBean(this)
     }
 
     @Inject
-    open fun init(){
+    open fun init() {
         moduleManager.loadModule()
     }
 
-    open fun start(){
+    open fun start() {
         loader.load()
         asLoader.start()
 
@@ -55,33 +54,45 @@ open class DefaultApp {
         Runtime.getRuntime().addShutdownHook(Thread { stop() })
     }
 
-    open fun stop(){
+    open fun stop() {
         eventBus.post(AppStopEvent())
         asLoader.stop()
     }
 
-    class PrintAppLog : AppLogger{
+    class PrintAppLog : AppLogger {
+        private var parent: AppLogger? = null
+        override fun getParent(): AppLogger? = parent
+
+        override fun setParent(parent: AppLogger?) {
+            this.parent = parent
+        }
+
         override fun logDebug(title: String?, body: String?): Int {
+            parent?.logDebug(title, body)
             println("------ Log Debug ------:: $title\t\t: $body")
             return 0
         }
 
         override fun logInfo(title: String?, body: String?): Int {
+            parent?.logInfo(title, body)
             println("------ Log Info ------:: $title\t\t: $body")
             return 0
         }
 
         override fun logWarning(title: String?, body: String?): Int {
+            parent?.logWarning(title, body)
             println("------ Log Warning ------:: $title\t\t: $body")
             return 0
         }
 
         override fun logError(title: String?, body: String?): Int {
+            parent?.logError(title, body)
             System.err.println("------ Log Error ------:: $title\t\t: $body")
             return 0
         }
 
         override fun logFatal(title: String?, body: String?): Int {
+            parent?.logFatal(title, body)
             System.err.println("------ Log Error ------:: $title\t\t: $body")
             return 0
         }
