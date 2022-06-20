@@ -1,7 +1,5 @@
 package com.IceCreamQAQ.Yu.util.classMaker
 
-import com.IceCreamQAQ.Yu.util.*
-
 open class ClassMaker @JvmOverloads constructor(
     val name: String,
     override var access: Access = Access.PUBLIC,

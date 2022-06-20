@@ -38,7 +38,7 @@ class AsLoader : Loader {
         for (instance in instances) {
             try {
                 log.debug("Init ApplicationService: ${instance::class.simpleName}.")
-                context.injectBean(instance)
+                context.populateBean(instance)
                 instance.init()
                 log.info("Init ApplicationService: ${instance::class.simpleName} Success!")
             } catch (e: Exception) {
@@ -52,7 +52,7 @@ class AsLoader : Loader {
         for (instance in instances) {
             try {
                 log.debug("Start ApplicationService: ${instance::class.simpleName}.")
-                context.injectBean(instance)
+                context.populateBean(instance)
                 instance.start()
                 log.info("Start ApplicationService: ${instance::class.simpleName} Success!")
             } catch (e: Exception) {

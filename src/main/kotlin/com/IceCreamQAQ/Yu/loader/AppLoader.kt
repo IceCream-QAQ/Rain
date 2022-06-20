@@ -99,7 +99,7 @@ open class AppLoader {
 //            }
 
             for (hook in YuHook.getRunnables()) {
-                context.injectBean(hook)
+                context.populateBean(hook)
             }
         } catch (e: Exception) {
             throw RuntimeException("程序初始化失败！", e)

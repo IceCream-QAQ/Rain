@@ -29,7 +29,7 @@ class DefaultStarter {
             val appClass = appClassLoader.loadClass("com.IceCreamQAQ.Yu.DefaultApp")
             val startMethod = appClass.getMethod("start")
 
-            val app = appClass.newInstance()
+            val app = appClass.getDeclaredConstructor().newInstance()
             startMethod.invoke(app)
         }
 
