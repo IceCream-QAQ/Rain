@@ -60,7 +60,7 @@ open class EventListenerLoader : Loader {
         }
     }
 
-    override fun width(): Int {
+    override fun priority(): Int {
         return 10
     }
 }

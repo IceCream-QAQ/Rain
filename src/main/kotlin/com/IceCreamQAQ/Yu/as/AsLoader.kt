@@ -75,6 +75,6 @@ class AsLoader : Loader {
         }
     }
 
-    override fun width(): Int = 2
+    override fun priority(): Int = 2
 
 }
