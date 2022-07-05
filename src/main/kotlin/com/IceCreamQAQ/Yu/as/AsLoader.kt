@@ -4,7 +4,9 @@ import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.Yu.loader.Loader
 import org.slf4j.LoggerFactory
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 class AsLoader : Loader {
 
@@ -22,17 +24,7 @@ class AsLoader : Loader {
         }
         val instances = list.toTypedArray()
 
-        for (i in instances.indices) {
-            for (j in 0 until instances.size - 1 - i) {
-                val c = instances[j]
-                val n = instances[j + 1]
-                if (c.width() > n.width()) {
-                    instances[j] = n
-                    instances[j + 1] = c
-                }
-            }
-        }
-
+        Arrays.sort(instances) { a, b -> a.priority() - b.priority() }
         this.instances = instances
 
         for (instance in instances) {

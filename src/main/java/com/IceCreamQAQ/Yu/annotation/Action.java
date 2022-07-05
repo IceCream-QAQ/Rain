@@ -12,6 +12,6 @@ public @interface Action {
     String value();
     boolean prefix() default true;
     boolean suffix() default true;
-    int loadWeight() default 0;
+    int loadPriority() default 0;
 
 }
