@@ -11,7 +11,7 @@ data class DoCatch(val catch: Catch, val invoker: CatchInvoker)
 data class ActionMap(
     val action: Action,
     val method: Method,
-    val priority: Int = action.loadPriority
+    val priority: Int = if (action.loadPriority != 0) action.loadPriority else action.loadWeight
 ) : Comparable<ActionMap> {
     override fun compareTo(other: ActionMap): Int = this.priority - other.priority
 }
