@@ -69,4 +69,7 @@ class AsLoader : Loader {
 
     override fun priority(): Int = 2
 
+    @Deprecated("过时方法", ReplaceWith("priority"))
+    fun width(): Int = priority()
+
 }
