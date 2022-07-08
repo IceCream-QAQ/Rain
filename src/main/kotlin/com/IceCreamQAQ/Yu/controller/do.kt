@@ -8,10 +8,16 @@ import java.lang.reflect.Method
 
 data class DoMethod<T : Annotation, I>(val annotation: T, val invoker: I)
 data class DoCatch(val catch: Catch, val invoker: CatchInvoker)
-data class ActionMap(val action: Action, val method: Method, val weight: Int = action.loadWeight)
+data class ActionMap(
+    val action: Action,
+    val method: Method,
+    val priority: Int = if (action.loadPriority != 0) action.loadPriority else action.loadWeight
+) : Comparable<ActionMap> {
+    override fun compareTo(other: ActionMap): Int = this.priority - other.priority
+}
 
 data class InterceptorInfo(
-        val befores: MutableList<DoMethod<Before, MethodInvoker>>,
-        val afters: MutableList<DoMethod<After, MethodInvoker>>,
-        val catchs: MutableList<DoMethod<Catch, CatchInvoker>>
+    val befores: MutableList<DoMethod<Before, MethodInvoker>>,
+    val afters: MutableList<DoMethod<After, MethodInvoker>>,
+    val catchs: MutableList<DoMethod<Catch, CatchInvoker>>
 )

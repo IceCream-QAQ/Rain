@@ -7,10 +7,8 @@ import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.Yu.loader.Loader
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Method
-import java.util.regex.Pattern
 import javax.inject.Inject
 import javax.inject.Named
-import kotlin.reflect.KProperty1
 
 
 abstract class DefaultControllerLoader : Loader {
@@ -32,7 +30,7 @@ abstract class DefaultControllerLoader : Loader {
     protected abstract fun createActionInvoker(level: Int, actionMethod: Method, instance: Any): DefaultActionInvoker
 
     override fun load(items: Map<String, LoadItem>) {
-        val rootRouters = HashMap<String, RootRouter>()
+        val rootRouters = mutableMapOf<String, RootRouter>()
         for (item in items.values) {
             if (!item.type.isBean()) continue
             val clazz = item.type
@@ -43,53 +41,53 @@ abstract class DefaultControllerLoader : Loader {
             controllerToRouter(clazz, context[clazz] ?: continue, rootRouter)
         }
 
-//        for (rrd in rootRouters.values) {
-//            val beforeList = rrd.globalBeforeList
-//            val afterList = rrd.globalAfterList
-//            val cacheList = rrd.globalCatchList
-//
-//            for (i in 0 until beforeList.size) {
-//                for (j in 0 until beforeList.size - 1 - i) {
-//                    val c = beforeList[j]
-//                    val n = beforeList[j + 1]
-//                    if ((c.annotation as Before).weight > (n.annotation as Before).weight) {
-//                        beforeList[j] = n
-//                        beforeList[j + 1] = c
-//                    }
-//                }
-//            }
-//
-//            for (i in 0 until afterList.size) {
-//                for (j in 0 until afterList.size - 1 - i) {
-//                    val c = afterList[j]
-//                    val n = afterList[j + 1]
-//                    if ((c.annotation as After).weight > (n.annotation as After).weight) {
-//                        afterList[j] = n
-//                        afterList[j + 1] = c
-//                    }
-//                }
-//            }
-//
-//            for (i in 0 until cacheList.size) {
-//                for (j in 0 until cacheList.size - 1 - i) {
-//                    val c = cacheList[j]
-//                    val n = cacheList[j + 1]
-//                    if (c.catch.weight > n.catch.weight) {
-//                        cacheList[j] = n
-//                        cacheList[j + 1] = c
-//                    }
-//                }
-//            }
-//
-//            val befores = rrd.globalBefores
-//            for (before in beforeList) befores.add(before.invoker)
-//
-//            val afters = rrd.globalAfters
-//            for (after in afterList) afters.add(after.invoker)
-//
-//            val catchs = rrd.globalCatchs
-//            for (catch in cacheList) catchs.add(catch.invoker)
-//        }
+        // for (rrd in rootRouters.values) {
+        //     val beforeList = rrd.globalBeforeList
+        //     val afterList = rrd.globalAfterList
+        //     val cacheList = rrd.globalCatchList
+        //
+        //     for (i in 0 until beforeList.size) {
+        //         for (j in 0 until beforeList.size - 1 - i) {
+        //             val c = beforeList[j]
+        //             val n = beforeList[j + 1]
+        //             if ((c.annotation as Before).weight > (n.annotation as Before).weight) {
+        //                 beforeList[j] = n
+        //                 beforeList[j + 1] = c
+        //             }
+        //         }
+        //     }
+        //
+        //     for (i in 0 until afterList.size) {
+        //         for (j in 0 until afterList.size - 1 - i) {
+        //             val c = afterList[j]
+        //             val n = afterList[j + 1]
+        //             if ((c.annotation as After).weight > (n.annotation as After).weight) {
+        //                 afterList[j] = n
+        //                 afterList[j + 1] = c
+        //             }
+        //         }
+        //     }
+        //
+        //     for (i in 0 until cacheList.size) {
+        //         for (j in 0 until cacheList.size - 1 - i) {
+        //             val c = cacheList[j]
+        //             val n = cacheList[j + 1]
+        //             if (c.catch.weight > n.catch.weight) {
+        //                 cacheList[j] = n
+        //                 cacheList[j + 1] = c
+        //             }
+        //         }
+        //     }
+        //
+        //     val befores = rrd.globalBefores
+        //     for (before in beforeList) befores.add(before.invoker)
+        //
+        //     val afters = rrd.globalAfters
+        //     for (after in afterList) afters.add(after.invoker)
+        //
+        //     val catchs = rrd.globalCatchs
+        //     for (catch in cacheList) catchs.add(catch.invoker)
+        // }
 
         for ((k, v) in rootRouters) {
             v.router.init(v)
@@ -104,17 +102,13 @@ abstract class DefaultControllerLoader : Loader {
     }
 
 
-    val p = Pattern.compile("\\{(.*?)}")
-
-//    open
-
     open fun controllerToRouter(controllerClass: Class<*>, instance: Any, rootRouterData: RootRouter) {
         val rootRouter = rootRouterData.router as RouterImpl
         val globalBeforeList = rootRouterData.interceptorInfo.befores
         val globalAfterList = rootRouterData.interceptorInfo.afters
         val globalCatchList = rootRouterData.interceptorInfo.catchs
 
-//        val controllerClass = instance::class.java
+        // val controllerClass = instance::class.java
 
         val controllerRouter = getRouterByPathString(
             rootRouter,
@@ -124,18 +118,19 @@ abstract class DefaultControllerLoader : Loader {
             0
         ).router
 
-        val allMethods = ArrayList<Method>()
+        val allMethods = mutableListOf<Method>()
         getMethods(allMethods, controllerClass)
         val with = controllerClass.getAnnotation(With::class.java)?.value
-        if (with != null)
+        if (with != null) {
             for (kClass in with) {
                 getMethods(allMethods, kClass.java)
             }
+        }
 
         val methods = controllerClass.methods
-        val befores = ArrayList<DoMethod<Before, MethodInvoker>>()
-        val afters = ArrayList<DoMethod<After, MethodInvoker>>()
-        val catchs = ArrayList<DoMethod<Catch, CatchInvoker>>()
+        val befores = mutableListOf<DoMethod<Before, MethodInvoker>>()
+        val afters = mutableListOf<DoMethod<After, MethodInvoker>>()
+        val catchs = mutableListOf<DoMethod<Catch, CatchInvoker>>()
 
         for (method in allMethods) {
             val before = method.getAnnotation(Before::class.java)
@@ -164,114 +159,105 @@ abstract class DefaultControllerLoader : Loader {
 
         val interceptorInfo = InterceptorInfo(befores, afters, catchs)
 
-//        for (i in 0 until befores.size) {
-//            for (j in 0 until befores.size - 1 - i) {
-//                val c = befores[j]
-//                val n = befores[j + 1]
-//                if ((c.annotation as Before).weight > (n.annotation as Before).weight) {
-//                    befores[j] = n
-//                    befores[j + 1] = c
-//                }
-//            }
-//        }
-//
-//        for (i in 0 until afters.size) {
-//            for (j in 0 until afters.size - 1 - i) {
-//                val c = afters[j]
-//                val n = afters[j + 1]
-//                if ((c.annotation as After).weight > (n.annotation as After).weight) {
-//                    afters[j] = n
-//                    afters[j + 1] = c
-//                }
-//            }
-//        }
-//
-//        for (i in 0 until catchs.size) {
-//            for (j in 0 until catchs.size - 1 - i) {
-//                val c = catchs[j]
-//                val n = catchs[j + 1]
-//                if (c.catch.weight > n.catch.weight) {
-//                    catchs[j] = n
-//                    catchs[j + 1] = c
-//                }
-//            }
-//        }
+        // for (i in 0 until befores.size) {
+        //     for (j in 0 until befores.size - 1 - i) {
+        //         val c = befores[j]
+        //         val n = befores[j + 1]
+        //         if ((c.annotation as Before).weight > (n.annotation as Before).weight) {
+        //             befores[j] = n
+        //             befores[j + 1] = c
+        //         }
+        //     }
+        // }
+        //
+        // for (i in 0 until afters.size) {
+        //     for (j in 0 until afters.size - 1 - i) {
+        //         val c = afters[j]
+        //         val n = afters[j + 1]
+        //         if ((c.annotation as After).weight > (n.annotation as After).weight) {
+        //             afters[j] = n
+        //             afters[j + 1] = c
+        //         }
+        //     }
+        // }
+        //
+        // for (i in 0 until catchs.size) {
+        //     for (j in 0 until catchs.size - 1 - i) {
+        //         val c = catchs[j]
+        //         val n = catchs[j + 1]
+        //         if (c.catch.weight > n.catch.weight) {
+        //             catchs[j] = n
+        //             catchs[j + 1] = c
+        //         }
+        //     }
+        // }
 
-        val actionMap = ArrayList<ActionMap>()
-        for (method in methods) actionMap.add(ActionMap(method.getAnnotation(Action::class.java) ?: continue, method))
+        val actionMapList = mutableListOf<ActionMap>()
+        for (method in methods) actionMapList.add(ActionMap(method.getAnnotation(Action::class.java) ?: continue, method))
 
-        for (i in 0 until actionMap.size) {
-            for (j in 0 until actionMap.size - 1 - i) {
-                val c = actionMap[j]
-                val n = actionMap[j + 1]
-                if (c.weight > n.weight) {
-                    actionMap[j] = n
-                    actionMap[j + 1] = c
-                }
-            }
-        }
+        actionMapList.sort()
 
 
-//        val before = befores.toTypedArray()
-        for (am in actionMap) {
+        // val before = befores.toTypedArray()
+        for (am in actionMapList) {
             val method = am.method
             val action = am.action
-//            val actionMethodName = method.name
+            // val actionMethodName = method.name
 
             val path = method.getAnnotation(ActionBy::class.java)
                 ?.let { context[it.value.java]?.getPath(controllerClass, method, instance) }
                 ?: action.value
-//                val aa = getActionRouter(path, controllerRouter, rootRouter)
-//                val actionRootRouter = aa.router
-//                val actionPath = aa.path
-
-//                val methodInvoker = createMethodInvoker(instance, method)
-//                actionInvoker.invoker = methodInvoker
-
-//            val abs = ArrayList<MethodInvoker>()
-//            w@ for ((before, invoker) in befores) {
-//                before as Before
-//                if (before.except.size != 1 || before.except[0] != "") for (s in before.except) {
-//                    if (s == actionMethodName) continue@w
-//                }
-//                if (before.only.size != 1 || before.only[0] != "") for (s in before.only) {
-//                    if (s != actionMethodName) continue@w
-//                }
-//                abs.add(invoker)
-//            }
-//            val aas = ArrayList<MethodInvoker>()
-//            w@ for ((after, invoker) in afters) {
-//                after as After
-//                if (after.except.size != 1 || after.except[0] != "") for (s in after.except) {
-//                    if (s == actionMethodName) continue@w
-//                }
-//                if (after.only.size != 1 || after.only[0] != "") for (s in after.only) {
-//                    if (s != actionMethodName) continue@w
-//                }
-//                aas.add(invoker)
-//            }
-//            val acs = ArrayList<CatchInvoker>()
-//            w@ for ((catch, invoker) in catchs) {
-//                if (catch.except.size != 1 || catch.except[0] != "") for (s in catch.except) {
-//                    if (s == actionMethodName) continue@w
-//                }
-//                if (catch.only.size != 1 || catch.only[0] != "") for (s in catch.only) {
-//                    if (s != actionMethodName) continue@w
-//                }
-//                acs.add(invoker)
-//            }
+            //     val aa = getActionRouter(path, controllerRouter, rootRouter)
+            //     val actionRootRouter = aa.router
+            //     val actionPath = aa.path
+            //
+            //     val methodInvoker = createMethodInvoker(instance, method)
+            //     actionInvoker.invoker = methodInvoker
+            //
+            //    val abs = ArrayList<MethodInvoker>()
+            // w@ for ((before, invoker) in befores) {
+            //     before as Before
+            //     if (before.except.size != 1 || before.except[0] != "") for (s in before.except) {
+            //         if (s == actionMethodName) continue@w
+            //     }
+            //     if (before.only.size != 1 || before.only[0] != "") for (s in before.only) {
+            //         if (s != actionMethodName) continue@w
+            //     }
+            //     abs.add(invoker)
+            // }
+            // val aas = ArrayList<MethodInvoker>()
+            // w@ for ((after, invoker) in afters) {
+            //     after as After
+            //     if (after.except.size != 1 || after.except[0] != "") for (s in after.except) {
+            //         if (s == actionMethodName) continue@w
+            //     }
+            //     if (after.only.size != 1 || after.only[0] != "") for (s in after.only) {
+            //         if (s != actionMethodName) continue@w
+            //     }
+            //     aas.add(invoker)
+            // }
+            // val acs = ArrayList<CatchInvoker>()
+            // w@ for ((catch, invoker) in catchs) {
+            //     if (catch.except.size != 1 || catch.except[0] != "") for (s in catch.except) {
+            //         if (s == actionMethodName) continue@w
+            //     }
+            //     if (catch.only.size != 1 || catch.only[0] != "") for (s in catch.only) {
+            //         if (s != actionMethodName) continue@w
+            //     }
+            //     acs.add(invoker)
+            // }
 
 
             val actionInvoker = getActionInvoker(path, controllerRouter, rootRouter, method, instance)
 
             actionInvoker.interceptorInfo = interceptorInfo
-//            actionInvoker.globalBefores = rootRouterData.globalBefores
-//            actionInvoker.globalAfters = rootRouterData.globalAfters
-//            actionInvoker.globalCatchs = rootRouterData.globalCatchs
-
-//            actionInvoker.befores = abs.toTypedArray()
-//            actionInvoker.afters = aas.toTypedArray()
-//            actionInvoker.catchs = acs.toTypedArray()
+            // actionInvoker.globalBefores = rootRouterData.globalBefores
+            // actionInvoker.globalAfters = rootRouterData.globalAfters
+            // actionInvoker.globalCatchs = rootRouterData.globalCatchs
+            //
+            // actionInvoker.befores = abs.toTypedArray()
+            // actionInvoker.afters = aas.toTypedArray()
+            // actionInvoker.catchs = acs.toTypedArray()
 
             val synonym = method.getAnnotation(Synonym::class.java) ?: continue
             for (s in
@@ -282,13 +268,13 @@ abstract class DefaultControllerLoader : Loader {
                 val sai = getActionInvoker(s, controllerRouter, rootRouter, method, instance)
 
                 sai.interceptorInfo = interceptorInfo
-//                sai.globalBefores = rootRouterData.globalBefores
-//                sai.globalAfters = rootRouterData.globalAfters
-//                sai.globalCatchs = rootRouterData.globalCatchs
-
-//                sai.befores = abs.toTypedArray()
-//                sai.afters = aas.toTypedArray()
-//                sai.catchs = acs.toTypedArray()
+                // sai.globalBefores = rootRouterData.globalBefores
+                // sai.globalAfters = rootRouterData.globalAfters
+                // sai.globalCatchs = rootRouterData.globalCatchs
+                //
+                // sai.befores = abs.toTypedArray()
+                // sai.afters = aas.toTypedArray()
+                // sai.catchs = acs.toTypedArray()
             }
 
         }
@@ -445,7 +431,7 @@ abstract class DefaultControllerLoader : Loader {
 
     fun getRouterByPathString(router: RouterImpl, paths: List<String>?, lessLevel: Int): ActionRouterAndPath {
         if (paths == null) return ActionRouterAndPath(router, "")
-//        val paths = pathString.split(*separationCharacter)
+        // val paths = pathString.split(*separationCharacter)
         var finishRouter = router
         val length = paths.size - lessLevel
         for (i in 0 until length) {

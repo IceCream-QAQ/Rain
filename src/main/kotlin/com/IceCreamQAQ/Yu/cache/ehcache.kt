@@ -1,3 +1,5 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package com.IceCreamQAQ.Yu.cache
 
 import com.IceCreamQAQ.Yu.`as`.ApplicationService
@@ -45,7 +47,6 @@ class EhcacheHelp<T>(private val cache: Cache) : Iterable<Map.Entry<String, T>> 
 
     override fun iterator(): Iterator<Map.Entry<String, T>> {
         return object : Iterator<Map.Entry<String, T>> {
-            //            val iter =
             val keys = cache.keys.iterator()
 
             inner class Entry<T>(override val key: String, override val value: T) : Map.Entry<String, T>
@@ -78,11 +79,11 @@ class EhcacheHelpFactory : BeanFactory<EhcacheHelp<*>?>, ApplicationService {
 
     private var cmDefaultMap = ConcurrentHashMap<String, CacheManager>()
 
-    override fun width() = 5
+    override fun priority() = 5
 
     override fun createBean(clazz: Class<EhcacheHelp<*>?>, name: String): EhcacheHelp<*>? {
-        val cache = cm?.getCache(name) ?: {
-            val cm = cmDefaultMap[name] ?: {
+        val cache = cm?.getCache(name) ?: run {
+            val cm1 = cmDefaultMap[name] ?: run {
                 val location = configManager.get("yu.cache.ehcache.caches.$name.default", String::class.java)
                 if (location != null) {
                     val url = classLoader.getResource(location)
@@ -98,14 +99,14 @@ class EhcacheHelpFactory : BeanFactory<EhcacheHelp<*>?>, ApplicationService {
                     println("location: $name is null")
                     null
                 }
-            }()
-            cm?.getCache(name)
-        }() ?: return null
+            }
+            cm1?.getCache(name)
+        } ?: return null
         return EhcacheHelp<Any>(cache)
     }
 
     override fun init() {
-//        context.register(EhcacheHelp::class.java, true)
+        // context.register(EhcacheHelp::class.java, true)
 
         val url = javaClass.classLoader.getResource(ehcacheConfigLocation) ?: return
         cm = CacheManager.newInstance(url)
@@ -121,7 +122,5 @@ class EhcacheHelpFactory : BeanFactory<EhcacheHelp<*>?>, ApplicationService {
             cache.shutdown()
         }
     }
-
-
 }
 
