@@ -24,7 +24,7 @@ class AsLoader : Loader {
         }
         val instances = list.toTypedArray()
 
-        Arrays.sort(instances) { a, b -> a.priority() - b.priority() }
+        Arrays.sort(instances) { a, b -> a.width() - b.width() }
         this.instances = instances
 
         for (instance in instances) {
