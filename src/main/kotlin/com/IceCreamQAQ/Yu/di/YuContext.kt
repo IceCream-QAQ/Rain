@@ -19,7 +19,6 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
-import kotlin.reflect.full.isSubclassOf
 
 open class YuContext(val configer: ConfigManager, private val logger: AppLogger) : ClassRegister {
 
@@ -112,10 +111,14 @@ open class YuContext(val configer: ConfigManager, private val logger: AppLogger)
                     else listOf()
                 val list = ArrayList<Any>()
                 for (b in context.binds!!.values) {
-                    list.add(b.defaultInstance ?: getBean(b.name, "") ?: error("在试图构建 List 容器时遇到无法响应的 Bean：${b.name}。"))
+                    list.add(
+                        b.defaultInstance ?: getBean(b.name, "")
+                        ?: error("在试图构建 List 容器时遇到无法响应的 Bean：${b.name}。")
+                    )
                 }
                 list
             }
+
             "map" -> {
                 val context = classContextMap[clazz] ?: return null
                 if (context.binds == null)
@@ -123,10 +126,12 @@ open class YuContext(val configer: ConfigManager, private val logger: AppLogger)
                     else mapOf()
                 val map = HashMap<String, Any>()
                 for ((n, b) in context.binds!!) {
-                    map[n] = b.defaultInstance ?: getBean(b.name, "") ?: error("在试图构建 Map 容器时遇到无法响应的 Bean：${b.name}。")
+                    map[n] = b.defaultInstance ?: getBean(b.name, "")
+                            ?: error("在试图构建 Map 容器时遇到无法响应的 Bean：${b.name}。")
                 }
                 map
             }
+
             "bean" -> getBean(clazz, name)
             else -> null
         }
@@ -175,6 +180,7 @@ open class YuContext(val configer: ConfigManager, private val logger: AppLogger)
                         key,
                         (field.genericType as ParameterizedType).actualTypeArguments[0] as Class<*>
                     )
+
                     isArray(type) -> configer.getArray(key, type.componentType)?.toTypedArray()
                     else -> configer.get(key, field.type)
                 } ?: field.getAnnotation(Default::class.java)?.value
@@ -210,6 +216,7 @@ open class YuContext(val configer: ConfigManager, private val logger: AppLogger)
                             is WildcardType -> a.upperBounds[0] as Class<*>
                             else -> error("在尝试构建 List 时，遇到无法解析的类型，在 ${obj::class.java.name}.${field.name}，类型：$a。")
                         }
+
                     Map::class.java.isAssignableFrom(ct) ->
                         "map" to when (val a = (field.genericType as ParameterizedType).actualTypeArguments[1]) {
                             is Class<*> -> a
@@ -217,6 +224,7 @@ open class YuContext(val configer: ConfigManager, private val logger: AppLogger)
                             is WildcardType -> a.upperBounds[0] as Class<*>
                             else -> error("在尝试构建 Map 时，遇到无法解析的类型，在 ${obj::class.java.name}.${field.name}，类型：$a。")
                         }
+
                     else -> "bean" to ct
                 }
                 val b = kotlin.runCatching {
@@ -322,8 +330,19 @@ open class YuContext(val configer: ConfigManager, private val logger: AppLogger)
 
 var context: YuContext? = null
 
-class ValueObj<T>(var obj: T) : ReadWriteProperty<Any, T> {
-    override fun getValue(thisRef: Any, property: KProperty<*>) = obj
+class ValueObj<T>(val read: () -> T) : ReadWriteProperty<Any, T> {
+
+    var init = false
+    var obj: T? = null
+
+    override fun getValue(thisRef: Any, property: KProperty<*>): T {
+        if (init) return obj!!
+        if (context == null) error("当 YuContext 不处于 single 模式时，不允许 Kotlin inject 方式注入！")
+        obj = read()
+        init = true
+        return getValue(thisRef, property)
+    }
+
 
     override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
         obj = value
@@ -342,13 +361,10 @@ class MultiModeNotSupport<T> : ReadWriteProperty<Any, T> {
 }
 
 inline fun <reified T> inject(name: String = ""): ReadWriteProperty<Any, T> =
-    if (context == null) MultiModeNotSupport()
-    else ValueObj(context!!.getBean(T::class.java, name)!!)
+    ValueObj { context!!.getBean(T::class.java, name)!! }
 
 inline fun <reified T> config(name: String): ReadWriteProperty<Any, T> =
-    if (context == null) MultiModeNotSupport()
-    else ValueObj(context!!.configer.get(name, T::class.java)!!)
+    ValueObj { context!!.configer.get(name, T::class.java)!! }
 
 inline fun <reified T> configArray(name: String): ReadWriteProperty<Any, List<T>> =
-    if (context == null) MultiModeNotSupport()
-    else ValueObj(context!!.configer.getArray(name, T::class.java)!!)
+    ValueObj { context!!.configer.getArray(name, T::class.java)!! }
