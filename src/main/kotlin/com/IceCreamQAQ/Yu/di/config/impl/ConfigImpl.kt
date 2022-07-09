@@ -20,14 +20,11 @@ import kotlin.collections.HashMap
 
 private typealias ModeFileMap = MutableMap<String, MutableMap<String, ObjectNode>>
 
-open class ConfigImpl(
-    val classLoader: ClassLoader, var runMode: String?, val launchPackage: String?
-) : ConfigManager {
+open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val launchPackage: String?) : ConfigManager {
 
     companion object {
         private val log = LoggerFactory.getLogger(ConfigImpl::class.java)
     }
-
 
     protected open val rootNode = ObjectNode()
 
