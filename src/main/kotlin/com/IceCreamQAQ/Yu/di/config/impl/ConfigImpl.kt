@@ -21,9 +21,7 @@ import kotlin.collections.HashMap
 private typealias ModeFileMap = MutableMap<String, MutableMap<String, ObjectNode>>
 
 open class ConfigImpl(
-    val classLoader: ClassLoader,
-    var runMode: String?,
-    val launchPackage: String?
+    val classLoader: ClassLoader, var runMode: String?, val launchPackage: String?
 ) : ConfigManager {
 
     companion object {
@@ -60,21 +58,19 @@ open class ConfigImpl(
     protected open fun mergeMode(modeFileMap: ModeFileMap) {
         val fileModeMap = HashMap<String, MutableMap<String, ObjectNode>>()
 
-        modeFileMap.filter { it.key != "module" }
-            .forEach { (mode, files) ->
-                files.forEach { (file, node) ->
-                    fileModeMap.getOrPut(file, HashMap())[mode] = node
-                }
+        modeFileMap.filter { it.key != "module" }.forEach { (mode, files) ->
+            files.forEach { (file, node) ->
+                fileModeMap.getOrPut(file, HashMap())[mode] = node
             }
+        }
 
         val fileNodeMap = HashMap<String, ObjectNode>()
 
         fileModeMap.forEach { (file, nodeMap) ->
-            fileNodeMap[file] = nodeMap.getOrDefault("conf", ObjectNode())
-                .apply {
-                    putAll(nodeMap.getOrDefault(runMode, ObjectNode()))
-                    putAll(nodeMap.getOrDefault("runLocation", ObjectNode()))
-                }
+            fileNodeMap[file] = nodeMap.getOrDefault("conf", ObjectNode()).apply {
+                putAll(nodeMap.getOrDefault(runMode, ObjectNode()))
+                putAll(nodeMap.getOrDefault("runLocation", ObjectNode()))
+            }
         }
 
         modeFileMap["module"]?.values?.forEach { rootNode.merge(it) }
@@ -108,21 +104,19 @@ open class ConfigImpl(
 
     protected open fun loadByFolder(fileMap: MutableMap<String, ObjectNode>, path: String) {
         File(path).apply {
-            if (isDirectory)
-                listFiles()?.forEach {
-                    if (it.isFile) it.name.let { name ->
-                        loadConfigFile(name, FileInputStream(it), fileMap.getOrPut(name, ObjectNode()))
-                    }
+            if (isDirectory) listFiles()?.forEach {
+                if (it.isFile) it.name.let { name ->
+                    loadConfigFile(name, FileInputStream(it), fileMap.getOrPut(name, ObjectNode()))
                 }
+            }
         }
     }
 
-    protected open val forceArrayPropertiesName =
-        arrayOf(
-            "yu.scanPackages",
-            "yu.classRegister",
-            "yu.modules",
-        )
+    protected open val forceArrayPropertiesName = arrayOf(
+        "yu.scanPackages",
+        "yu.classRegister",
+        "yu.modules",
+    )
 
     protected open fun loadConfigFile(name: String, inputStream: InputStream, node: ObjectNode) {
         log.debug("[配置管理器] 加载配置文件: $name。")
@@ -143,23 +137,20 @@ open class ConfigImpl(
             val value = properties.getProperty(name)!!
 
             val valueNode =
-                if ((value.startsWith("[") && value.endsWith("]") && !value.endsWith("\\]")))
-                    ArrayNode().apply {
-                        val cs = StringBuilder()
-                        var i = 1
-                        val max = value.length - 1
-                        fun next(): Char = value[++i]
-                        while (i < max) {
-                            value[i].let {
-                                if (it != ',') cs.append(if (it == '\\') next() else it)
-                                else add(StringNode(cs.toString().trim().apply { cs.clear() }))
-                            }
-                            i++
+                if ((value.startsWith("[") && value.endsWith("]") && !value.endsWith("\\]"))) ArrayNode().apply {
+                    val cs = StringBuilder()
+                    var i = 1
+                    fun next(): Char = value[++i]
+                    while (i < value.length - 1) {
+                        value[i].let {
+                            if (it != ',') cs.append(if (it == '\\') next() else it)
+                            else add(StringNode(cs.toString().trim().apply { cs.clear() }))
                         }
-                        add(StringNode(cs.toString().trim().apply { cs.clear() }))
+                        i++
                     }
-                else if (name in forceArrayPropertiesName || name.endsWith("["))
-                    ArrayNode(StringNode(value))
+                    add(StringNode(cs.toString().trim().apply { cs.clear() }))
+                }
+                else if (name in forceArrayPropertiesName || name.endsWith("[")) ArrayNode(StringNode(value))
                 else StringNode(value)
 
             val nameNodes = name.split(".")
@@ -179,8 +170,7 @@ open class ConfigImpl(
             val last = o[lastName]
             if (last == null) o[lastName] = valueNode
             else if (last is ArrayNode) if (valueNode is ArrayNode) last.addAll(valueNode) else last.add(valueNode)
-            else ArrayNode(last)
-                .apply { if (valueNode is ArrayNode) addAll(valueNode) else add(valueNode) }
+            else ArrayNode(last).apply { if (valueNode is ArrayNode) addAll(valueNode) else add(valueNode) }
                 .apply { o[lastName] = this }
         }
     }

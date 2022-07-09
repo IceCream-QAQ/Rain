@@ -25,10 +25,10 @@ annotation class SynonymBy(val value: KClass<out SynonymManager>)
 @LoadBy(JobManagerImpl::class)
 annotation class JobCenter
 annotation class Cron(
-        val value: String,
-        val time: Long = 0,
-        val async: Boolean = false,
-        val runWithStart: Boolean = false
+    val value: String,
+    val time: Long = 0,
+    val async: Boolean = false,
+    val runWithStart: Boolean = false
 )
 
 annotation class NotSearch
