@@ -93,6 +93,7 @@ val ByteArray.md5: String
 val Member.isExecutable get() = !isStatic && !isAbstract
 val Member.isAbstract get() = Modifier.isAbstract(modifiers)
 val Member.isStatic get() = Modifier.isStatic(modifiers)
+val Member.isFinal get() = Modifier.isFinal(modifiers)
 
 inline fun <reified T : Annotation> AnnotatedElement.hasAnnotation(): Boolean =
     getAnnotation(T::class.java)?.let { true } ?: false

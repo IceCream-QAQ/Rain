@@ -33,4 +33,4 @@ annotation class Cron(
 
 annotation class NotSearch
 
-annotation class Configuration
+annotation class Configuration(val onlyRead: Boolean = false, val array: Boolean = false)
