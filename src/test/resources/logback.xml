@@ -37,7 +37,7 @@
 
     <!-- 日志输出级别 -->
 
-    <logger name="com.IceCreamQAQ.Yu" level="INFO" additivity="false">
+    <logger name="com.IceCreamQAQ.Yu" level="DEBUG" additivity="false">
         <appender-ref ref="FILE" />
         <appender-ref ref="STDOUT" />
     </logger>

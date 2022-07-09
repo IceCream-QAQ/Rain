@@ -79,16 +79,16 @@ open class ConfigImpl(
 
     protected open fun loadByMode(modeFileMap: ModeFileMap, mode: String, path: String) {
         modeFileMap.getOrPut(mode, HashMap()).let {
-            if (mode == "runLocation") loadByFolder(it, path)
-            else loadByResource(it, path)
+            if (mode == "runLocation") loadByFolder(it, mode, path)
+            else loadByResource(it, mode, path)
         }
     }
 
-    protected open fun loadByResource(fileMap: MutableMap<String, ObjectNode>, path: String) {
+    protected open fun loadByResource(fileMap: MutableMap<String, ObjectNode>, mode: String, path: String) {
         val dirs = classLoader.getResources(path)!!
         for (url: URL in dirs) {
             val protocol = url.protocol
-            if ("file" == protocol) loadByFolder(fileMap, URLDecoder.decode(url.file, "UTF-8"))
+            if ("file" == protocol) loadByFolder(fileMap, mode, URLDecoder.decode(url.file, "UTF-8"))
             else if ("jar" == protocol) {
                 val prefix = "$path/"
                 val jar = (url.openConnection() as JarURLConnection).jarFile
@@ -96,17 +96,17 @@ open class ConfigImpl(
                     if (entry.isDirectory) continue
                     val name = entry.name.replace(prefix, "")
                     if (name.contains("/")) continue
-                    loadConfigFile(name, jar.getInputStream(entry), fileMap.getOrPut(name, ObjectNode()))
+                    loadConfigFile(mode, name, jar.getInputStream(entry), fileMap.getOrPut(name, ObjectNode()))
                 }
             }
         }
     }
 
-    protected open fun loadByFolder(fileMap: MutableMap<String, ObjectNode>, path: String) {
+    protected open fun loadByFolder(fileMap: MutableMap<String, ObjectNode>, mode: String, path: String) {
         File(path).apply {
             if (isDirectory) listFiles()?.forEach {
                 if (it.isFile) it.name.let { name ->
-                    loadConfigFile(name, FileInputStream(it), fileMap.getOrPut(name, ObjectNode()))
+                    loadConfigFile(mode, name, FileInputStream(it), fileMap.getOrPut(name, ObjectNode()))
                 }
             }
         }
@@ -118,8 +118,8 @@ open class ConfigImpl(
         "yu.modules",
     )
 
-    protected open fun loadConfigFile(name: String, inputStream: InputStream, node: ObjectNode) {
-        log.debug("[配置管理器] 加载配置文件: $name。")
+    protected open fun loadConfigFile(mode: String, name: String, inputStream: InputStream, node: ObjectNode) {
+        log.debug("[配置管理器] 加载配置文件, 模式: $mode, 文件: $name。")
 
         when {
             name.endsWith(".properties") -> loadConfigByProperties(node, inputStream)
