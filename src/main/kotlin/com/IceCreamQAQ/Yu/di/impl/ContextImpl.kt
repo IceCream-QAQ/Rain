@@ -1,13 +1,13 @@
 package com.IceCreamQAQ.Yu.di.impl
 
 import com.IceCreamQAQ.Yu.annotation
-import com.IceCreamQAQ.Yu.annotation.CreateByPrimaryConstructor
 import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.di.*
 import com.IceCreamQAQ.Yu.di.config.ConfigManager
 import com.IceCreamQAQ.Yu.di.config.ConfigReader
 import com.IceCreamQAQ.Yu.hasAnnotation
 import com.IceCreamQAQ.Yu.util.type.RelType
+import org.slf4j.LoggerFactory
 import java.lang.reflect.Constructor
 import java.lang.reflect.Type
 import javax.inject.Inject
@@ -20,10 +20,15 @@ open class ContextImpl(
     override val configManager: ConfigManager
 ) : YuContext {
 
+    companion object {
+        private val log = LoggerFactory.getLogger(ContextImpl::class.java)
+    }
+
     open val contextMap: MutableMap<Class<*>, ClassContext<*>> = HashMap()
     open val dataReaderFactory: DataReaderFactory = ObjectDataReaderFactory(this, RelType.create(Any::class.java))
 
     open fun init(): ContextImpl {
+        log.info("[上下文管理器] 初始化。")
         contextMap[ClassLoader::class.java] = NoInstanceClassContext(ClassLoader::class.java)
             .apply {
                 putBinds("appClassloader", LocalInstanceClassContext(classloader))
@@ -44,6 +49,7 @@ open class ContextImpl(
 
 //        contextMap[YuContext::class.java] = LocalInstanceClassContext(this)
 //        contextMap[ConfigManager::class.java] = LocalInstanceClassContext(configManager)
+        log.info("[上下文管理器] 初始化完成。")
         return this
     }
 
