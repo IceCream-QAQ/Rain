@@ -3,7 +3,7 @@ package com.IceCreamQAQ.Yu.util.dataNode
 import com.IceCreamQAQ.Yu.util.type.RelType
 import java.util.LinkedList
 
-open class ArrayNode() : BaseNode() {
+open class ArrayNode() : BaseNode(), MutableIterable<DataNode> {
 
     protected open val list = LinkedList<DataNode>()
 
@@ -52,4 +52,6 @@ open class ArrayNode() : BaseNode() {
     override fun <T> asArray(type: RelType<T>): List<T> {
         return list.map { it.asObject(type) }
     }
+
+    override fun iterator() = list.iterator()
 }

@@ -21,6 +21,8 @@ class RelType<T>(
 
                 else -> error("在尝试构建 RelType 时，遇到无法解析的类型，在 $type。")
             }
+
+        fun <T> create(clazz: Class<T>): RelType<T> = RelType(clazz, clazz, null)
     }
 
     fun isAssignableFrom(otherType: RelType<*>): Boolean = realClass.isAssignableFrom(otherType.realClass)

@@ -3,9 +3,11 @@ package com.IceCreamQAQ.Yu.di.config.impl
 import com.IceCreamQAQ.Yu.di.config.ConfigManager
 import com.IceCreamQAQ.Yu.di.config.ConfigReader
 import com.IceCreamQAQ.Yu.util.dataNode.ArrayNode
+import com.IceCreamQAQ.Yu.util.dataNode.DataNode
 import com.IceCreamQAQ.Yu.util.dataNode.ObjectNode
 import com.IceCreamQAQ.Yu.util.dataNode.StringNode
 import com.IceCreamQAQ.Yu.util.getOrPut
+import com.IceCreamQAQ.Yu.util.type.RelType
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
@@ -29,20 +31,25 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
     protected open val rootNode = ObjectNode()
 
     fun init(): ConfigImpl {
-        log.info("[配置管理器] 初始化.")
+        log.info("[配置管理器] 初始化。")
 
         val modeFileMap = HashMap<String, MutableMap<String, ObjectNode>>()
         loadByMode(modeFileMap, "module", "conf/module")
         loadByMode(modeFileMap, "conf", "conf")
 
         runMode = runMode ?: "dev"
-        log.info("[配置管理器] 加载模式: $runMode.")
+        log.info("[配置管理器] 加载模式: $runMode。")
         loadByMode(modeFileMap, runMode!!, "conf/$runMode")
 
         loadByMode(modeFileMap, "runLocation", "conf")
 
         mergeMode(modeFileMap)
-        log.info("[配置管理器] 初始化完成.")
+
+        launchPackage?.let {
+            ((rootNode.getOrPut("yu", ObjectNode()) as ObjectNode)
+                .getOrPut("scanPackages", ArrayNode()) as ArrayNode).add(StringNode(it))
+        }
+        log.info("[配置管理器] 初始化完成。")
 
         return this
     }
@@ -170,6 +177,29 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
             else ArrayNode(last).apply { if (valueNode is ArrayNode) addAll(valueNode) else add(valueNode) }
                 .apply { o[lastName] = this }
         }
+    }
+
+    protected open fun getConfigNode(name: String): DataNode? {
+        var o: ObjectNode = rootNode
+        val nodes = name.split(".")
+        for (i in 0 until nodes.size - 1) {
+            o = o[nodes[i]]?.let {
+                when(it){
+                    is ObjectNode -> it
+                    is ArrayNode -> it.firstOrNull { item -> item is ObjectNode } as ObjectNode
+                    else -> null
+                }
+            } ?: return null
+        }
+        return o[nodes.last()]
+    }
+
+    override fun <T> getConfig(name: String, type: RelType<T>): T? {
+        return getConfigNode(name)?.asObject(type)
+    }
+
+    override fun <T> getArray(name: String, type: RelType<T>): List<T> {
+        return getConfigNode(name)?.asArray(type) ?: emptyList()
     }
 
     override fun <T> getConfigReader(type: Type): ConfigReader<T> {
