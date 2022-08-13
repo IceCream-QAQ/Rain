@@ -120,10 +120,10 @@ open class InstanceAbleClassContext<T>(
     var instanceMap: MutableMap<String, T> = HashMap()
 
     override fun getBean(): T? =
-        defaultInstance
+        defaultInstance?: newBean().apply { defaultInstance = this }
 
     override fun getBean(name: String): T? =
-        if (name == din) defaultInstance else instanceMap[name]
+        if (name == din) getBean() else instanceMap[name]
 
     override fun newBean(): T =
         injector(creator())
