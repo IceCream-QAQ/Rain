@@ -52,10 +52,13 @@ class ReflectBeanInject<T>(
             }.apply {
                 addAll(
                     clazz.methods
-                        .filter { it.name.startsWith("set") && it.hasAnnotation<Inject>() && it.parameters.size == 1 && it.isExecutable }
+                        .filter { it.name.startsWith("set") && (it.hasAnnotation<Inject>() || it.hasAnnotation<Config>()) && it.parameters.size == 1 && it.isExecutable }
                         .map {
                             val named = it.annotation<Named>()
-                            val dataReader = context.getDataReader(it.parameters[0].parameterizedType)
+
+                            val dataReader =
+                                if (it.hasAnnotation<Inject>()) context.getDataReader(it.parameters[0].parameterizedType)
+                                else context.getConfigReader(it.parameters[0].parameterizedType)
 
                             if (named == null) {
                                 { instance: T ->
