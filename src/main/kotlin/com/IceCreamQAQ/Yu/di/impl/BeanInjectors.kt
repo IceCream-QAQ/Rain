@@ -1,6 +1,7 @@
 package com.IceCreamQAQ.Yu.di.impl
 
 import com.IceCreamQAQ.Yu.*
+import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.di.BeanInjector
 import javax.inject.Inject
 import javax.inject.Named
@@ -12,7 +13,7 @@ class ReflectBeanInject<T>(
 
     private val fields =
         clazz.declaredFields
-            .filter { !it.isStatic && it.hasAnnotation<Inject>() }
+            .filter { !it.isStatic && (it.hasAnnotation<Inject>() || it.hasAnnotation<Config>()) }
             .mutableMap {
                 val named = it.annotation<Named>()
                 val setMethod =
@@ -20,7 +21,9 @@ class ReflectBeanInject<T>(
                         clazz.getMethod("set${it.name.toUpperCaseFirstOne()}", it.type)
                     }.getOrNull()
 
-                val dataReader = context.getDataReader(it.genericType)
+                val dataReader =
+                    if (it.hasAnnotation<Inject>()) context.getDataReader(it.genericType)
+                    else context.getConfigReader(it.genericType)
 
                 if (named == null) {
                     if (setMethod == null) {
