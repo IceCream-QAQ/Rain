@@ -21,7 +21,7 @@ interface ConfigManager {
 
     fun <T> getConfig(name: String, type: RelType<T>): T?
     fun <T> getArray(name: String, type: RelType<T>): List<T>
-    fun <T> getConfigReader(type: Type): ConfigReader<T>
-    fun <T> getConfigWriter(type: Type): ConfigReader<T>
+    fun <T> getConfigReader(type: RelType<T>): ConfigReader<T>
+    fun <T> getConfigWriter(type: RelType<T>): ConfigReader<T>
 
 }

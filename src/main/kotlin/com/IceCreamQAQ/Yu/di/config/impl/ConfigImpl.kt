@@ -202,11 +202,11 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
         return getConfigNode(name)?.asArray(type) ?: emptyList()
     }
 
-    override fun <T> getConfigReader(type: Type): ConfigReader<T> {
+    override fun <T> getConfigReader(type: RelType<T>): ConfigReader<T> {
         TODO("Not yet implemented")
     }
 
-    override fun <T> getConfigWriter(type: Type): ConfigReader<T> {
+    override fun <T> getConfigWriter(type: RelType<T>): ConfigReader<T> {
         TODO("Not yet implemented")
     }
 }
