@@ -23,7 +23,7 @@ open class InjectConstructorBeanCreator<T>(
 ) : BeanCreator<T> {
 
     open val readers = constructor.parameters.map {
-        context.run { it.annotation<Config>()?.run { getConfigReader(it.type) } ?: getDataReader(it.type) }
+        context.run { it.annotation<Config>()?.run { getConfigReader(value, it.type) } ?: getDataReader(it.type) }
             .let { reader ->
                 { it.named.let { named -> if (named == din) reader() else reader(it.named) } }
             }

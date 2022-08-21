@@ -22,8 +22,8 @@ class ReflectBeanInject<T>(
                     }.getOrNull()
 
                 val dataReader =
-                    if (it.hasAnnotation<Inject>()) context.getDataReader(it.genericType)
-                    else context.getConfigReader(it.genericType)
+                    it.annotation<Config>()?.let { config -> context.getConfigReader(config.value, it.genericType) }
+                        ?: context.getDataReader(it.genericType)
 
                 if (named == null) {
                     if (setMethod == null) {
@@ -57,8 +57,12 @@ class ReflectBeanInject<T>(
                             val named = it.annotation<Named>()
 
                             val dataReader =
-                                if (it.hasAnnotation<Inject>()) context.getDataReader(it.parameters[0].parameterizedType)
-                                else context.getConfigReader(it.parameters[0].parameterizedType)
+                                it.annotation<Config>()?.let { config ->
+                                    context.getConfigReader(
+                                        config.value,
+                                        it.parameters[0].parameterizedType
+                                    )
+                                } ?: context.getDataReader(it.parameters[0].parameterizedType)
 
                             if (named == null) {
                                 { instance: T ->

@@ -88,9 +88,8 @@ open class ContextImpl(
 
     open fun getDataReader(type: Type): DataReader<*> = dataReaderFactory(RelType.create(type))
 
-    open fun getConfigReader(type: Type): ConfigReader<*> {
-        TODO()
-    }
+    open fun getConfigReader(name: String, type: Type): ConfigReader<*> =
+        configManager.getConfigReader(name, RelType.create(type))
 
     inline fun <reified T : Any> getBeanCreator(): BeanCreator<T> = getBeanCreator(T::class.java)
     open fun <T : Any> getBeanCreator(clazz: Class<T>): BeanCreator<T> =
