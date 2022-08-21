@@ -13,7 +13,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.io.InputStreamReader
-import java.lang.reflect.Type
 import java.net.JarURLConnection
 import java.net.URL
 import java.net.URLDecoder
@@ -202,11 +201,11 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
         return getConfigNode(name)?.asArray(type) ?: emptyList()
     }
 
-    override fun <T> getConfigReader(type: RelType<T>): ConfigReader<T> {
+    override fun <T> getConfigReader(name: String, type: RelType<T>): ConfigReader<T> {
         TODO("Not yet implemented")
     }
 
-    override fun <T> getConfigWriter(type: RelType<T>): ConfigReader<T> {
+    override fun <T> getConfigWriter(name: String, type: RelType<T>): ConfigReader<T> {
         TODO("Not yet implemented")
     }
 }

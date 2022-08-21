@@ -1,7 +1,6 @@
 package com.IceCreamQAQ.Yu.di.config
 
 import com.IceCreamQAQ.Yu.util.type.RelType
-import java.lang.reflect.Type
 
 interface ConfigManager {
 
@@ -21,7 +20,7 @@ interface ConfigManager {
 
     fun <T> getConfig(name: String, type: RelType<T>): T?
     fun <T> getArray(name: String, type: RelType<T>): List<T>
-    fun <T> getConfigReader(type: RelType<T>): ConfigReader<T>
-    fun <T> getConfigWriter(type: RelType<T>): ConfigReader<T>
+    fun <T> getConfigReader(name: String, type: RelType<T>): ConfigReader<T>
+    fun <T> getConfigWriter(name: String, type: RelType<T>): ConfigReader<T>
 
 }
