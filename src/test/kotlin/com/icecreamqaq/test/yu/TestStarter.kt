@@ -12,6 +12,7 @@ class TestStarter {
             DefaultStarter.init(args)
 
             val appClassLoader = AppClassloader(TestStarter::class.java.classLoader)
+            Thread.currentThread().contextClassLoader = appClassLoader
 
             val appClass = appClassLoader.loadClass("com.icecreamqaq.test.yu.TestApp")
             val startMethod = appClass.getMethod("start")

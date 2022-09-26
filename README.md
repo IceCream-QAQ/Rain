@@ -49,3 +49,21 @@ Yu-Core 将提供非常棒的特性和功能让开发者开发的更加轻松愉
     * 支持静态与非静态方法
     * 支持 Hook final 类与 final 方法
   * AOP 支持
+
+## 依赖内容
+<details>
+  <summary>引用依赖表</summary>
+
+* [Kotlin](https://kotlinlang.org/) ([Apache-2.0 license](https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt))
+* [Kotlin-stdlib](https://kotlinlang.org/) ([Apache-2.0 license](https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt))
+* [Kotlin-reflect](https://kotlinlang.org/) ([Apache-2.0 license](https://github.com/JetBrains/kotlin/blob/master/license/LICENSE.txt))
+* [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) ([Apache-2.0 license](https://github.com/Kotlin/kotlinx.coroutines/blob/master/LICENSE.txt))
+* [okhttp3](https://square.github.io/okhttp/) ([Apache-2.0 license](https://github.com/square/okhttp/blob/master/LICENSE.txt))
+* [logback](http://logback.qos.ch/) ([Logback LICENSE](https://github.com/qos-ch/logback/blob/master/LICENSE.txt))
+* [fastjson2](https://github.com/alibaba/fastjson2) ([Apache-2.0 license](https://github.com/alibaba/fastjson2/blob/main/LICENSE))
+* [ecj](http://www.eclipse.org/jdt/) ([Eclipse Public License 2.0](https://projects.eclipse.org/projects/eclipse.jdt))
+* [ehcache3](https://github.com/ehcache/ehcache3) ([Apache-2.0 license](https://www.ehcache.org/about/license.html))
+* [asm](https://asm.ow2.org/) ([License](https://asm.ow2.io/license.html))
+* [javax.inject](https://github.com/javax-inject/javax-inject) ([Apache-2.0 license](https://github.com/javax-inject/javax-inject#license))
+* [lombok](https://projectlombok.org/) ([license](https://github.com/projectlombok/lombok/blob/master/LICENSE))
+</details>
