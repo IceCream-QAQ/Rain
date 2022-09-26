@@ -27,7 +27,7 @@ import kotlin.reflect.KProperty
  * 应用上下文，具有注册Class的能力。每种具体的Class由[ClassContext]类实际管理。[ClassContext]可以看成
  * 是一种具体Class类型的承载容器。
  */
-open class YuContext(val manager: ConfigManager, logger: AppLogger) : ClassRegister {
+open class YuContext(val configManager: ConfigManager, logger: AppLogger) : ClassRegister {
 
     private var factoryManager: BeanFactoryManager? = null
 
@@ -39,9 +39,9 @@ open class YuContext(val manager: ConfigManager, logger: AppLogger) : ClassRegis
     }
 
     init {
-        if (manager.get("yu.context.mode", String::class.java) == "singleton") context = this
+        if (configManager.get("yu.context.mode", String::class.java) == "singleton") context = this
         putBean(this)
-        putBean(manager)
+        putBean(configManager)
         putBean(logger)
         factoryManager = newBean(BeanFactoryManager::class.java, save = true)
             ?: throw RuntimeException("Yu Init Err! Cant new BeanFactoryManager!")
@@ -263,12 +263,12 @@ open class YuContext(val manager: ConfigManager, logger: AppLogger) : ClassRegis
                 val type = field.type
 
                 val value = when {
-                    isTypeOf(List::class.java, type) -> manager.getArray(
+                    isTypeOf(List::class.java, type) -> configManager.getArray(
                         key,
                         (field.genericType as ParameterizedType).actualTypeArguments[0] as Class<*>
                     )
-                    isArray(type) -> manager.getArray(key, type.componentType)?.toTypedArray()
-                    else -> manager.get(key, field.type)
+                    isArray(type) -> configManager.getArray(key, type.componentType)?.toTypedArray()
+                    else -> configManager.get(key, field.type)
                 } ?: field.getAnnotation(Default::class.java)?.value
 
                 if (value != null) {
@@ -429,7 +429,7 @@ class ValueObj<T>(val read: () -> T) : ReadWriteProperty<Any, T> {
 
     override fun getValue(thisRef: Any, property: KProperty<*>): T {
         if (init) return obj!!
-        if (context == null) error("当 YuContext 不处于 single 模式时，不允许 Kotlin inject 方式注入！")
+        if (context == null) error("当 YuContext 不处于 singleton 模式时，不允许 Kotlin inject 方式注入！")
         obj = read()
         init = true
         return getValue(thisRef, property)
@@ -441,22 +441,11 @@ class ValueObj<T>(val read: () -> T) : ReadWriteProperty<Any, T> {
     }
 }
 
-class MultiModeNotSupport<T> : ReadWriteProperty<Any, T> {
-    override fun getValue(thisRef: Any, property: KProperty<*>): T {
-        error("当 YuContext 不处于 single 模式时，不允许 Kotlin inject 方式注入！")
-    }
-
-    override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
-        error("当 YuContext 不处于 single 模式时，不允许 Kotlin inject 方式注入！")
-    }
-
-}
-
 inline fun <reified T> inject(name: String = ""): ReadWriteProperty<Any, T> =
     ValueObj { context!!.getBean(T::class.java, name)!! }
 
 inline fun <reified T> config(name: String): ReadWriteProperty<Any, T> =
-    ValueObj { context!!.configer.get(name, T::class.java)!! }
+    ValueObj { context!!.configManager.get(name, T::class.java)!! }
 
 inline fun <reified T> configArray(name: String): ReadWriteProperty<Any, List<T>> =
-    ValueObj { context!!.configer.getArray(name, T::class.java)!! }
+    ValueObj { context!!.configManager.getArray(name, T::class.java)!! }
