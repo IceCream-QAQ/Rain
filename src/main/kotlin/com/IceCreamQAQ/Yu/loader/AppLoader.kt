@@ -147,7 +147,7 @@ open class AppLoader {
         loadBy: LoadBy,
         loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, MutableMap<String, LoadItem>>>
     ) {
-        val loader = Class.forName(loadBy.value.java.name) as Class<out Loader>
+        val loader = Class.forName(loadBy.value.java.name,true,appClassloader) as Class<out Loader>
         val loadItems = loadItemsMap[loader] ?: {
             val l = HashMap<String, MutableMap<String, LoadItem>>()
             loadItemsMap[loader] = l
@@ -201,7 +201,7 @@ open class AppLoader {
                                     if (name.endsWith(".class") && !entry.isDirectory) {
                                         val className = name.substring(packageName.length + 1, name.length - 6)
                                         try {
-                                            val clazz = appClassloader.loadClass("$packageName.$className")
+                                            val clazz = Class.forName("$packageName.$className",false,appClassloader)
                                             if (clazz.getAnnotation(NotSearch::class.java) == null)
                                                 classes.putIfAbsent(clazz.name, clazz)
                                         } catch (e: ClassNotFoundException) {
@@ -239,7 +239,7 @@ open class AppLoader {
             } else {
                 val className = file.name.substring(0, file.name.length - 6)
                 try {
-                    val clazz = Class.forName("$packageName.$className")
+                    val clazz = Class.forName("$packageName.$className",false,appClassloader)
                     if (clazz.getAnnotation(NotSearch::class.java) == null)
                         classes.putIfAbsent(clazz.name, clazz)
                 } catch (e: ClassNotFoundException) {
