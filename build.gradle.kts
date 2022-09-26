@@ -26,7 +26,7 @@ dependencies {
     // ECJ 当前版本为最后支持 Java8 的版本，应停留在本版本。
     api("org.eclipse.jdt:ecj:3.26.0")
     api("org.ehcache:ehcache:3.10.1")
-    implementation("com.google.code.findbugs:jsr305:3.0.2")
+    api("com.google.code.findbugs:jsr305:3.0.2")
 
     api("org.ow2.asm:asm-commons:9.3")
 
