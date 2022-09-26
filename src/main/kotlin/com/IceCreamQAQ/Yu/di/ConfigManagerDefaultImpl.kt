@@ -15,8 +15,11 @@ import java.net.URLDecoder
 import java.util.*
 import kotlin.collections.ArrayList
 
-class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger: AppLogger, runMode: String?) :
-    ConfigManager {
+class ConfigManagerDefaultImpl(
+    val classloader: ClassLoader,
+    private val logger: AppLogger,
+    runMode: String?
+) : ConfigManager {
 
     private var config: JSONObject = JSONObject()
 
@@ -24,7 +27,7 @@ class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger:
 
     init {
 
-//        logger.logDebug("ConfigManager", "Init.")
+        // logger.logDebug("ConfigManager", "Init.")
         log.info("ConfigManager Init.")
 
         loadFolder("conf/module")
@@ -41,7 +44,7 @@ class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger:
         }
 
         log.info("ConfigManager Config Mode: $mode.")
-//        logger.logDebug("ConfigManager", "Config Mode: $mode")
+        // logger.logDebug("ConfigManager", "Config Mode: $mode")
 
         loadFolder("conf/$mode")
 
@@ -57,10 +60,9 @@ class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger:
         config = c
 
         log.info("ConfigManager Init Success.")
-//        logger.logDebug("ConfigManager", "Init Success")
+        // logger.logDebug("ConfigManager", "Init Success")
 
     }
-
 
     private fun loadFolder(folder: String): List<String> {
         val dirs: Enumeration<URL> = classloader.getResources(folder)!!
@@ -68,9 +70,8 @@ class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger:
         val configFiles = ArrayList<String>();
 
         for (url in dirs) {
-
+            configFiles.add(url.file)
             loadUrl(url, folder)
-
         }
 
         return configFiles
@@ -85,7 +86,7 @@ class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger:
                 for (ss in dir.listFiles()) {
                     if (ss.isFile) {
                         val name = ss.name
-//                        configFiles.add(name)
+                        // configFiles.add(name)
                         loadConfigFile(name, FileInputStream(ss))
                     }
                 }
@@ -103,13 +104,13 @@ class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger:
 
     private fun loadConfigFile(name: String, inputStream: InputStream) {
         log.debug("ConfigManager LoadConfig: $name")
-//        logger.logDebug("ConfigManager", "LoadConfig: $name")
+        // logger.logDebug("ConfigManager", "LoadConfig: $name")
 
-        val jo = config[name] as JSONObject? ?: {
-            val jo = JSONObject()
-            config[name] = jo
-            jo
-        }()
+        val jo = config[name] as JSONObject? ?: run {
+            JSONObject().also {
+                config[name] = it
+            }
+        }
 
         when {
             name.endsWith(".properties") -> loadConfigByProperties(jo, inputStream)
@@ -184,9 +185,7 @@ class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger:
                 ooo = oooo
             }
         }
-
-
-        appendObj(jo as JSONObject, o)
+        appendObj(jo, o)
     }
 
     private fun loadConfigByJSON(jo: JSONObject, inputStream: InputStream) {
@@ -242,7 +241,7 @@ class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger:
                         if (oo is JSONObject) {
                             return oo.toJavaObject(type)
                         }
-                        return co.getObject(n,type)
+                        return co.getObject(n, type)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -261,7 +260,7 @@ class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger:
     override fun <T> getArray(key: String, type: Class<T>): MutableList<T>? {
         val o = get(key, Any::class.java) ?: return null
         if (o is JSONArray) return o.toJavaList(type)
-//        throw ConfigFormatError("Config Format Error: key $key is not a array!")
+        // throw ConfigFormatError("Config Format Error: key $key is not a array!")
         val ja = JSONArray()
         ja.add(o)
         return ja.toJavaList(type)
@@ -276,14 +275,14 @@ class ConfigManagerDefaultImpl(val classloader: ClassLoader, private val logger:
         }
     }
 
-//    fun <T> toArray(key: String, type: Class<T>):Array<T>?{
-////        val jr = getArray(key, type)?:return null
-//        val o = get(key, Any::class.java) ?: return null
-//        if (o is JSONArray) return o.toJavaList(type)
-////        throw ConfigFormatError("Config Format Error: key $key is not a array!")
-//        val ja = JSONArray()
-//        ja.add(o)
-//        return ja.toArray(Array<T>())
-//    }
+    // fun <T> toArray(key: String, type: Class<T>): Array<T>? {
+    //     val jr = getArray(key, type) ?: return null
+    //     val o = get(key, Any::class.java) ?: return null
+    //     if (o is JSONArray) return o.toJavaList(type)
+    //     /       throw ConfigFormatError("Config Format Error: key $key is not a array!")
+    //     val ja = JSONArray()
+    //     ja.add(o)
+    //     return ja.toArray(Array<T>())
+    // }
 }
 

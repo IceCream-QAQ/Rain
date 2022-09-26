@@ -1,11 +1,19 @@
-*.iml
-/.idea
+### Gradle template
+.gradle
+**/build/
+!src/**/build/
 
-/target
+# Ignore Gradle GUI config
+gradle-app.setting
 
-/log
-/tmp
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
 
-/build
+# Cache of project
+.gradletasknamecache
 
-mavenInfo.txt
+# # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
+# gradle/wrapper/gradle-wrapper.properties
+
+### Custom
+.idea

@@ -63,29 +63,20 @@ open class AppLoader {
                 searchLoadBy(clazz, clazz, loadItemsMap)
             }
 
-//            val beanFactories = loadItemsMap[BeanFactoryLoader::class.java] ?: HashMap()
-//            val bfl = context.newBean(BeanFactoryLoader::class.java) ?: throw BeanCreateError("Cant Instanced Loader!")
-//            bfl.load(beanFactories)
-//            loadItemsMap.remove(BeanFactoryLoader::class.java)
+            // val beanFactories = loadItemsMap[BeanFactoryLoader::class.java] ?: HashMap()
+            // val bfl = context.newBean(BeanFactoryLoader::class.java) ?: throw BeanCreateError("Cant Instanced Loader!")
+            // bfl.load(beanFactories)
+            // loadItemsMap.remove(BeanFactoryLoader::class.java)
             val loaders = ArrayList<Loader>()
 
             loadItemsMap = loadItemsMap.mapOf { k, v -> loaderRewrite.getOrDefault(k, k) to v }
 
             for (loader in loadItemsMap.keys) {
                 loaders.add(context[loader] ?: continue)
-//                loaderInstance.load(loadItemsMap[loader] ?: continue)
+                // loaderInstance.load(loadItemsMap[loader] ?: continue)
             }
 
-            for (i in 0 until loaders.size) {
-                for (j in 0 until loaders.size - 1 - i) {
-                    val c = loaders[j]
-                    val n = loaders[j + 1]
-                    if (c.width() > n.width()) {
-                        loaders[j] = n
-                        loaders[j + 1] = c
-                    }
-                }
-            }
+            loaders.sort()
 
             for (loader in loaders) {
                 val ls = loadItemsMap[loader::class.java] ?: continue
@@ -94,12 +85,12 @@ open class AppLoader {
                 }
             }
 
-//            for (clazz in classes.values) {
-//                context[clazz]
-//            }
+            // for (clazz in classes.values) {
+            //     context[clazz]
+            // }
 
             for (hook in YuHook.getRunnables()) {
-                context.injectBean(hook)
+                context.populateBean(hook)
             }
         } catch (e: Exception) {
             throw RuntimeException("程序初始化失败！", e)
@@ -111,11 +102,11 @@ open class AppLoader {
         searchClass: Class<*>,
         loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, MutableMap<String, LoadItem>>>
     ) {
-//        if (!loadClass.isBean()) return
-//        val loadBy =
-//        if (loadBy != null) {
-//            addLoadItem(loadClass, loadBy, loadBy, loadItemsMap)
-//        }
+        // if (!loadClass.isBean()) return
+        // val loadBy =
+        // if (loadBy != null) {
+        //     addLoadItem(loadClass, loadBy, loadBy, loadItemsMap)
+        // }
         searchClass.getAnnotation(LoadBy::class.java)?.let {
             if (it.mastBean) if (!loadClass.isBean()) return@let
             addLoadItem(loadClass, it, it, loadItemsMap)
@@ -129,7 +120,7 @@ open class AppLoader {
                 addLoadItem(loadClass, annotationInstance, it, loadItemsMap)
             }
 
-//            return
+            // return
         }
 
         val superClass = searchClass.superclass
@@ -141,23 +132,15 @@ open class AppLoader {
         }
     }
 
-    fun addLoadItem(
+    private fun addLoadItem(
         loadClass: Class<*>,
         annotationInstance: Annotation,
         loadBy: LoadBy,
         loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, MutableMap<String, LoadItem>>>
     ) {
-        val loader = Class.forName(loadBy.value.java.name,true,appClassloader) as Class<out Loader>
-        val loadItems = loadItemsMap[loader] ?: {
-            val l = HashMap<String, MutableMap<String, LoadItem>>()
-            loadItemsMap[loader] = l
-            l
-        }()
-        val lii = loadItems[annotationInstance::class.java.name] ?: {
-            val l = HashMap<String, LoadItem>()
-            loadItems[annotationInstance::class.java.name] = l
-            l
-        }()
+        val loader = Class.forName(loadBy.value.java.name) as Class<out Loader>
+        val loadItems = loadItemsMap.computeIfAbsent(loader) { mutableMapOf() }
+        val lii = loadItems.computeIfAbsent(annotationInstance.annotationClass.qualifiedName!!) { mutableMapOf() }
         val loadItem = LoadItem()
         loadItem.loadBy = annotationInstance
         loadItem.type = loadClass

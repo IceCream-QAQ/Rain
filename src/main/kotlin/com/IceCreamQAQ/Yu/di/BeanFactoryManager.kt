@@ -22,7 +22,7 @@ class BeanFactoryManager {
                         ?: (pi.actualTypeArguments[0] as ParameterizedType).rawType as Class<*>
                 factories[beanClass.name] = factory
 
-                context.register(ClassContext(beanClass.name, beanClass, factory.isMulti(), factory))
+                context.register(ClassContext(beanClass.name, beanClass, factory.isSingleton(), factory))
 
             }
         }

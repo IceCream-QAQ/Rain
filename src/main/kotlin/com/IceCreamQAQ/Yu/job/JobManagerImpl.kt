@@ -167,7 +167,7 @@ class JobManagerImpl : ApplicationService, Loader, JobManager {
             else KFunReflectCronInvoker(instance, it)
         } ?: ReflectCronInvoker(instance, method)
 
-    override fun width() = 10
+    override fun priority() = 10
 
     override fun init() {}
 
