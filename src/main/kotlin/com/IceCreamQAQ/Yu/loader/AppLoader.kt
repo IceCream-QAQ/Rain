@@ -139,8 +139,8 @@ open class AppLoader {
         loadItemsMap: HashMap<Class<out Loader>, MutableMap<String, MutableMap<String, LoadItem>>>
     ) {
         val loader = Class.forName(loadBy.value.java.name) as Class<out Loader>
-        val loadItems = loadItemsMap.computeIfAbsent(loader) { mutableMapOf() }
-        val lii = loadItems.computeIfAbsent(annotationInstance.annotationClass.qualifiedName!!) { mutableMapOf() }
+        val loadItems = loadItemsMap.getOrPut(loader) { mutableMapOf() }
+        val lii = loadItems.getOrPut(annotationInstance.annotationClass.qualifiedName!!) { mutableMapOf() }
         val loadItem = LoadItem()
         loadItem.loadBy = annotationInstance
         loadItem.type = loadClass

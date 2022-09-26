@@ -2,7 +2,6 @@ package com.IceCreamQAQ.Yu.cache
 
 import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import com.IceCreamQAQ.Yu.annotation.Config
-import com.IceCreamQAQ.Yu.annotation.Default
 import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.di.BeanFactory
 import com.IceCreamQAQ.Yu.di.ConfigManagerDefaultImpl
