@@ -19,7 +19,7 @@ dependencies {
     api(kotlin("reflect"))
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
 
-    api("com.squareup.okhttp3:okhttp:4.9.3")
+    api("com.squareup.okhttp3:okhttp:4.10.0")
     // Logback 1.4+ 最低支持 Java 11。
     api("ch.qos.logback:logback-classic:1.3.1")
     api("com.alibaba.fastjson2:fastjson2:2.0.14")

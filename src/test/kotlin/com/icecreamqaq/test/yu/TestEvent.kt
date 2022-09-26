@@ -35,6 +35,10 @@ class TestEvent {
 
     @Event
     fun onStart(e: AppStartEvent) {
+        println("Baidu:")
+        println(web.get("https://www.baidu.com/"))
+        println("Baidu.")
+
         eventBus.post(CustomEvent())
         jobManager.registerTimer(1000) {
             error("Test Job Error!")
