@@ -24,7 +24,8 @@ dependencies {
     api("com.alibaba.fastjson2:fastjson2:2.0.14")
     // ECJ 当前版本为最后支持 Java8 的版本，应停留在本版本。
     api("org.eclipse.jdt:ecj:3.26.0")
-    api("net.sf.ehcache:ehcache:2.10.9.2")
+    api("org.ehcache:ehcache:3.10.0")
+    implementation("com.google.code.findbugs:jsr305:3.0.2")
 
     api("org.ow2.asm:asm-commons:9.3")
 
