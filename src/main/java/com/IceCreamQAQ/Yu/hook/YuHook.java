@@ -129,14 +129,17 @@ public class YuHook {
             val ans = (List<AnnotationNode>) method.visibleAnnotations;
             if (ans != null) {
                 for (AnnotationNode an : ans) {
-                    val annotationClassName = an.desc.substring(1, an.desc.length() - 1).replace("/", ".");
-                    val annotationClass = classloader.loadClass(annotationClassName, false, false);
-                    val aa = annotationClass.getAnnotations();
-                    for (Annotation a : aa) {
-                        if (a instanceof HookBy) {
-                            ah = true;
-                            getInvoker(name, method.name).put(getOrNewRunnable(((HookBy) a).value()));
+                    try {
+                        val annotationClassName = an.desc.substring(1, an.desc.length() - 1).replace("/", ".");
+                        val annotationClass = classloader.loadClass(annotationClassName, false, false);
+                        val aa = annotationClass.getAnnotations();
+                        for (Annotation a : aa) {
+                            if (a instanceof HookBy) {
+                                ah = true;
+                                getInvoker(name, method.name).put(getOrNewRunnable(((HookBy) a).value()));
+                            }
                         }
+                    } catch (Exception ignore) {
                     }
                 }
             }
