@@ -42,6 +42,10 @@ class EhcacheHelp<T>(private val cache: Cache<String, Any>) : Iterable<Map.Entry
         cache.remove(key)
     }
 
+    fun removeAll(){
+        cache.removeAll()
+    }
+
     override fun iterator(): Iterator<Map.Entry<String, T>> {
         return object : Iterator<Map.Entry<String, T>> {
             //            val iter =
