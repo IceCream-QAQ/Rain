@@ -132,6 +132,7 @@ public class AppClassloader extends ClassLoader {
                 || name.startsWith("kotlin")
                 || name.startsWith("com.google.")
                 || name.startsWith("org.apache.")
+                || name.startsWith("org.w3c.")
                 || name.startsWith("sun.")
                 || name.startsWith("com.sun.")
                 || name.startsWith("net.sf.ehcache")
