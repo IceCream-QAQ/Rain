@@ -6,7 +6,7 @@ abstract class BaseNode : DataNode {
 
     override fun <T> asObject(type: RelType<T>): T {
         return if (type.realClass.isEnum) asEnum(type)
-        else when (type.realType) {
+        else when (type.realClass) {
             Boolean::class.java, Boolean::class.javaObjectType -> asBoolean()
             Byte::class.java, Byte::class.javaObjectType -> asByte()
             Short::class.java, Short::class.javaObjectType -> asShort()
