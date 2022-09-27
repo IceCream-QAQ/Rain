@@ -183,7 +183,7 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
         val nodes = name.split(".")
         for (i in 0 until nodes.size - 1) {
             o = o[nodes[i]]?.let {
-                when(it){
+                when (it) {
                     is ObjectNode -> it
                     is ArrayNode -> it.firstOrNull { item -> item is ObjectNode } as ObjectNode
                     else -> null
@@ -201,7 +201,8 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
         return getConfigNode(name)?.asArray(type) ?: emptyList()
     }
 
-    override fun <T> getConfigReader(name: String, type: RelType<T>): ConfigReader<T> = ConfigNodeReader(this,name,type)
+    override fun <T> getConfigReader(name: String, type: RelType<T>): ConfigReader<T> =
+        ConfigNodeReader(this, name, type)
 
     override fun <T> getConfigWriter(name: String, type: RelType<T>): ConfigReader<T> {
         TODO("Not yet implemented")
