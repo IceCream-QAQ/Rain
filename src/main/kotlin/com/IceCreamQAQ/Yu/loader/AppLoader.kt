@@ -81,6 +81,19 @@ open class AppLoader(
         }.forEach { (ctx, binds) ->
             ctx.putBinds(binds.mapMap { (named, bindClass) -> named to context.findContext(bindClass) })
         }
+
+        val loaders = ArrayList<Loader>()
+        loadItemsMap.keys.forEach {
+            loaders.add(
+                context.getBean(it) ?: error("在应用加载的过程中试图获取 Loader(${it.name}) 的实例失败！")
+            )
+        }
+
+        loaders.sortBy { it.width() }
+
+        loaders.forEach { loader ->
+            loadItemsMap[loader::class.java]?.values?.forEach { loader.load(it.values) }
+        }
     }
 
     open fun checkAutoBind(clazz: Class<*>, binds: ArrayList<Class<*>>) {
