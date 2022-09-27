@@ -202,7 +202,8 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
     }
 
     override fun <T> getConfigReader(name: String, type: RelType<T>): ConfigReader<T> =
-        ConfigNodeReader(this, name, type)
+        if (type.realClass == List::class.java) ConfigArrayReader(this, name, type.generics!![0])
+        else ConfigNodeReader(this, name, type)
 
     override fun <T> getConfigWriter(name: String, type: RelType<T>): ConfigReader<T> {
         TODO("Not yet implemented")
