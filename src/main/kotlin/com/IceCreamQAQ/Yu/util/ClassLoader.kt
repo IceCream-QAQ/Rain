@@ -49,7 +49,7 @@ private fun ClassLoader.findAndAddClassesInPackageByFile(
     val dir = File(packagePath)
     if (!dir.exists() || !dir.isDirectory) return
     dir.listFiles()?.map { it: File ->
-        if (it.isDirectory) findAndAddClassesInPackageByFile(packageName, packagePath, classes)
+        if (it.isDirectory) findAndAddClassesInPackageByFile(packageName + "." + it.name, it.absolutePath, classes)
         else if (it.name.endsWith(".class"))
             it.name.subStringByLast(6).let { classes.add(loadClass("$packageName.$it")) }
     }
