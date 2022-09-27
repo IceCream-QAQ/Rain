@@ -5,6 +5,7 @@ import com.IceCreamQAQ.Yu.di.YuContext.Companion.get
 import com.IceCreamQAQ.Yu.di.config.impl.ConfigImpl
 import com.IceCreamQAQ.Yu.di.impl.ContextImpl
 import com.IceCreamQAQ.Yu.event.EventBusImpl
+import com.IceCreamQAQ.Yu.loader.AppLoader
 
 fun main() {
     val context = ContextImpl(
@@ -15,4 +16,5 @@ fun main() {
     val eventBus = cc.getBean()
     println(cc)
     println(eventBus)
+    context.getBean(AppLoader::class.java).apply { println() }
 }
