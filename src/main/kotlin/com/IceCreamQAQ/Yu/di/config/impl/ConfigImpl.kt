@@ -117,7 +117,7 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
 
     protected open val forceArrayPropertiesName = arrayOf(
         "yu.scanPackages",
-        "yu.classRegister",
+        "yu.classRegisters",
         "yu.modules",
     )
 
