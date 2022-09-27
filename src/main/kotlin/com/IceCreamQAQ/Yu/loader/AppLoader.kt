@@ -43,7 +43,7 @@ open class AppLoader(
          * 一个类上出现多种不同的标记方式指向同一个 Loader，则可以为每个标记方式，分别加载一次该类。
          * 如果一个类通过标记一个标记了 LoadBy 注解的注解，则标记方式为注解。
          * 如果一个类通过继承一个类/实现一个接口，指向一个标记 LoadBy 注解的类/接口，则标记方式为继承的类/实现的接口。
-         * 如果一个类通过继承一个类/实现一个接口，而该类/接口标记了一个注解，该注解标记了一个 LoadBy 注解，则标记方式为改注解。
+         * 如果一个类通过继承一个类/实现一个接口，而该类/接口标记了一个注解，该注解标记了一个 LoadBy 注解，则标记方式为该注解。
          */
         val loadItemsMap =
             HashMap<Class<out Loader>, MutableMap<Class<*>, MutableMap<Class<*>, LoadItem>>>()
