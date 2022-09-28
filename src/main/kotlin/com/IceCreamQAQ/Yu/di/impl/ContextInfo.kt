@@ -86,7 +86,9 @@ open class NoInstanceClassContext<T>(override val clazz: Class<T>) : BindableCla
         bindMap[name]?.getBean()
 
     override fun putBean(name: String, instance: T): T {
-        error("Class: $name, 无法提交实例！")
+        instance as Any
+        bindMap[name] = LocalInstanceClassContext(instance)
+        return instance
     }
 }
 
