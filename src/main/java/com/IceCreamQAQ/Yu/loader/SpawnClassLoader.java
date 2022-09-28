@@ -8,7 +8,7 @@ public class SpawnClassLoader extends ClassLoader {
     private Long time;
 
     @Inject
-    public SpawnClassLoader(@Named("appClassLoader") ClassLoader appClassLoader) {
+    public SpawnClassLoader(@Named("appClassloader") ClassLoader appClassLoader) {
         super(appClassLoader);
     }
 
