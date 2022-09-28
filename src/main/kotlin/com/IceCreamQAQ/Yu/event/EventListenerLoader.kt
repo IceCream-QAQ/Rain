@@ -22,9 +22,9 @@ open class EventListenerLoader : Loader {
     lateinit var context: YuContext
 
 
-    override fun load(items: Map<String, LoadItem>) {
+    override fun load(items: Collection<LoadItem>) {
 
-        for (item in items.values) {
+        for (item in items) {
             if (!item.clazz.isBean()) continue
             log.debug("Register EventListener: ${item.clazz.name}.")
             try {

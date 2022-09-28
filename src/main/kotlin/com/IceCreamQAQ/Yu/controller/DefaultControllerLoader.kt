@@ -26,9 +26,9 @@ abstract class DefaultControllerLoader : Loader {
     protected fun createCatchMethodInvoker(instance: Any, method: Method, errorType: Class<out Throwable>): CatchInvoker = ReflectCatchInvoker(errorType, createMethodInvoker(instance, method))
     protected abstract fun createActionInvoker(level: Int, actionMethod: Method, instance: Any): DefaultActionInvoker
 
-    override fun load(items: Map<String, LoadItem>) {
+    override fun load(items: Collection<LoadItem>) {
         val rootRouters = HashMap<String, RootRouter>()
-        for (item in items.values) {
+        for (item in items) {
             if (!item.clazz.isBean()) continue
             val clazz = item.clazz
             val name = clazz.getAnnotation(Named::class.java)?.value

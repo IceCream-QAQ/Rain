@@ -127,8 +127,8 @@ class JobManagerImpl : ApplicationService, Loader, JobManager {
             time to time
         }
 
-    override fun load(items: Map<String, LoadItem>) {
-        for (item in items.values) {
+    override fun load(items: Collection<LoadItem>) {
+        for (item in items) {
             if (!item.clazz.isBean()) continue
             log.debug("Register JobCenter: ${item.clazz.name}.")
             val instance = context[item.clazz] ?: continue

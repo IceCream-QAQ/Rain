@@ -15,9 +15,9 @@ class AsLoader : Loader {
     private lateinit var instances: Array<ApplicationService>
     private val log = LoggerFactory.getLogger(AsLoader::class.java)
 
-    override fun load(items: Map<String, LoadItem>) {
+    override fun load(items: Collection<LoadItem>) {
         val list = ArrayList<ApplicationService>()
-        for (item in items.values) {
+        for (item in items) {
             val a = context[item.clazz] as? ApplicationService ?: continue
             list.add(a)
         }
