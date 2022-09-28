@@ -1,25 +1,20 @@
 package com.IceCreamQAQ.Yu.util
 
-import com.IceCreamQAQ.Yu.`as`.ApplicationService
+import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.annotation.Config
-import com.IceCreamQAQ.Yu.annotation.Default
 import com.IceCreamQAQ.Yu.annotation.NotSearch
-import com.IceCreamQAQ.Yu.di.BeanFactory
-import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.toJSONString
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.internal.userAgent
 import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 import java.io.InputStream
 import java.net.InetSocketAddress
 import java.net.Proxy
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+import kotlin.collections.getOrPut
 
 
 class WebProxy {
@@ -49,9 +44,9 @@ object HeaderBuilder {
     infix fun String.to(that: String) = Header(this, that)
 
     fun headerOf(
-            ua: String? = null,
-            referer: String? = null,
-            vararg headers: Header
+        ua: String? = null,
+        referer: String? = null,
+        vararg headers: Header
     ): List<Header> = arrayListOf<Header>().run {
         ua?.let { add("User-Agent" to it) }
         referer?.let { add("Referer" to it) }
@@ -60,34 +55,39 @@ object HeaderBuilder {
     }
 }
 
+@AutoBind
 interface Web {
 
     fun saveCookie(
-            domain: String,
-            path: String,
-            name: String,
-            value: String,
-            expiresAt: Long = 253402300799999L,
-            httpOnly: Boolean = true,
-            hostOnly: Boolean = false
+        domain: String,
+        path: String,
+        name: String,
+        value: String,
+        expiresAt: Long = 253402300799999L,
+        httpOnly: Boolean = true,
+        hostOnly: Boolean = false
     )
-
-    fun init()
 
     fun get(url: String) = get(url, null)
     fun get(url: String, headers: HeaderBuilder.() -> List<Header>?) = get(url, headers(HeaderBuilder))
     fun get(url: String, headers: List<Header>?): String
 
     fun post(url: String, para: Map<String, String>) = post(url, para, null)
-    fun post(url: String, para: Map<String, String>, headers: HeaderBuilder.() -> List<Header>?) = post(url, para, headers(HeaderBuilder))
+    fun post(url: String, para: Map<String, String>, headers: HeaderBuilder.() -> List<Header>?) =
+        post(url, para, headers(HeaderBuilder))
+
     fun post(url: String, para: Map<String, String>, headers: List<Header>?): String
 
     fun postJSON(url: String, json: String) = postJSON(url, json, null)
-    fun postJSON(url: String, json: String, headers: HeaderBuilder.() -> List<Header>?) = postJSON(url, json, headers(HeaderBuilder))
+    fun postJSON(url: String, json: String, headers: HeaderBuilder.() -> List<Header>?) =
+        postJSON(url, json, headers(HeaderBuilder))
+
     fun postJSON(url: String, json: String, headers: List<Header>?): String
 
     fun postJSON(url: String, obj: Any) = postJSON(url, obj.toJSONString(), null)
-    fun postJSON(url: String, obj: Any, headers: HeaderBuilder.() -> List<Header>?) = postJSON(url, obj.toJSONString(), headers(HeaderBuilder))
+    fun postJSON(url: String, obj: Any, headers: HeaderBuilder.() -> List<Header>?) =
+        postJSON(url, obj.toJSONString(), headers(HeaderBuilder))
+
     fun postJSON(url: String, obj: Any, headers: List<Header>?) = postJSON(url, obj.toJSONString(), headers)
 
     //    fun download(url: String): InputStream
@@ -102,25 +102,22 @@ interface Web {
     fun stop()
 }
 
-@NotSearch
-class OkHttpWebImpl : Web {
+class OkHttpWebImpl(
+    @Config("yu.web")
+    var config: WebConfig? = null
+) : Web {
 
-    lateinit var client: OkHttpClient
-    lateinit var ua: String
+    var client: OkHttpClient
+    var ua: String
 
     val domainMap = ConcurrentHashMap<String, MutableMap<String, Cookie>>()
 
-    @Config("yu.web")
-    var config: WebConfig? = null
+
 
     fun getDomainCookies(domain: String) =
-            domainMap[domain] ?: {
-                val domainCookies = HashMap<String, Cookie>()
-                domainMap[domain] = domainCookies
-                domainCookies
-            }()
+        domainMap.getOrPut(domain) { HashMap() }
 
-    override fun init() {
+    init {
         val builder = OkHttpClient.Builder()
         builder.cookieJar(object : CookieJar {
 
@@ -166,18 +163,17 @@ class OkHttpWebImpl : Web {
                             i.remove()
                             continue
                         }
-                        if (path.startsWith(cookie.path)) if (!cookie.hostOnly) cookies.add(cookie) else if (cookie.domain == domain) cookies.add(cookie)
+                        if (path.startsWith(cookie.path))
+                            if (!cookie.hostOnly) cookies.add(cookie)
+                            else if (cookie.domain == domain) cookies.add(cookie)
                     }
                 }
                 return cookies
             }
         })
 
-        val config = this.config ?: {
-            val wc = WebConfig()
-            this.config = wc
-            wc
-        }()
+        val config = this.config ?: WebConfig().apply { config = this }
+
         ua = config.ua ?: "Rain/$userAgent"
 
         val proxy = config.proxy
@@ -186,16 +182,12 @@ class OkHttpWebImpl : Web {
                 "http", "https" -> builder.proxy(Proxy(Proxy.Type.HTTP, InetSocketAddress(proxy.host, proxy.port)))
                 "socks", "socks5" -> builder.proxy(Proxy(Proxy.Type.SOCKS, InetSocketAddress(proxy.host, proxy.port)))
             }
-            builder.proxyAuthenticator(object : Authenticator {
-                @Throws(IOException::class)
-                override fun authenticate(route: Route?, response: Response): Request? {
-                    //设置代理服务器账号密码
-                    val credential = Credentials.basic(proxy.username ?: "", proxy.password ?: "")
-                    return response.request.newBuilder()
-                            .header("Proxy-Authorization", credential)
-                            .build()
-                }
-            })
+            builder.proxyAuthenticator { _, response -> //设置代理服务器账号密码
+                val credential = Credentials.basic(proxy.username ?: "", proxy.password ?: "")
+                response.request.newBuilder()
+                    .header("Proxy-Authorization", credential)
+                    .build()
+            }
         }
 
         if (config.readTimeout != null) builder.readTimeout(config.readTimeout!!, TimeUnit.MINUTES)
@@ -209,7 +201,15 @@ class OkHttpWebImpl : Web {
         client = builder.build()
     }
 
-    override fun saveCookie(domain: String, path: String, name: String, value: String, expiresAt: Long, httpOnly: Boolean, hostOnly: Boolean) {
+    override fun saveCookie(
+        domain: String,
+        path: String,
+        name: String,
+        value: String,
+        expiresAt: Long,
+        httpOnly: Boolean,
+        hostOnly: Boolean
+    ) {
         val cb = Cookie.Builder().domain(domain).path(path).name(name).value(value).expiresAt(expiresAt)
         if (httpOnly) cb.httpOnly()
         if (hostOnly) cb.hostOnlyDomain(domain)
@@ -217,7 +217,8 @@ class OkHttpWebImpl : Web {
     }
 
     //    override fun get(url: String) =
-    override fun get(url: String, headers: List<Header>?) = client.newCall(createRequest(url,headers)).execute().body!!.string()
+    override fun get(url: String, headers: List<Header>?) =
+        client.newCall(createRequest(url, headers)).execute().body!!.string()
 
     override fun post(url: String, para: Map<String, String>, headers: List<Header>?): String {
         val fbBuilder = FormBody.Builder()
@@ -252,7 +253,9 @@ class OkHttpWebImpl : Web {
         return rb.build()
     }
 
-    override fun download(url: String, headers: List<Header>?) = client.newCall(createRequest(url, headers)).execute().body!!.byteStream()
+    override fun download(url: String, headers: List<Header>?) =
+        client.newCall(createRequest(url, headers)).execute().body!!.byteStream()
+
     override fun stop() {
 
     }
