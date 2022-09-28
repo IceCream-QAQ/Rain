@@ -122,7 +122,7 @@ open class InstanceAbleClassContext<T>(
     var instanceMap: MutableMap<String, T> = HashMap()
 
     override fun getBean(): T? =
-        defaultInstance?: newBean().apply { defaultInstance = this }
+        defaultInstance ?: newBean().apply { defaultInstance = this }
 
     override fun getBean(name: String): T? =
         if (name == din) getBean() else instanceMap[name]
