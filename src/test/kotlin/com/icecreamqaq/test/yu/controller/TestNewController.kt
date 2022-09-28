@@ -18,7 +18,7 @@ class TestNewController {
     }
 
 
-    @Action("co{id}", loadWeight = 1)
+    @Action("co{id}", loadPriority = 1)
     fun co(id: String) = id
 
     @Action("coc{id}")

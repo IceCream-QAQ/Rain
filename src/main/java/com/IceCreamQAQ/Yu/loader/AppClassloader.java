@@ -67,17 +67,24 @@ public class AppClassloader extends ClassLoader {
 
         if (isBlackListClass(name)) c = this.getParent().loadClass(name);
 
-        if (c == null) if (enhance) c = loadAppClass(name);
+        if (c == null) if (enhance) c = loadAppClass(name, resolve);
 
-        if (null == c) {
-            return super.loadClass(name, resolve);
-        } else {
-            if (resolve) this.resolveClass(c);
-            return c;
+        if (null == c) c = super.loadClass(name, resolve);
+
+        val pkgName = name.substring(0,name.lastIndexOf("."));
+//        if (getParent())
+        if (getPackage(pkgName) == null) {
+            try {
+                definePackage(pkgName, null, null, null, null, null, null, null);
+            } catch (IllegalArgumentException iae) {
+                throw new AssertionError("Cannot find package " +
+                        pkgName);
+            }
         }
+        return c;
     }
 
-    private Class<?> loadAppClass(String name) throws IOException, ClassNotFoundException {
+    private Class<?> loadAppClass(String name, boolean resolve) throws IOException, ClassNotFoundException {
         log.trace(String.format("Load Class: %s.", name));
 
         val path = name.replace(".", "/") + ".class";
@@ -104,11 +111,18 @@ public class AppClassloader extends ClassLoader {
             IO.writeFile(new File(classOutLocation, name + ".class"), bytes);
         }
 
-        return defineClass(name, bytes, 0, bytes.length);
+        val c = defineClass(name, bytes, 0, bytes.length);
+        if (resolve) resolveClass(c);
+        return c;
     }
 
     public Class<?> define(String name, byte[] data) {
         return defineClass(name, data, 0, data.length);
+    }
+
+    @Override
+    protected Package getPackage(String name) {
+        return super.getPackage(name);
     }
 
     public boolean isBlackListClass(String name) {
@@ -118,6 +132,7 @@ public class AppClassloader extends ClassLoader {
                 || name.startsWith("kotlin")
                 || name.startsWith("com.google.")
                 || name.startsWith("org.apache.")
+                || name.startsWith("org.w3c.")
                 || name.startsWith("sun.")
                 || name.startsWith("com.sun.")
                 || name.startsWith("net.sf.ehcache")

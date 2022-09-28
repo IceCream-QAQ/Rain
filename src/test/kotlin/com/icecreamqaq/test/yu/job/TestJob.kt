@@ -25,6 +25,8 @@ class TestJob {
 
     @Cron("10s")
     fun c2() {
+        c["10s"] = c.getOrPut("10s", 0) + 1
+        println("c: " + c["10s"])
 //        println("时间：${dateUtil.formatDateTimeSSS()}，c2 定时任务触发。当前 Cache: ${c["ccc"]}")
     }
 

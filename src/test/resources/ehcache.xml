@@ -1,30 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ehcache name="test">
+<config xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xmlns='http://www.ehcache.org/v3'
+        xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core.xsd">
 
-    <diskStore path="java.io.tmpdir"/>
+    <persistence directory="${java.io.tmpdir}"/>
 
-    <defaultCache
-            maxElementsInMemory="10000"
-            eternal="false"
-            overflowToDisk="true"
-            timeToIdleSeconds="10"
-            timeToLiveSeconds="20"
-            diskPersistent="false"
-            diskExpiryThreadIntervalSeconds="120"/>
+    <cache alias="testCache1">
+        <key-type>java.lang.String</key-type>
+        <value-type>java.lang.Object</value-type>
+        <resources>
+            <heap>2000</heap>
+        </resources>
+    </cache>
 
-    <cache
-            name="testCache"
-            maxElementsInMemory="10000"
-            eternal="false"
-            overflowToDisk="false"
-            timeToIdleSeconds="1800"
-    />
-    <cache
-            name="testCache2"
-            maxElementsInMemory="10000"
-            eternal="false"
-            overflowToDisk="false"
-            timeToIdleSeconds="1800"
-    />
-
-</ehcache>
+    <cache alias="testCache2">
+        <key-type>java.lang.String</key-type>
+        <value-type>java.lang.Object</value-type>
+        <resources>
+            <heap>2000</heap>
+        </resources>
+    </cache>
+</config>

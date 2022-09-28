@@ -13,28 +13,44 @@ public class HookInfo {
 
     public final Class clazz;
     public final Method method;
+    public final Method sourceMethod;
     public final Class[] methodParas;
 
     public final HookInvokerRunnable runnable;
 
-    private Map<String,Object> saves;
+    private Map<String, Object> saves;
 
-    public HookInfo(String className, String methodName, Class clazz, Method method, Class[] methodParas, HookInvokerRunnable runnable) {
+    public HookInfo(
+            String className,
+            String methodName,
+            Class<?> clazz,
+            Method method,
+            Method sourceMethod,
+            Class<?>[] methodParas,
+            HookInvokerRunnable runnable
+    ) {
         this.className = className;
         this.methodName = methodName;
         this.clazz = clazz;
         this.method = method;
+        this.sourceMethod = sourceMethod;
         this.methodParas = methodParas;
         this.runnable = runnable;
     }
 
-    public static HookInfo create(Class clazz, String methodName, Class[] methodParas) {
+    public static HookInfo create(Class clazz, String methodName, String sourceMethodName, Class[] methodParas) {
         try {
             Method method;
-            if (methodParas.length == 0)method = clazz.getDeclaredMethod(methodName);
-            else method = clazz.getDeclaredMethod(methodName, methodParas);
+            Method sourceMethod;
+            if (methodParas.length == 0) {
+                method = clazz.getDeclaredMethod(methodName);
+                sourceMethod = clazz.getDeclaredMethod(sourceMethodName);
+            } else {
+                method = clazz.getDeclaredMethod(methodName, methodParas);
+                sourceMethod = clazz.getDeclaredMethod(sourceMethodName, methodParas);
+            }
             HookInvokerRunnable runnable = YuHook.getInvoker(clazz.getName(), methodName);
-            val info = new HookInfo(clazz.getName(), methodName, clazz, method, methodParas, runnable);
+            val info = new HookInfo(clazz.getName(), methodName, clazz, method, sourceMethod, methodParas, runnable);
             runnable.init(info);
             return info;
         } catch (Exception e) {
@@ -42,17 +58,17 @@ public class HookInfo {
         }
     }
 
-    public void saveInfo(String key,Object value){
+    public void saveInfo(String key, Object value) {
         if (saves == null) saves = new HashMap<>();
         saves.put(key, value);
     }
 
-    public Object getInfo(String key){
+    public Object getInfo(String key) {
         if (saves == null) return null;
         return saves.get(key);
     }
 
-    public Object delInfo(String key){
+    public Object delInfo(String key) {
         if (saves == null) return null;
         return saves.remove(key);
     }

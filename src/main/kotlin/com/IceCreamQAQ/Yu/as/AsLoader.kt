@@ -5,7 +5,9 @@ import com.IceCreamQAQ.Yu.di.YuContext.Companion.get
 import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.Yu.loader.Loader
 import org.slf4j.LoggerFactory
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 class AsLoader : Loader {
 
@@ -23,23 +25,13 @@ class AsLoader : Loader {
         }
         val instances = list.toTypedArray()
 
-        for (i in instances.indices) {
-            for (j in 0 until instances.size - 1 - i) {
-                val c = instances[j]
-                val n = instances[j + 1]
-                if (c.width() > n.width()) {
-                    instances[j] = n
-                    instances[j + 1] = c
-                }
-            }
-        }
-
+        Arrays.sort(instances) { a, b -> a.width() - b.width() }
         this.instances = instances
 
         for (instance in instances) {
             try {
                 log.debug("Init ApplicationService: ${instance::class.simpleName}.")
-                context.injectBean(instance)
+                context.populateBean(instance)
                 instance.init()
                 log.info("Init ApplicationService: ${instance::class.simpleName} Success!")
             } catch (e: Exception) {
@@ -53,7 +45,7 @@ class AsLoader : Loader {
         for (instance in instances) {
             try {
                 log.debug("Start ApplicationService: ${instance::class.simpleName}.")
-                context.injectBean(instance)
+                context.populateBean(instance)
                 instance.start()
                 log.info("Start ApplicationService: ${instance::class.simpleName} Success!")
             } catch (e: Exception) {
@@ -76,6 +68,9 @@ class AsLoader : Loader {
         }
     }
 
-    override fun width(): Int = 2
+    override fun priority(): Int = 2
+
+    @Deprecated("过时方法", ReplaceWith("priority"))
+    fun width(): Int = priority()
 
 }

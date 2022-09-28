@@ -1,12 +1,12 @@
 plugins {
     java
-    kotlin("jvm") version "1.6.10"
+    kotlin("jvm") version "1.6.21"
     `java-library`
     `maven-publish`
 }
 
 group = "com.IceCreamQAQ"
-version = "0.2.0.0-DEV15"
+version = "0.2.0.0-DEV26"
 
 repositories {
     mavenLocal()
@@ -17,20 +17,22 @@ repositories {
 dependencies {
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
 
-    api("com.squareup.okhttp3:okhttp:4.9.3")
-    api("ch.qos.logback:logback-classic:1.2.10")
-    api("com.alibaba:fastjson:1.2.79")
-    api("org.eclipse.jdt:ecj:3.22.0")
-    api("net.sf.ehcache:ehcache:2.10.9.2")
+    api("com.squareup.okhttp3:okhttp:4.10.0")
+    // Logback 1.4+ 最低支持 Java 11。
+    api("ch.qos.logback:logback-classic:1.3.1")
+    api("com.alibaba.fastjson2:fastjson2:2.0.14")
+    // ECJ 当前版本为最后支持 Java8 的版本，应停留在本版本。
+    api("org.eclipse.jdt:ecj:3.26.0")
+    api("org.ehcache:ehcache:3.10.1")
 
-    api("org.ow2.asm:asm-commons:9.2")
+    api("org.ow2.asm:asm-commons:9.3")
 
     api("javax.inject:javax.inject:1")
 
-    compileOnly("org.projectlombok:lombok:1.18.22")
-    annotationProcessor("org.projectlombok:lombok:1.18.22")
+    compileOnly("org.projectlombok:lombok:1.18.24")
+    annotationProcessor("org.projectlombok:lombok:1.18.24")
 }
 
 java {
