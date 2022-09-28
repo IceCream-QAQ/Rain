@@ -3,6 +3,7 @@ package com.IceCreamQAQ.Yu.util.type
 import com.IceCreamQAQ.Yu.arrayMap
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
+import java.lang.reflect.WildcardType
 
 class RelType<T>(
     val realType: Type,
@@ -18,7 +19,7 @@ class RelType<T>(
                     type,
                     type.rawType as Class<*>,
                     type.actualTypeArguments.arrayMap { create(it) })
-
+                is WildcardType -> RelType(type,type.upperBounds[0] as Class<*>,null)
                 else -> error("在尝试构建 RelType 时，遇到无法解析的类型，在 $type。")
             }
 
