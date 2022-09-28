@@ -139,7 +139,7 @@ open class AppLoader(
         loadBy: LoadBy,
         loadItemsMap: HashMap<Class<out Loader>, MutableMap<Class<*>, MutableMap<Class<*>, LoadItem>>>
     ) {
-        loadItemsMap.getOrPut(loadBy.value.java, HashMap())
+        loadItemsMap.getOrPut(Class.forName(loadBy.value.java.name, false, classLoader) as Class<out Loader>, HashMap())
             .getOrPut(targetClass, HashMap())[loadClass] = LoadItem(loadClass, targetClass, annotationInstance)
     }
 
