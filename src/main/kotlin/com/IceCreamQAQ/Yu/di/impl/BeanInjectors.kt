@@ -12,7 +12,7 @@ class ReflectBeanInject<T>(
 ) : BeanInjector<T> {
 
     private val fields =
-        clazz.declaredFields
+        clazz.allField
             .filter { !it.isStatic && (it.hasAnnotation<Inject>() || it.hasAnnotation<Config>()) }
             .mutableMap {
                 val named = it.annotation<Named>()
@@ -51,8 +51,8 @@ class ReflectBeanInject<T>(
                 }
             }.apply {
                 addAll(
-                    clazz.methods
-                        .filter { it.name.startsWith("set") && (it.hasAnnotation<Inject>() || it.hasAnnotation<Config>()) && it.parameters.size == 1 && it.isExecutable }
+                    clazz.allMethod
+                        .filter { it.isPublic && it.name.startsWith("set") && (it.hasAnnotation<Inject>() || it.hasAnnotation<Config>()) && it.parameters.size == 1 && it.isExecutable }
                         .map {
                             val named = it.annotation<Named>()
 
