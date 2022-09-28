@@ -5,6 +5,7 @@ import com.IceCreamQAQ.Yu.util.YuParaValueException
 import com.alibaba.fastjson.JSON
 import okhttp3.internal.and
 import java.lang.reflect.AnnotatedElement
+import java.lang.reflect.Field
 import java.lang.reflect.Member
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
@@ -67,6 +68,34 @@ val Method.fullName: String
         return nameBuilder.toString()
     }
 
+val Method.nameWithParams: String
+    inline get() = StringBuilder(name)
+        .append("(")
+        .apply {
+            parameterTypes.let { parameterTypes ->
+                val max = parameterTypes.size - 1
+                parameterTypes.forEachIndexed { i, it ->
+                    append(it.simpleName)
+                    if (i < max) append(", ")
+                }
+            }
+        }.append(")")
+        .toString()
+
+val Method.nameWithParamsFullClass: String
+    inline get() = StringBuilder(name)
+        .append("(")
+        .apply {
+            parameterTypes.let { parameterTypes ->
+                val max = parameterTypes.size - 1
+                parameterTypes.forEachIndexed { i, it ->
+                    append(it.name)
+                    if (i < max) append(", ")
+                }
+            }
+        }.append(")")
+        .toString()
+
 fun String.md5(charset: Charset = Charsets.UTF_8) = this.toByteArray(charset).md5
 val String.md5: String get() = this.toByteArray().md5
 
@@ -94,6 +123,31 @@ val Member.isExecutable get() = !isStatic && !isAbstract
 val Member.isAbstract get() = Modifier.isAbstract(modifiers)
 val Member.isStatic get() = Modifier.isStatic(modifiers)
 val Member.isFinal get() = Modifier.isFinal(modifiers)
+val Member.isPrivate get() = Modifier.isPrivate(modifiers)
+val Member.isProtected get() = Modifier.isProtected(modifiers)
+val Member.isPublic get() = Modifier.isPublic(modifiers)
+
+val Class<*>.allField: List<Field>
+    get() {
+        val list = ArrayList<Field>()
+        var clazz: Class<*>? = this
+        while (clazz != null) {
+            list.addAll(clazz.declaredFields)
+            clazz = clazz.superclass
+        }
+        return list
+    }
+
+val Class<*>.allMethod: List<Method>
+    get() {
+        val list = ArrayList<Method>()
+        var clazz: Class<*>? = this
+        while (clazz != null) {
+            list.addAll(clazz.declaredMethods)
+            clazz = clazz.superclass
+        }
+        return list
+    }
 
 inline fun <reified T : Annotation> AnnotatedElement.hasAnnotation(): Boolean =
     getAnnotation(T::class.java)?.let { true } ?: false
