@@ -1,11 +1,16 @@
-# Yu-Core Java Framework
+# Rain - JVM Application Development Framework
 ## 自我介绍
-Yu-Core 旨在简化 Java 程序开发难度，与开发过程。  
-Yu-Core 将提供非常棒的特性和功能让开发者开发的更加轻松愉快。
+Rain，一个更加清爽，更加灵活的 JVM 应用开发框架。  
 
-虽然不是很想承认，但是我可能还是把它写成了类 Spring 的框架。  
-我个人不是很喜欢 Spring，他对我而言太大了。  
-而且说实话，Spring 的运行时性能并不优秀，我虽然不能写出来比 Spring 更优秀的框架，但是我能写出来比 Spring 更适合我的框架，也更贴近我心里的那个优秀的框架。
+Rain 使用 Kotlin 开发，并且原生兼容 Java/Kotlin。  
+
+Rain 最低支持到 Java 1.8。  
+同时 Rain 将随时准备更新的 JVM。  
+目前 Rain 正在为 无需配置/无损特性 进行 GraalVM Native-Image 前进着。
+
+Rain 是一个功能相对复杂的开发框架，以 "后端开发" 为基础思路，对现代项目开发工作流程探索。
+不只 "后端"，借由 Rain 模块化/插件化 的设计，基于 Rain 开发的应用也可以享受 Rain 带来的 模块化/插件化 的能力。  
+助你在符合你的现代化 项目管理/开发 工作流上探索的一臂之力。
 
 ## 功能
 
