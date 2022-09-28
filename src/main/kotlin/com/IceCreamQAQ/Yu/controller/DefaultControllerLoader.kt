@@ -30,13 +30,13 @@ abstract class DefaultControllerLoader : Loader {
 
     protected abstract fun createActionInvoker(level: Int, actionMethod: Method, instance: Any): DefaultActionInvoker
 
-    override fun load(items: Map<String, LoadItem>) {
+    override fun load(items: Collection<LoadItem>) {
         val rootRouters = mutableMapOf<String, RootRouter>()
-        for (item in items.values) {
-            if (!item.type.isBean()) continue
-            val clazz = item.type
+        for (item in items) {
+            if (!item.clazz.isBean()) continue
+            val clazz = item.clazz
             val name = clazz.getAnnotation(Named::class.java)?.value
-                ?: item.loadBy::class.java.interfaces[0].getAnnotation(Named::class.java)?.value ?: continue
+                ?: item.annotation?.javaClass?.let { it.interfaces[0].getAnnotation(Named::class.java)?.value } ?: continue
             val rootRouter = rootRouters.getOrPut(name) { RootRouter() }
 
             controllerToRouter(clazz, context[clazz] ?: continue, rootRouter)

@@ -4,7 +4,6 @@ import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.di.BeanFactory
-import com.IceCreamQAQ.Yu.di.ConfigManagerDefaultImpl
 import com.IceCreamQAQ.Yu.di.YuContext
 import org.ehcache.Cache
 import org.ehcache.CacheManager
@@ -63,55 +62,55 @@ class EhcacheHelp<T>(private val cache: Cache<String, Any>) : Iterable<Map.Entry
 
 }
 
-class EhcacheHelpFactory : BeanFactory<EhcacheHelp<*>?>, ApplicationService {
-
-    @Config("yu.cache.ehcache.config")
-    private var ehcacheConfigLocation: String? = null
-    private var cm: CacheManager? = null
-
-    @Inject
-    private lateinit var configManager: ConfigManagerDefaultImpl
-
-    @Inject
-    private lateinit var context: YuContext
-
-    @Inject
-    @field:Named("appClassLoader")
-    private lateinit var classLoader: ClassLoader
-
-    private var cmDefaultMap = ConcurrentHashMap<String, CacheManager>()
-
-    override fun width() = 5
-
-    override fun createBean(clazz: Class<EhcacheHelp<*>?>, name: String): EhcacheHelp<*>? {
-        return EhcacheHelp<Any>(
-            cm?.getCache(name, String::class.java, Any::class.java)
-                ?: cmDefaultMap.getOrPut(name) {
-                    configManager.get("yu.cache.ehcache.caches.$name.default", String::class.java)
-                        ?.let { classLoader.getResource(it) }
-                        ?.let { EhcacheManager(XmlConfiguration(it, classLoader)) }
-                        ?.apply { init() }
-                }?.getCache(name, String::class.java, Any::class.java) ?: return null
-        )
-    }
-
-    override fun init() {
-        val url = ehcacheConfigLocation?.let { javaClass.classLoader.getResource(it) } ?: return
-        cm = EhcacheManager(XmlConfiguration(url, classLoader))
-        cm!!.init()
-    }
-
-    override fun start() {
-
-    }
-
-    override fun stop() {
-        cm?.close()
-        for (cache in cmDefaultMap.values) {
-            cache.close()
-        }
-    }
-
-
-}
+//class EhcacheHelpFactory : BeanFactory<EhcacheHelp<*>?>, ApplicationService {
+//
+//    @Config("yu.cache.ehcache.config")
+//    private var ehcacheConfigLocation: String? = null
+//    private var cm: CacheManager? = null
+//
+//    @Inject
+//    private lateinit var configManager: ConfigManagerDefaultImpl
+//
+//    @Inject
+//    private lateinit var context: YuContext
+//
+//    @Inject
+//    @field:Named("appClassLoader")
+//    private lateinit var classLoader: ClassLoader
+//
+//    private var cmDefaultMap = ConcurrentHashMap<String, CacheManager>()
+//
+//    override fun width() = 5
+//
+//    override fun createBean(clazz: Class<EhcacheHelp<*>?>, name: String): EhcacheHelp<*>? {
+//        return EhcacheHelp<Any>(
+//            cm?.getCache(name, String::class.java, Any::class.java)
+//                ?: cmDefaultMap.getOrPut(name) {
+//                    configManager.get("yu.cache.ehcache.caches.$name.default", String::class.java)
+//                        ?.let { classLoader.getResource(it) }
+//                        ?.let { EhcacheManager(XmlConfiguration(it, classLoader)) }
+//                        ?.apply { init() }
+//                }?.getCache(name, String::class.java, Any::class.java) ?: return null
+//        )
+//    }
+//
+//    override fun init() {
+//        val url = ehcacheConfigLocation?.let { javaClass.classLoader.getResource(it) } ?: return
+//        cm = EhcacheManager(XmlConfiguration(url, classLoader))
+//        cm!!.init()
+//    }
+//
+//    override fun start() {
+//
+//    }
+//
+//    override fun stop() {
+//        cm?.close()
+//        for (cache in cmDefaultMap.values) {
+//            cache.close()
+//        }
+//    }
+//
+//
+//}
 

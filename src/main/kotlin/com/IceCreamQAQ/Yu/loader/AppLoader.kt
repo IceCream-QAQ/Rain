@@ -89,7 +89,7 @@ open class AppLoader(
             )
         }
 
-        loaders.sortBy { it.width() }
+        loaders.sortBy { it.priority() }
 
         loaders.forEach { loader ->
             loadItemsMap[loader::class.java]?.values?.forEach { loader.load(it.values) }
