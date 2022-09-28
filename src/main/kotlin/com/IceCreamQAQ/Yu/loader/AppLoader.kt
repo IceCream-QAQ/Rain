@@ -4,6 +4,8 @@ import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.annotation.LoadBy
 import com.IceCreamQAQ.Yu.di.BeanFactory
+import com.IceCreamQAQ.Yu.di.ClassContext
+import com.IceCreamQAQ.Yu.di.impl.BeanFactoryClassContext
 import com.IceCreamQAQ.Yu.di.impl.BindableClassContext.Companion.putBinds
 import com.IceCreamQAQ.Yu.di.impl.ContextImpl
 import com.IceCreamQAQ.Yu.di.impl.NoInstanceClassContext
@@ -51,6 +53,7 @@ open class AppLoader(
         val registers = classRegister.map { context.getBean(Class.forName(it)) as ClassRegister }
 
         val bindMap = HashMap<Class<*>, MutableMap<String, Class<*>>>()
+        val beanFactoryMap = HashMap<Class<*>, Class<BeanFactory<*>>>()
 //        val beanFactoryList = ArrayList<Class<out BeanFactory<*>>>()
 
         classes.forEach { clazz ->
@@ -64,7 +67,9 @@ open class AppLoader(
                 clazz.genericInterfaces.forEach {
                     RelType.create(it).apply {
                         if (realClass == BeanFactory::class.java) {
-                            generics?.let { }
+                            generics?.let { type ->
+                                beanFactoryMap[type[0].realClass] = clazz as Class<BeanFactory<*>>
+                            }
                         }
                     }
                 }
@@ -74,12 +79,15 @@ open class AppLoader(
             searchLoadBy(clazz, clazz, loadItemsMap)
         }
 
-
-
         bindMap.mapMap { (clazz, binds) ->
             NoInstanceClassContext(clazz).also { context.registerClass(it) } to binds
         }.forEach { (ctx, binds) ->
             ctx.putBinds(binds.mapMap { (named, bindClass) -> named to context.findContext(bindClass) })
+        }
+
+        beanFactoryMap.forEach { (type, factoryType) ->
+            BeanFactoryClassContext(context, context.findContext(factoryType) as ClassContext<BeanFactory<Any>>, type as Class<Any>)
+                .apply { context.registerClass(this) }
         }
 
         val loaders = ArrayList<Loader>()
