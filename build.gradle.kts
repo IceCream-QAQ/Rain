@@ -17,7 +17,7 @@ repositories {
 dependencies {
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     api("com.squareup.okhttp3:okhttp:4.10.0")
     // Logback 1.4+ 最低支持 Java 11。
