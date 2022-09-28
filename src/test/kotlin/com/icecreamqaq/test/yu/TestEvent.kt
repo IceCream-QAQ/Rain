@@ -3,7 +3,6 @@ package com.icecreamqaq.test.yu
 import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.annotation.Event
 import com.IceCreamQAQ.Yu.annotation.EventListener
-import com.IceCreamQAQ.Yu.di.inject
 import com.IceCreamQAQ.Yu.event.EventBus
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent
 import com.IceCreamQAQ.Yu.event.events.AppStopEvent
@@ -25,7 +24,8 @@ class TestEvent {
     @Inject
     private lateinit var testInterface: TestInterface
 
-    private val jobManager: JobManager by inject()
+    @Inject
+    private lateinit var jobManager: JobManager
 
     @Inject
     private lateinit var web: Web
@@ -36,7 +36,7 @@ class TestEvent {
     @Event
     fun onStart(e: AppStartEvent) {
         println("Baidu:")
-        println(web.get("https://www.baidu.com/"))
+//        println(web.get("https://www.baidu.com/"))
         println("Baidu.")
 
         eventBus.post(CustomEvent())

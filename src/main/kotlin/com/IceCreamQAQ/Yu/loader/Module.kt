@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.Yu.module
+package com.IceCreamQAQ.Yu.loader
 
 interface Module {
 

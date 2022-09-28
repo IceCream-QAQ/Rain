@@ -4,6 +4,7 @@ import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.annotation.Cron
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.di.YuContext.Companion.get
 import com.IceCreamQAQ.Yu.event.EventBus
 import com.IceCreamQAQ.Yu.event.events.JobRunExceptionEvent
 import com.IceCreamQAQ.Yu.fullName
@@ -131,12 +132,12 @@ class JobManagerImpl : ApplicationService, Loader, JobManager {
             time to time
         }
 
-    override fun load(items: Map<String, LoadItem>) {
-        for (item in items.values) {
-            if (!item.type.isBean()) continue
-            log.debug("Register JobCenter: ${item.type.name}.")
-            val instance = context[item.type] ?: continue
-            val methods = item.type.methods
+    override fun load(items: Collection<LoadItem>) {
+        for (item in items) {
+            if (!item.clazz.isBean()) continue
+            log.debug("Register JobCenter: ${item.clazz.name}.")
+            val instance = context[item.clazz] ?: continue
+            val methods = item.clazz.methods
             for (method in methods) {
                 val cron = method.getAnnotation(Cron::class.java) ?: continue
                 val fullName = method.fullName
@@ -157,7 +158,7 @@ class JobManagerImpl : ApplicationService, Loader, JobManager {
                 jobs[uuid()] = (job)
                 log.trace("Register Job: $fullName Success!")
             }
-            log.info("Register JobCenter: ${item.type.name} Success!")
+            log.info("Register JobCenter: ${item.clazz.name} Success!")
         }
     }
 

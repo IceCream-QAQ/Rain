@@ -8,6 +8,7 @@ import com.IceCreamQAQ.Yu.loader.Loader
 import kotlin.reflect.KClass
 
 annotation class MultiInstance
+annotation class CreateByPrimaryConstructor
 
 
 annotation class With(val value: Array<KClass<*>>)
@@ -24,10 +25,12 @@ annotation class SynonymBy(val value: KClass<out SynonymManager>)
 @LoadBy(JobManagerImpl::class)
 annotation class JobCenter
 annotation class Cron(
-        val value: String,
-        val time: Long = 0,
-        val async: Boolean = false,
-        val runWithStart: Boolean = false
+    val value: String,
+    val time: Long = 0,
+    val async: Boolean = false,
+    val runWithStart: Boolean = false
 )
 
 annotation class NotSearch
+
+annotation class Configuration(val onlyRead: Boolean = false, val array: Boolean = false)

@@ -7,7 +7,7 @@ import com.IceCreamQAQ.Yu.loader.AppClassloader
 fun main(args: Array<String>) {
     YuHook.put(HookItem("com.icecream.test.Tc", "f", "com.icecreamqaq.test.yu.HookTa"))
 
-    val appClassLoader = AppClassloader(TestStarter::class.java.classLoader)
+    val appClassLoader = AppClassloader(Ta::class.java.classLoader)
 
     val tac = appClassLoader.loadClass("com.icecream.test.Tc")
     val ta = tac.newInstance()

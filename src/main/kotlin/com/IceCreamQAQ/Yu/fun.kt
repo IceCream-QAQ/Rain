@@ -1,13 +1,18 @@
 package com.IceCreamQAQ.Yu
 
+import com.IceCreamQAQ.Yu.di.din
 import com.IceCreamQAQ.Yu.util.YuParaValueException
 import com.alibaba.fastjson2.JSON
 import okhttp3.internal.and
+import java.lang.reflect.AnnotatedElement
+import java.lang.reflect.Field
+import java.lang.reflect.Member
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.nio.charset.Charset
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+import javax.inject.Named
 
 
 fun Class<*>.isBean() = !(this.isInterface || Modifier.isAbstract(this.modifiers))
@@ -63,6 +68,34 @@ val Method.fullName: String
         return nameBuilder.toString()
     }
 
+val Method.nameWithParams: String
+    inline get() = StringBuilder(name)
+        .append("(")
+        .apply {
+            parameterTypes.let { parameterTypes ->
+                val max = parameterTypes.size - 1
+                parameterTypes.forEachIndexed { i, it ->
+                    append(it.simpleName)
+                    if (i < max) append(", ")
+                }
+            }
+        }.append(")")
+        .toString()
+
+val Method.nameWithParamsFullClass: String
+    inline get() = StringBuilder(name)
+        .append("(")
+        .apply {
+            parameterTypes.let { parameterTypes ->
+                val max = parameterTypes.size - 1
+                parameterTypes.forEachIndexed { i, it ->
+                    append(it.name)
+                    if (i < max) append(", ")
+                }
+            }
+        }.append(")")
+        .toString()
+
 fun String.md5(charset: Charset = Charsets.UTF_8) = this.toByteArray(charset).md5
 val String.md5: String get() = this.toByteArray().md5
 
@@ -85,3 +118,69 @@ val ByteArray.md5: String
         }
         return hexValue.toString()
     }
+
+val Member.isExecutable get() = !isStatic && !isAbstract
+val Member.isAbstract get() = Modifier.isAbstract(modifiers)
+val Member.isStatic get() = Modifier.isStatic(modifiers)
+val Member.isFinal get() = Modifier.isFinal(modifiers)
+val Member.isPrivate get() = Modifier.isPrivate(modifiers)
+val Member.isProtected get() = Modifier.isProtected(modifiers)
+val Member.isPublic get() = Modifier.isPublic(modifiers)
+
+val Class<*>.allField: List<Field>
+    get() {
+        val list = ArrayList<Field>()
+        var clazz: Class<*>? = this
+        while (clazz != null) {
+            list.addAll(clazz.declaredFields)
+            clazz = clazz.superclass
+        }
+        return list
+    }
+
+val Class<*>.allMethod: List<Method>
+    get() {
+        val list = ArrayList<Method>()
+        var clazz: Class<*>? = this
+        while (clazz != null) {
+            list.addAll(clazz.declaredMethods)
+            clazz = clazz.superclass
+        }
+        return list
+    }
+
+inline fun <reified T : Annotation> AnnotatedElement.hasAnnotation(): Boolean =
+    getAnnotation(T::class.java)?.let { true } ?: false
+
+inline fun <reified T : Annotation> AnnotatedElement.annotation(): T? = getAnnotation(T::class.java)
+inline fun <reified T : Annotation> AnnotatedElement.annotation(body: T.() -> Unit): T? =
+    getAnnotation(T::class.java)?.apply(body)
+
+val AnnotatedElement.named get() = annotation<Named>()?.value ?: din
+
+inline fun <E, reified R> Collection<E>.arrayMap(body: (E) -> R): Array<R?> {
+    val array = arrayOfNulls<R>(size)
+    forEachIndexed { i, it -> array[i] = body(it) }
+    return array
+}
+
+inline fun <E, reified R> Array<out E>.arrayMap(body: (E) -> R): Array<R> {
+    val array = arrayOfNulls<R>(size)
+    forEachIndexed { i, it -> array[i] = body(it) }
+    return array as Array<R>
+}
+
+inline fun <T, R> Iterable<T>.mutableMap(transform: (T) -> R): MutableList<R> {
+    return mapTo(ArrayList(if (this is Collection<*>) this.size else 10), transform)
+}
+
+inline fun <K, V, RK, RV> Map<out K, V>.mapMap(transform: (Map.Entry<K, V>) -> Pair<RK, RV>): Map<RK, RV> {
+    return mapOf(mapTo(ArrayList(size), transform))
+}
+
+inline fun <T, K, V> Iterable<T>.mapMap(transform: (T) -> Pair<K, V>): Map<K, V> {
+    return mapOf(mapTo(ArrayList(if (this is Collection<*>) this.size else 10), transform))
+}
+
+fun <K, V> mapOf(i: Iterable<Pair<K, V>>): Map<K, V> =
+    HashMap<K, V>(if (i is Collection<*>) i.size else 10).apply { i.forEach { put(it.first, it.second) } }

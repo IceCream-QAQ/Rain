@@ -1,6 +1,7 @@
 package com.IceCreamQAQ.Yu.`as`
 
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.di.YuContext.Companion.get
 import com.IceCreamQAQ.Yu.loader.LoadItem
 import com.IceCreamQAQ.Yu.loader.Loader
 import org.slf4j.LoggerFactory
@@ -16,10 +17,10 @@ class AsLoader : Loader {
     private lateinit var instances: Array<ApplicationService>
     private val log = LoggerFactory.getLogger(AsLoader::class.java)
 
-    override fun load(items: Map<String, LoadItem>) {
+    override fun load(items: Collection<LoadItem>) {
         val list = ArrayList<ApplicationService>()
-        for (item in items.values) {
-            val a = context[item.type] as? ApplicationService ?: continue
+        for (item in items) {
+            val a = context[item.clazz] as? ApplicationService ?: continue
             list.add(a)
         }
         val instances = list.toTypedArray()
@@ -30,7 +31,7 @@ class AsLoader : Loader {
         for (instance in instances) {
             try {
                 log.debug("Init ApplicationService: ${instance::class.simpleName}.")
-                context.populateBean(instance)
+                context.injectBean(instance)
                 instance.init()
                 log.info("Init ApplicationService: ${instance::class.simpleName} Success!")
             } catch (e: Exception) {
@@ -44,7 +45,7 @@ class AsLoader : Loader {
         for (instance in instances) {
             try {
                 log.debug("Start ApplicationService: ${instance::class.simpleName}.")
-                context.populateBean(instance)
+                context.injectBean(instance)
                 instance.start()
                 log.info("Start ApplicationService: ${instance::class.simpleName} Success!")
             } catch (e: Exception) {
