@@ -4,11 +4,7 @@ import com.IceCreamQAQ.Yu.di.din
 import com.IceCreamQAQ.Yu.util.YuParaValueException
 import com.alibaba.fastjson2.JSON
 import okhttp3.internal.and
-import java.lang.reflect.AnnotatedElement
-import java.lang.reflect.Field
-import java.lang.reflect.Member
-import java.lang.reflect.Method
-import java.lang.reflect.Modifier
+import java.lang.reflect.*
 import java.nio.charset.Charset
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -68,7 +64,7 @@ val Method.fullName: String
         return nameBuilder.toString()
     }
 
-val Method.nameWithParams: String
+val Executable.nameWithParams: String
     inline get() = StringBuilder(name)
         .append("(")
         .apply {
@@ -82,7 +78,7 @@ val Method.nameWithParams: String
         }.append(")")
         .toString()
 
-val Method.nameWithParamsFullClass: String
+val Executable.nameWithParamsFullClass: String
     inline get() = StringBuilder(name)
         .append("(")
         .apply {
