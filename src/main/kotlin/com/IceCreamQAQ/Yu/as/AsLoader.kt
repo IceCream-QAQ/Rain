@@ -30,12 +30,12 @@ class AsLoader : Loader {
 
         for (instance in instances) {
             try {
-                log.debug("Init ApplicationService: ${instance::class.simpleName}.")
+                log.debug("[应用服务] 初始化应用服务: ${instance::class.simpleName}.")
                 context.injectBean(instance)
                 instance.init()
-                log.info("Init ApplicationService: ${instance::class.simpleName} Success!")
+                log.info("[应用服务] 初始化应用服务: ${instance::class.simpleName} 成功!")
             } catch (e: Exception) {
-                log.error("Init ApplicationService: ${instance::class.simpleName} Error!", e)
+                log.error("[应用服务] 初始化应用服务: ${instance::class.simpleName} 出错!", e)
                 throw e
             }
         }
@@ -44,12 +44,12 @@ class AsLoader : Loader {
     fun start() {
         for (instance in instances) {
             try {
-                log.debug("Start ApplicationService: ${instance::class.simpleName}.")
+                log.debug("[应用服务] 启动应用服务: ${instance::class.simpleName}.")
                 context.injectBean(instance)
                 instance.start()
-                log.info("Start ApplicationService: ${instance::class.simpleName} Success!")
+                log.info("[应用服务] 启动应用服务: ${instance::class.simpleName} 成功!")
             } catch (e: Exception) {
-                log.error("Start ApplicationService: ${instance::class.simpleName} Error!", e)
+                log.error("[应用服务] 启动应用服务: ${instance::class.simpleName} 出错!", e)
                 throw e
             }
         }
@@ -58,11 +58,11 @@ class AsLoader : Loader {
     fun stop() {
         for (instance in instances) {
             try {
-                log.debug("Stop ApplicationService: ${instance::class.simpleName}.")
+                log.debug("[应用服务] 停止应用服务: ${instance::class.simpleName}.")
                 instance.stop()
-                log.info("Stop ApplicationService: ${instance::class.simpleName} Success!")
+                log.info("[应用服务] 停止应用服务: ${instance::class.simpleName} 成功!")
             } catch (e: Exception) {
-                log.error("Stop ApplicationService: ${instance::class.simpleName} Error!", e)
+                log.error("[应用服务] 停止应用服务: ${instance::class.simpleName} 出错!", e)
                 throw e
             }
         }
