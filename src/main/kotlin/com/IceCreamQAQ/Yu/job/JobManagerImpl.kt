@@ -135,7 +135,7 @@ class JobManagerImpl : ApplicationService, Loader, JobManager {
     override fun load(items: Collection<LoadItem>) {
         for (item in items) {
             if (!item.clazz.isBean()) continue
-            log.debug("Register JobCenter: ${item.clazz.name}.")
+            log.debug("[时钟任务] 注册时钟任务类: ${item.clazz.name}.")
             val instance = context[item.clazz] ?: continue
             val methods = item.clazz.methods
             for (method in methods) {
@@ -156,10 +156,11 @@ class JobManagerImpl : ApplicationService, Loader, JobManager {
                         )
                     }
                 jobs[uuid()] = (job)
-                log.trace("Register Job: $fullName Success!")
+                log.trace("[时钟任务] 注册时钟任务: $fullName 成功!")
             }
-            log.info("Register JobCenter: ${item.clazz.name} Success!")
+            log.info("[时钟任务] 注册时钟任务类: ${item.clazz.name} 成功!")
         }
+        log.info("[时钟任务] 时钟任务启动完成。")
     }
 
     private fun makeInvoker(instance: Any, method: Method) =
