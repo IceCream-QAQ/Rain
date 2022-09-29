@@ -36,7 +36,7 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
         loadByMode(modeFileMap, "module", "conf/module")
         loadByMode(modeFileMap, "conf", "conf")
 
-        runMode = runMode ?: "dev"
+        runMode = runMode ?: "prod"
         log.info("[配置管理器] 加载模式: $runMode。")
         loadByMode(modeFileMap, runMode!!, "conf/$runMode")
 
