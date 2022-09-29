@@ -28,6 +28,7 @@ class AsLoader : Loader {
         Arrays.sort(instances) { a, b -> a.width() - b.width() }
         this.instances = instances
 
+        log.info("[应用服务] 开始加载应用服务。")
         for (instance in instances) {
             try {
                 log.debug("[应用服务] 初始化应用服务: ${instance::class.simpleName}.")
@@ -39,9 +40,11 @@ class AsLoader : Loader {
                 throw e
             }
         }
+        log.info("[应用服务] 应用服务加载完成!")
     }
 
     fun start() {
+        log.info("[应用服务] 开始启动应用服务。")
         for (instance in instances) {
             try {
                 log.debug("[应用服务] 启动应用服务: ${instance::class.simpleName}.")
@@ -53,9 +56,11 @@ class AsLoader : Loader {
                 throw e
             }
         }
+        log.info("[应用服务] 应用服务启动完成!")
     }
 
     fun stop() {
+        log.info("[应用服务] 开始停止应用服务。")
         for (instance in instances) {
             try {
                 log.debug("[应用服务] 停止应用服务: ${instance::class.simpleName}.")
@@ -66,6 +71,7 @@ class AsLoader : Loader {
                 throw e
             }
         }
+        log.info("[应用服务] 应用服务停止完成!")
     }
 
     override fun priority(): Int = 2
