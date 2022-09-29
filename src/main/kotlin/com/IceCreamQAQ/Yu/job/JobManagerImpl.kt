@@ -133,6 +133,7 @@ class JobManagerImpl : ApplicationService, Loader, JobManager {
         }
 
     override fun load(items: Collection<LoadItem>) {
+        log.info("[时钟任务] 开始加载时钟任务。")
         for (item in items) {
             if (!item.clazz.isBean()) continue
             log.debug("[时钟任务] 注册时钟任务类: ${item.clazz.name}.")
