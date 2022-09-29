@@ -23,18 +23,19 @@ open class EventListenerLoader : Loader {
 
 
     override fun load(items: Collection<LoadItem>) {
-
+        log.info("[事件服务] 开始加载事件监听器。")
         for (item in items) {
             if (!item.clazz.isBean()) continue
-            log.debug("Register EventListener: ${item.clazz.name}.")
+            log.debug("[事件服务] 注册事件监听器: ${item.clazz.name}.")
             try {
                 register(item.clazz, context.getBean(item.clazz, "")!!)
-                log.info("Register EventListener: ${item.clazz.name} Success!")
+                log.info("[事件服务] 注册事件监听器: ${item.clazz.name} 成功!")
             } catch (e: Exception) {
                 e.printStackTrace()
-                log.error("Register EventListener: ${item.clazz.name} Fail!", e)
+                log.error("[事件服务] 注册事件监听器: ${item.clazz.name} 出错!", e)
             }
         }
+        log.info("[事件服务] 加载事件监听器完成。")
     }
 
     @Inject
