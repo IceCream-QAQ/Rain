@@ -21,15 +21,15 @@ public class EnchantManager {
     }
 
     @SneakyThrows
-    public static byte[] checkClass(byte[] bytes) {
-        val reader = new ClassReader(bytes);
-        val node = new ClassNode();
-        reader.accept(node, 0);
+    public static boolean checkClass(ClassNode node) {
+//        val reader = new ClassReader(bytes);
+//        val node = new ClassNode();
+//        reader.accept(node, 0);
 
         if (node.visibleAnnotations != null) {
             boolean en = false;
 
-            for (AnnotationNode annotation : (List<AnnotationNode>) node.visibleAnnotations) {
+            for (AnnotationNode annotation : node.visibleAnnotations) {
                 val annotationClassName = annotation.desc.substring(1, annotation.desc.length() - 1).replace("/", ".");
                 val annotationClass = classloader.loadClass(annotationClassName, false, false);
                 val aa = annotationClass.getAnnotations();
@@ -41,13 +41,9 @@ public class EnchantManager {
                     }
                 }
             }
-            if (en){
-                ClassWriter cw = new ClassWriter(0);
-                node.accept(cw);
-                bytes = cw.toByteArray();
-            }
+            return en;
         }
-        return bytes;
+        return false;
     }
 
 

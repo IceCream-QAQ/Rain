@@ -92,12 +92,12 @@ public class YuHook {
         }
     }
 
-    public static byte[] checkClass(String name, byte[] bytes) {
+    public static boolean checkClass(String name, ClassNode node) {
         val ch = his.get(name);
 
-        ClassReader reader = new ClassReader(bytes);
-        ClassNode node = new ClassNode();
-        reader.accept(node, 0);
+//        ClassReader reader = new ClassReader(bytes);
+//        ClassNode node = new ClassNode();
+//        reader.accept(node, 0);
 
 
         val newMethods = new ArrayList<MethodInfo>();
@@ -165,7 +165,7 @@ public class YuHook {
             }
         }
 
-        if (newMethods.size() == 0) return bytes;
+        if (newMethods.size() == 0) return false;
 
         if (clInitNode != null) {
             clInitNode.instructions.insert(new MethodInsnNode(INVOKESTATIC, cName, initFunName, "()V", false));
@@ -175,10 +175,7 @@ public class YuHook {
 
         if (clInitNode == null) node.methods.add(createClInit(cName, initFunName));
 
-        ClassWriter ncw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-        node.accept(ncw);
-
-        return ncw.toByteArray();
+        return true;
     }
 
     private static MethodNode createNewMethod(String name, String cName, MethodNode mi, String paraName) {

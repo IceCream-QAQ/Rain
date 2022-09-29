@@ -1,7 +1,9 @@
 package com.IceCreamQAQ.Yu.loader.transformer;
 
+import org.objectweb.asm.tree.ClassNode;
+
 public interface ClassTransformer {
 
-    byte[] transform(byte[] bytes, String className);
+    boolean transform(ClassNode node, String className);
 
 }

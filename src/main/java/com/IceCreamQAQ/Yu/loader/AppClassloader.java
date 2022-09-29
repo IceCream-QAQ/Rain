@@ -7,6 +7,10 @@ import com.IceCreamQAQ.Yu.util.IO;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.var;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.tree.ClassNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +36,9 @@ public class AppClassloader extends ClassLoader {
         EnchantManager.init(this);
         YuHook.init(this);
 
+//        transformers.add(new JetbrainsNullableTransformer());
 
+//        transformers.add((ClassTransformer) loadClass("com.IceCreamQAQ.Yu.loader.transformer.JetbrainsNullableTransformer").newInstance());
         for (String s : transformerList) {
             transformers.add((ClassTransformer) loadClass(s, true, false).newInstance());
         }
@@ -71,7 +77,7 @@ public class AppClassloader extends ClassLoader {
 
         if (null == c) c = super.loadClass(name, resolve);
 
-        val pkgName = name.substring(0,name.lastIndexOf("."));
+        val pkgName = name.substring(0, name.lastIndexOf("."));
 //        if (getParent())
         if (getPackage(pkgName) == null) {
             try {
@@ -92,22 +98,29 @@ public class AppClassloader extends ClassLoader {
         val in = this.getParent().getResourceAsStream(path);
         if (in == null) throw new ClassNotFoundException(name);
 
-        byte[] oldBytes = IO.read(in, true);
-        byte[] bytes = oldBytes;
+        var changed = false;
 
 //        if (name.equals("com.icecreamqaq.test.yu.bf.TestFactory")){
 //            System.out.println("123456");
 //        }
 
+        ClassReader reader = new ClassReader(IO.read(in, true));
+        ClassNode node = new ClassNode();
+        reader.accept(node, 0);
+
+
         for (ClassTransformer transformer : transformers) {
-            bytes = transformer.transform(bytes, name);
+            if (transformer.transform(node, name)) changed = true;
         }
 
-        bytes = EnchantManager.checkClass(bytes);
+        if (EnchantManager.checkClass(node)) changed = true;
+        if (YuHook.checkClass(name, node)) changed = true;
 
-        bytes = YuHook.checkClass(name, bytes);
+        ClassWriter ncw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+        node.accept(ncw);
 
-        if (oldBytes != bytes) {
+        val bytes = ncw.toByteArray();
+        if (changed) {
             IO.writeFile(new File(classOutLocation, name + ".class"), bytes);
         }
 
