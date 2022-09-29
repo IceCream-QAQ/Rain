@@ -20,7 +20,7 @@ class Application {
     fun start() {
         val appClassloader = this::class.java.classLoader
         val runMode = System.getProperty("yu.runMode")?.lowercase(Locale.getDefault())
-            ?: if (exists("pom.xml", "build.gradle", "build.gradle.kts")) "prod"
+            ?: if (exists("pom.xml", "build.gradle", "build.gradle.kts")) "dev"
             else null
         val launchPackage = System.getProperty("yu.launchPackage")
 
