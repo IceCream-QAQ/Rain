@@ -139,6 +139,6 @@ open class ContextImpl(
     }
 
     open fun <T : Any> makeBeanInjector(clazz: Class<T>): BeanInjector<T> =
-        ReflectBeanInject(this, clazz)
+        if (clazz.hasAnnotation<Metadata>()) KReflectBeanInject(this, clazz) else ReflectBeanInject(this, clazz)
 
 }
