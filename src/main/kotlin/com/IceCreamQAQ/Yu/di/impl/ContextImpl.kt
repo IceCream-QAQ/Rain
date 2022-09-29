@@ -11,7 +11,9 @@ import org.slf4j.LoggerFactory
 import java.lang.reflect.Constructor
 import java.lang.reflect.Type
 import javax.inject.Inject
+import kotlin.reflect.KFunction
 import kotlin.reflect.KVisibility
+import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaConstructor
 
@@ -103,23 +105,37 @@ open class ContextImpl(
         val createByPrimaryConstructor = !clazz.hasAnnotation<NotSearch>()
         val isKClass = clazz.hasAnnotation<Metadata>()
 
-        var constructor: Constructor<T>? = null
-        if (createByPrimaryConstructor && isKClass)
-            constructor = clazz.kotlin
-                .primaryConstructor
-                ?.let { if (it.visibility == KVisibility.PUBLIC) it else null }
-                ?.javaConstructor
+        return if (isKClass) {
+            val kClass = clazz.kotlin
+            var constructor: KFunction<T>? = null
+            if (createByPrimaryConstructor && isKClass)
+                constructor = kClass.primaryConstructor
+                    ?.let { if (it.visibility == KVisibility.PUBLIC) it else null }
 
-        var defaultConstructor: Constructor<T>? = null
-        clazz.constructors.forEach {
-            it as Constructor<T>
-            if (it.parameters.isEmpty()) defaultConstructor = it
-            it.annotation<Inject> { constructor = it }
+            var defaultConstructor: KFunction<T>? = null
+
+            kClass.constructors.forEach {
+                if (it.parameters.isEmpty()) defaultConstructor = it
+                if (it.hasAnnotation<Inject>()) constructor = it
+            }
+
+            constructor?.let { KInjectConstructorBeanCreator(this, it, it.javaConstructor!!) }
+                ?: defaultConstructor?.javaConstructor?.let { DefaultConstructorBeanCreator(it) }
+                ?: NoPublicConstructorBeanCreator(clazz)
+        } else {
+            var constructor: Constructor<T>? = null
+
+            var defaultConstructor: Constructor<T>? = null
+            clazz.constructors.forEach {
+                it as Constructor<T>
+                if (it.parameters.isEmpty()) defaultConstructor = it
+                it.annotation<Inject> { constructor = it }
+            }
+
+            constructor?.let { InjectConstructorBeanCreator(this, it) }
+                ?: defaultConstructor?.let { DefaultConstructorBeanCreator(it) }
+                ?: NoPublicConstructorBeanCreator(clazz)
         }
-
-        return constructor?.let { InjectConstructorBeanCreator(this, it) }
-            ?: defaultConstructor?.let { DefaultConstructorBeanCreator(it) }
-            ?: NoPublicConstructorBeanCreator(clazz)
     }
 
     open fun <T : Any> makeBeanInjector(clazz: Class<T>): BeanInjector<T> =

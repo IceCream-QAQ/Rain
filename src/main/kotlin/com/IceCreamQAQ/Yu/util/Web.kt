@@ -104,7 +104,7 @@ interface Web {
 
 class OkHttpWebImpl(
     @Config("yu.web")
-    var config: WebConfig? = null
+    var config: WebConfig = WebConfig()
 ) : Web {
 
     var client: OkHttpClient
@@ -172,7 +172,7 @@ class OkHttpWebImpl(
             }
         })
 
-        val config = this.config ?: WebConfig().apply { config = this }
+        val config = this.config
 
         ua = config.ua ?: "Rain/$userAgent"
 
