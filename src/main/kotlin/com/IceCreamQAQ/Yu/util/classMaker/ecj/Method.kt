@@ -1,7 +1,8 @@
-package com.IceCreamQAQ.Yu.util.classMaker
+package com.IceCreamQAQ.Yu.util.classMaker.ecj
 
 import com.IceCreamQAQ.Yu.util.sout
 import com.IceCreamQAQ.Yu.util.subStringByLast
+import com.IceCreamQAQ.Yu.util.classMaker.*
 
 open class MethodMaker @JvmOverloads constructor(
     open val name: String,

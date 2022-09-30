@@ -1,7 +1,7 @@
 package com.IceCreamQAQ.Yu.util.classMaker.ecj
 
-import com.IceCreamQAQ.Yu.toLowerCaseFirstOne
 import com.IceCreamQAQ.Yu.toUpperCaseFirstOne
+import com.IceCreamQAQ.Yu.util.classMaker.*
 
 class FieldMaker @JvmOverloads constructor(
     val classMaker: ClassMaker,
