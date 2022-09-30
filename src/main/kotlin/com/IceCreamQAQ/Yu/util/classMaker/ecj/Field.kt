@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.Yu.util.classMaker
+package com.IceCreamQAQ.Yu.util.classMaker.ecj
 
 import com.IceCreamQAQ.Yu.toLowerCaseFirstOne
 import com.IceCreamQAQ.Yu.toUpperCaseFirstOne

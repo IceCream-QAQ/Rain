@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.Yu.util.classMaker
+package com.IceCreamQAQ.Yu.util.classMaker.ecj
 
 import com.IceCreamQAQ.Yu.annotation.Action
 import com.IceCreamQAQ.Yu.annotation.DefaultController
@@ -6,6 +6,7 @@ import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.error.InvokerClassCreateException
 import com.IceCreamQAQ.Yu.loader.AppClassloader
+import com.IceCreamQAQ.Yu.util.classMaker.*
 import com.IceCreamQAQ.Yu.util.sout
 import org.eclipse.jdt.internal.compiler.CompilationResult
 import org.eclipse.jdt.internal.compiler.Compiler
@@ -26,67 +27,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
-
-enum class Access(val value: String) {
-    PUBLIC("public"), DEFAULT(""), PROTECTED("protected"), PRIVATE("private")
-}
-
-interface AccessAble {
-    var access: Access
-}
-
-fun AccessAble.private() {
-    this.access = Access.PRIVATE
-}
-
-fun AccessAble.protected() {
-    this.access = Access.PROTECTED
-}
-
-fun AccessAble.public() {
-    this.access = Access.PUBLIC
-}
-
-interface StaticAble {
-    var static: Boolean
-}
-
-fun StaticAble.static() {
-    this.static = true
-}
-
-interface FinalAble {
-    var final: Boolean
-}
-
-fun FinalAble.final() {
-    this.final = true
-}
-
-interface AbstractAble{
-    var abstract: Boolean
-}
-
-fun AbstractAble.abstract() {
-    this.abstract = true
-}
-
-fun <T> makeClass(
-    name: String,
-    access: Access = Access.PUBLIC,
-    abstract: Boolean = false,
-    static: Boolean = false,
-    final: Boolean = false,
-    superClass: Class<*> = Any::class.java,
-    interfaceClass: Class<*>? = null,
-    op: ClassMaker.() -> Unit
-): String {
-    val classMaker = ClassMaker(name, access, abstract, static, final, superClass, interfaceClass)
-
-    op(classMaker)
-
-    return classMaker.toString()
-}
 
 object ClassMakerCompiler {
 
@@ -170,7 +110,7 @@ object ClassMakerCompiler {
     }
 
     @Synchronized
-    fun doCompile(classLoader: AppClassloader,className: String, code: String): Class<*>? {
+    fun doCompile(classLoader: AppClassloader, className: String, code: String): Class<*>? {
         val compilationUnits = arrayOfNulls<ICompilationUnit>(1)
         sourceList.add(className)
         compilationUnits[0] = object : ICompilationUnit {
@@ -218,6 +158,24 @@ object ClassMakerCompiler {
     }
 
 }
+
+fun <T> makeClass(
+    name: String,
+    access: Access = Access.PUBLIC,
+    abstract: Boolean = false,
+    static: Boolean = false,
+    final: Boolean = false,
+    superClass: Class<*> = Any::class.java,
+    interfaceClass: Class<*>? = null,
+    op: ClassMaker.() -> Unit
+): String {
+    val classMaker = ClassMaker(name, access, abstract, static, final, superClass, interfaceClass)
+
+    op(classMaker)
+
+    return classMaker.toString()
+}
+
 
 fun main() {
 

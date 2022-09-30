@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.Yu.util.classMaker
+package com.IceCreamQAQ.Yu.util.classMaker.ecj
 
 open class ClassMaker @JvmOverloads constructor(
     val name: String,
