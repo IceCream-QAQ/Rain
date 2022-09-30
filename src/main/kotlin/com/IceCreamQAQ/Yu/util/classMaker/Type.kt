@@ -1,5 +1,9 @@
 package com.IceCreamQAQ.Yu.util.classMaker
 
+import com.IceCreamQAQ.Yu.util.classMaker.ecj.AnnotationBodyBuilder
+import com.IceCreamQAQ.Yu.util.classMaker.ecj.AnnotationMaker
+import com.IceCreamQAQ.Yu.util.subStringByLast
+
 enum class Access(val value: String) {
     PUBLIC("public"), DEFAULT(""), PROTECTED("protected"), PRIVATE("private")
 }
@@ -37,7 +41,7 @@ interface FinalAble {
 
 }
 
-interface AbstractAble{
+interface AbstractAble {
     var abstract: Boolean
 
     fun abstract() {
