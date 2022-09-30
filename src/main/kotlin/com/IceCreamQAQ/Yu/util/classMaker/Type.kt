@@ -6,40 +6,41 @@ enum class Access(val value: String) {
 
 interface AccessAble {
     var access: Access
-}
 
-fun AccessAble.private() {
-    this.access = Access.PRIVATE
-}
+    fun private() {
+        this.access = Access.PRIVATE
+    }
 
-fun AccessAble.protected() {
-    this.access = Access.PROTECTED
-}
+    fun protected() {
+        this.access = Access.PROTECTED
+    }
 
-fun AccessAble.public() {
-    this.access = Access.PUBLIC
+    fun public() {
+        this.access = Access.PUBLIC
+    }
 }
 
 interface StaticAble {
     var static: Boolean
-}
 
-fun StaticAble.static() {
-    this.static = true
+    fun static() {
+        this.static = true
+    }
 }
 
 interface FinalAble {
     var final: Boolean
-}
 
-fun FinalAble.final() {
-    this.final = true
+    fun final() {
+        this.final = true
+    }
+
 }
 
 interface AbstractAble{
     var abstract: Boolean
-}
 
-fun AbstractAble.abstract() {
-    this.abstract = true
+    fun abstract() {
+        this.abstract = true
+    }
 }
