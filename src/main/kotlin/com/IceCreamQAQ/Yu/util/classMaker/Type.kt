@@ -48,3 +48,7 @@ interface AbstractAble {
         this.abstract = true
     }
 }
+
+interface AnnotationAble {
+    val annotations: MutableList<MAnnotation<*>>
+}
