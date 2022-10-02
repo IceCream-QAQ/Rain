@@ -19,7 +19,7 @@ abstract class MClass<T>(
 
     val constructors: MutableList<MConstructor> = ArrayList()
     val fields: MutableList<MField<*>> = ArrayList()
-    val methods: MutableList<MMethod<*>> = ArrayList()
+    val methods: MutableList<MMethod> = ArrayList()
 
     abstract fun make(): Class<Any>
 }

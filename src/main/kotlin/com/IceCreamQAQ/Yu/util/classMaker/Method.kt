@@ -1,11 +1,11 @@
 package com.IceCreamQAQ.Yu.util.classMaker
 
-abstract class MMethod<T>(
+abstract class MMethod(
     val name: String
 ) : AccessAble, StaticAble, FinalAble, AbstractAble, AnnotationAble {
 
     abstract val parameters: List<MMethodParameter<*>>
-    abstract val returnType: MMethodParameter<T>
+    abstract val returnType: MMethodParameter<*>?
 
     override var access: Access = Access.PUBLIC
     override var static: Boolean = false
