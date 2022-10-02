@@ -52,14 +52,14 @@ interface AnnotationAble {
         inline fun <reified T : Annotation> AnnotationAble.annotation(values: Map<String, Any>) =
             this.annotation(T::class.java, values)
 
-        inline fun <reified T : Annotation> AnnotationAble.annotation(block: Annotation.() -> Unit) =
+        inline fun <reified T : Annotation> AnnotationAble.annotation(block: MAnnotation<T>.() -> Unit):MAnnotation<T> =
             this.annotation(T::class.java).apply(block)
     }
 
     val annotations: MutableList<MAnnotation<*>>
 
-    fun annotation(type: Class<out Annotation>): Annotation
+    fun <T: Annotation> annotation(type: Class<T>): MAnnotation<T>
 
-    fun annotation(type: Class<out Annotation>, values: Map<String, Any>): Annotation
+    fun <T: Annotation> annotation(type: Class<T>, values: Map<String, Any>): MAnnotation<T>
 
 }
