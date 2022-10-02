@@ -1,9 +1,5 @@
 package com.IceCreamQAQ.Yu.util.classMaker
 
-import com.IceCreamQAQ.Yu.util.classMaker.ecj.AnnotationBodyBuilder
-import com.IceCreamQAQ.Yu.util.classMaker.ecj.AnnotationMaker
-import com.IceCreamQAQ.Yu.util.subStringByLast
-
 enum class Access(val value: String) {
     PUBLIC("public"), DEFAULT(""), PROTECTED("protected"), PRIVATE("private")
 }
@@ -50,5 +46,20 @@ interface AbstractAble {
 }
 
 interface AnnotationAble {
+
+    companion object {
+        inline fun <reified T : Annotation> AnnotationAble.annotation() = this.annotation(T::class.java)
+        inline fun <reified T : Annotation> AnnotationAble.annotation(values: Map<String, Any>) =
+            this.annotation(T::class.java, values)
+
+        inline fun <reified T : Annotation> AnnotationAble.annotation(block: Annotation.() -> Unit) =
+            this.annotation(T::class.java).apply(block)
+    }
+
     val annotations: MutableList<MAnnotation<*>>
+
+    fun annotation(type: Class<out Annotation>): Annotation
+
+    fun annotation(type: Class<out Annotation>, values: Map<String, Any>): Annotation
+
 }
