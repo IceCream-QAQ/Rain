@@ -1,7 +1,18 @@
 package com.IceCreamQAQ.Yu.util.classMaker
 
 enum class Access {
-    PUBLIC, DEFAULT, PROTECTED, PRIVATE
+    PUBLIC {
+        override fun toString() = "public"
+    },
+    DEFAULT {
+        override fun toString() = ""
+    },
+    PROTECTED {
+        override fun toString() = "protected"
+    },
+    PRIVATE {
+        override fun toString() = "private"
+    }
 }
 
 interface AccessAble {

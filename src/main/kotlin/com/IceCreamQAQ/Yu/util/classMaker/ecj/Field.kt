@@ -15,7 +15,7 @@ class FieldMaker @JvmOverloads constructor(
     override val annotations = arrayListOf<AnnotationMaker>()
 
     override fun toString() =
-        "${annotationsToString("\n")}${access.value} ${type.name} $name${defaultValue?.let { " = $it" } ?: ""};"
+        "${annotationsToString("\n")}${access} ${type.name} $name${defaultValue?.let { " = $it" } ?: ""};"
 }
 
 fun FieldMaker.getter() {

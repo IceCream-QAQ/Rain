@@ -41,7 +41,7 @@ open class ClassMaker @JvmOverloads constructor(
             }
 
             append(annotationsToString("\n"))
-            append("${access.value} class ${np.last()}{\n\n")
+            append("${access} class ${np.last()}{\n\n")
             append(makeFieldsString())
             append(makeMethodsString())
             append("}")

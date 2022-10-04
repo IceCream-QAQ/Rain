@@ -15,7 +15,7 @@ open class MethodMaker @JvmOverloads constructor(
     var body: String = ""
     override val annotations = arrayListOf<AnnotationMaker>()
 
-    override fun toString() = "${annotationsToString("\n")}${access.value} ${returnType.name} $name(${getParametersString()}){\n$body\n}"
+    override fun toString() = "${annotationsToString("\n")}${access} ${returnType.name} $name(${getParametersString()}){\n$body\n}"
 
     open fun getParametersString(): String {
         if (parameters == null) return ""
