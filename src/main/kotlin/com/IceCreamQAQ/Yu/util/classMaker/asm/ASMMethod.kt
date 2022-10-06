@@ -19,8 +19,6 @@ class ASMMethod(
     override val parameters: MutableList<MMethodParameter<*>> = ArrayList()
     override var returnType: MMethodParameter<*>? = null
 
-    val localVariables: MutableList<MMethodParameter<*>> = ArrayList()
-
     var body: ASMMethodWriter? = null
         private set
 
@@ -44,12 +42,9 @@ class ASMMethod(
         return this
     }
 
-    fun build(): MethodNode {
+    fun build(clazz: ASMClass<*>): MethodNode {
         val node = MethodNode(countAccess(access, static, final, abstract), name, descriptor(), null, null)
-        node.parameters
-        val (stacks, locals) = body!!.write(node)
-//        if (!static) node.visitLocalVariable("this")
-        node.visitMaxs(stacks, locals)
+        body!!.write(clazz, node)
         return node
     }
 
