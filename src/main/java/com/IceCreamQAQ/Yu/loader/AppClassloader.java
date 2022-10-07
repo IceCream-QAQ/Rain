@@ -100,11 +100,8 @@ public class AppClassloader extends ClassLoader {
 
         var changed = false;
 
-//        if (name.equals("com.icecreamqaq.test.yu.bf.TestFactory")){
-//            System.out.println("123456");
-//        }
-
-        ClassReader reader = new ClassReader(IO.read(in, true));
+        var bytes = IO.read(in, true);
+        ClassReader reader = new ClassReader(bytes);
         ClassNode node = new ClassNode();
         reader.accept(node, 0);
 
@@ -116,11 +113,11 @@ public class AppClassloader extends ClassLoader {
         if (EnchantManager.checkClass(node)) changed = true;
         if (YuHook.checkClass(name, node)) changed = true;
 
-        ClassWriter ncw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-        node.accept(ncw);
-
-        val bytes = ncw.toByteArray();
         if (changed) {
+            ClassWriter ncw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+            node.accept(ncw);
+
+            bytes = ncw.toByteArray();
             IO.writeFile(new File(classOutLocation, name + ".class"), bytes);
         }
 
