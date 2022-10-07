@@ -79,6 +79,7 @@ open class ObjectNode : BaseNode(), MutableIterable<Map.Entry<String, DataNode>>
 
     override fun <T> castTo(type: RelType<T>): T {
         val clazz = type.realClass
+        if (clazz == this::class.java) return this as T
         val defaultConstructor = kotlin.runCatching { clazz.getConstructor() }.getOrNull()
 
         val instance = defaultConstructor?.newInstance() ?: error("类: ${clazz.name} 未包含公开的无参构造！")
