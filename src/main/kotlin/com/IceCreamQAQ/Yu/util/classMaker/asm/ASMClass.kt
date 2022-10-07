@@ -23,7 +23,7 @@ class ASMClass<T>(
     override val fields: MutableList<ASMField<*>> = ArrayList()
     override val methods: MutableList<ASMMethod> = ArrayList()
 
-    override fun make(): Class<Any> {
+    override fun make(): Class<out T> {
         val cw = ClassWriter(0)
         cw.visit(
             Opcodes.V1_8,
@@ -38,6 +38,6 @@ class ASMClass<T>(
         methods.forEach { it.build(this, cw) }
 
         cw.visitEnd()
-        return classloader.define(name, cw.toByteArray()) as Class<Any>
+        return classloader.define(name, cw.toByteArray()) as Class<out T>
     }
 }
