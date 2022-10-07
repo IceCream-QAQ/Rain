@@ -10,16 +10,16 @@ abstract class MClass<T>(
     override var static: Boolean = false
     override var final: Boolean = false
 
-    val interfaceClass: MutableList<Class<*>> = ArrayList()
+    abstract val interfaceClass: MutableList<Class<*>>
 
-    override val annotations: MutableList<MAnnotation<*>> = ArrayList()
+//    override val annotations: MutableList<MAnnotation<*>>
 
-    val initBlocks: MutableList<MInitBlock> = ArrayList()
-    val staticBlocks: MutableList<MStaticBlock> = ArrayList()
+    abstract val initBlocks: MutableList<out MInitBlock>
+    abstract val staticBlocks: MutableList<out MStaticBlock>
 
-    val constructors: MutableList<MConstructor> = ArrayList()
-    val fields: MutableList<MField<*>> = ArrayList()
-    val methods: MutableList<MMethod> = ArrayList()
+    abstract val constructors: MutableList<out MConstructor>
+    abstract val fields: MutableList<out MField<*>>
+    abstract val methods: MutableList<out MMethod>
 
     abstract fun make(): Class<Any>
 }
