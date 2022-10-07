@@ -2,7 +2,7 @@ package com.IceCreamQAQ.Yu.util.classMaker.asm
 
 import com.IceCreamQAQ.Yu.util.classMaker.MMethod
 import com.IceCreamQAQ.Yu.util.classMaker.MMethodParameter
-import org.objectweb.asm.tree.MethodNode
+import org.objectweb.asm.ClassVisitor
 
 class ASMMethod(
     name: String
@@ -42,10 +42,9 @@ class ASMMethod(
         return this
     }
 
-    fun build(clazz: ASMClass<*>): MethodNode {
-        val node = MethodNode(countAccess(access, static, final, abstract), name, descriptor(), null, null)
-        body!!.write(clazz, node)
-        return node
+    fun build(clazz: ASMClass<*>, visitor: ClassVisitor) {
+        val mv = visitor.visitMethod(countAccess(access, static, final, abstract), name, descriptor(), null, null)
+        body!!.write(clazz, mv)
     }
 
     private fun descriptor(): String {

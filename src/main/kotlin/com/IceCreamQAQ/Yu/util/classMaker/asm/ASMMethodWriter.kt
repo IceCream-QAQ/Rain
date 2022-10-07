@@ -1,11 +1,11 @@
 package com.IceCreamQAQ.Yu.util.classMaker.asm
 
-import org.objectweb.asm.tree.MethodNode
+import org.objectweb.asm.MethodVisitor
 
 
 interface ASMMethodWriter {
 
-    fun write(clazz: ASMClass<*>, methodNode: MethodNode)
+    fun write(clazz: ASMClass<*>, methodNode: MethodVisitor)
 
 
 }
