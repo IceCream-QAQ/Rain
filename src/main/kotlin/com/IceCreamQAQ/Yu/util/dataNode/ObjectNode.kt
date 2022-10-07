@@ -48,6 +48,10 @@ open class ObjectNode : BaseNode(), MutableIterable<Map.Entry<String, DataNode>>
     open fun getOrDefault(key: String, defaultValue: DataNode) = dataMap.getOrDefault(key, defaultValue)
     open fun getOrDefault(key: String, defaultValue: () -> DataNode) = dataMap.getOrDefault(key, defaultValue)
 
+    open fun containsKey(key: String): Boolean = dataMap.containsKey(key)
+
+    open fun size(): Int = dataMap.size
+
     override fun iterator() = dataMap.iterator()
 
 
