@@ -73,7 +73,13 @@ public class AppClassloader extends ClassLoader {
 
         if (isBlackListClass(name)) c = this.getParent().loadClass(name);
 
-        if (c == null) if (enhance) c = loadAppClass(name, resolve);
+        try {
+            if (c == null) if (enhance) c = loadAppClass(name, resolve);
+        } catch (ClassNotFoundException e){
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("加载类: " + name + " 出错！", e);
+        }
 
         if (null == c) c = super.loadClass(name, resolve);
 
