@@ -128,7 +128,8 @@ open class InstanceAbleClassContext<T>(
         if (name == din) getBean() else instanceMap[name]
 
     override fun newBean(): T =
-        injector(creator())
+        kotlin.runCatching { injector(creator()) }
+            .getOrElse { com.IceCreamQAQ.Yu.util.error("在试图创建 Bean: ${clazz.name} 时出错！", it) }
 
     override fun putBean(name: String, instance: T): T {
         if (name == din) defaultInstance = instance
