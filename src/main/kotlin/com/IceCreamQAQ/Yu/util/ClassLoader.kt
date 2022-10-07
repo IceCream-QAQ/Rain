@@ -26,16 +26,16 @@ private fun ClassLoader.getClasses(packageName: String): Set<Class<*>> {
                 val filePath = URLDecoder.decode(url.file, "UTF-8")
                 findAndAddClassesInPackageByFile(packageName, filePath, classes)
             }
-            "jar" -> {
-                val jar = (url.openConnection() as JarURLConnection).jarFile
-                jar.stream().map { entry ->
+
+            "jar" ->
+                (url.openConnection() as JarURLConnection).jarFile.entries().iterator().forEach { entry ->
                     val name = entry.name.let { if (it[0] == '/') it.substring(1) else it }!!
                     if (name.startsWith(packageDirName))
                         if (name.endsWith(".class") && !entry.isDirectory)
-                            name.substring(packageName.length + 1, name.length - 6)
-                                .let { classes.add(loadClass("$packageName.$it")) }
+                            name.subStringByLast(6).replace("/", ".")
+                                .let { classes.add(loadClass(it)) }
                 }
-            }
+
         }
     }
     return classes
