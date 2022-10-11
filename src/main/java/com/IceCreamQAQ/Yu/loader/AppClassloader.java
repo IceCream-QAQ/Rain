@@ -8,6 +8,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import lombok.var;
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
@@ -18,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class AppClassloader extends ClassLoader {
+public class AppClassloader extends ClassLoader implements IRainClassLoader {
 
 //    private static AppClassloader instance;
 
@@ -166,5 +167,23 @@ public class AppClassloader extends ClassLoader {
             if (name.startsWith(s)) return true;
         }
         return false;
+    }
+
+    @NotNull
+    @Override
+    public ClassTransformer getHook() {
+        return null;
+    }
+
+    @Override
+    public void setHook(@NotNull ClassTransformer classTransformer) {
+
+    }
+
+    @SneakyThrows
+    @NotNull
+    @Override
+    public Class<?> forName(@NotNull String name, boolean initialize) {
+        return loadAppClass(name, initialize);
     }
 }
