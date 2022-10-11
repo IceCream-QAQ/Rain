@@ -1,7 +1,6 @@
 package com.IceCreamQAQ.Yu.loader;
 
 import com.IceCreamQAQ.Yu.hook.YuHook;
-import com.IceCreamQAQ.Yu.loader.enchant.EnchantManager;
 import com.IceCreamQAQ.Yu.loader.transformer.ClassTransformer;
 import com.IceCreamQAQ.Yu.util.IO;
 import lombok.SneakyThrows;
@@ -34,12 +33,8 @@ public class AppClassloader extends ClassLoader implements IRainClassLoader {
 
     public AppClassloader(ClassLoader parent) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         super(parent);
-        EnchantManager.init(this);
         YuHook.init(this);
 
-//        transformers.add(new JetbrainsNullableTransformer());
-
-//        transformers.add((ClassTransformer) loadClass("com.IceCreamQAQ.Yu.loader.transformer.JetbrainsNullableTransformer").newInstance());
         for (String s : transformerList) {
             transformers.add((ClassTransformer) loadClass(s, true, false).newInstance());
         }
@@ -58,6 +53,10 @@ public class AppClassloader extends ClassLoader implements IRainClassLoader {
 
     public void registerTransformer(String className) throws IllegalAccessException, InstantiationException {
         transformers.add((ClassTransformer) loadClass(className, true, false).newInstance());
+    }
+
+    public void registerTransformer(ClassTransformer transformer) throws IllegalAccessException, InstantiationException {
+        transformers.add(transformer);
     }
 
     @SneakyThrows
@@ -117,7 +116,6 @@ public class AppClassloader extends ClassLoader implements IRainClassLoader {
             if (transformer.transform(node, name)) changed = true;
         }
 
-        if (EnchantManager.checkClass(node)) changed = true;
         if (YuHook.checkClass(name, node)) changed = true;
 
         if (changed) {
@@ -133,7 +131,8 @@ public class AppClassloader extends ClassLoader implements IRainClassLoader {
         return c;
     }
 
-    public Class<?> define(String name, byte[] data) {
+    @NotNull
+    public Class<?> define(@NotNull String name, @NotNull byte[] data) {
         return defineClass(name, data, 0, data.length);
     }
 
@@ -184,6 +183,6 @@ public class AppClassloader extends ClassLoader implements IRainClassLoader {
     @NotNull
     @Override
     public Class<?> forName(@NotNull String name, boolean initialize) {
-        return loadAppClass(name, initialize);
+        return loadClass(name, initialize);
     }
 }

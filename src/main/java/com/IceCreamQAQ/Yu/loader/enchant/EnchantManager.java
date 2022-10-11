@@ -2,8 +2,12 @@ package com.IceCreamQAQ.Yu.loader.enchant;
 
 import com.IceCreamQAQ.Yu.annotation.EnchantBy;
 import com.IceCreamQAQ.Yu.loader.AppClassloader;
+import com.IceCreamQAQ.Yu.loader.IRainClassLoader;
+import com.IceCreamQAQ.Yu.loader.transformer.ClassTransformer;
 import lombok.SneakyThrows;
 import lombok.val;
+import org.ehcache.core.EhcacheManager;
+import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.AnnotationNode;
@@ -12,26 +16,23 @@ import org.objectweb.asm.tree.ClassNode;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
-public class EnchantManager {
+public class EnchantManager implements ClassTransformer {
 
-    private static AppClassloader classloader;
+    private final IRainClassLoader classloader;
 
-    public static void init(AppClassloader appClassloader) {
-        classloader = appClassloader;
+    public EnchantManager(IRainClassLoader classLoader){
+        this.classloader = classLoader;
     }
 
+    @Override
     @SneakyThrows
-    public static boolean checkClass(ClassNode node) {
-//        val reader = new ClassReader(bytes);
-//        val node = new ClassNode();
-//        reader.accept(node, 0);
-
+    public boolean transform(@NotNull ClassNode node, @NotNull String className) {
         if (node.visibleAnnotations != null) {
             boolean en = false;
 
             for (AnnotationNode annotation : node.visibleAnnotations) {
                 val annotationClassName = annotation.desc.substring(1, annotation.desc.length() - 1).replace("/", ".");
-                val annotationClass = classloader.loadClass(annotationClassName, false, false);
+                val annotationClass = classloader.forName(annotationClassName, false);
                 val aa = annotationClass.getAnnotations();
                 for (Annotation a : aa) {
                     if (a instanceof EnchantBy) {
@@ -45,6 +46,4 @@ public class EnchantManager {
         }
         return false;
     }
-
-
 }
