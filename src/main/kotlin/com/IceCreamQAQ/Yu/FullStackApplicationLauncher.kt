@@ -1,9 +1,10 @@
 package com.IceCreamQAQ.Yu
 
-import com.IceCreamQAQ.Yu.annotation.NotSearch
 import com.IceCreamQAQ.Yu.loader.AppClassloader
+import com.IceCreamQAQ.Yu.loader.IRainClassLoader
+import com.IceCreamQAQ.Yu.loader.transformer.ClassTransformer
 
-object ApplicationLauncher {
+object FullStackApplicationLauncher {
 
     @JvmStatic
     fun launch(args: Array<String>) {
@@ -25,6 +26,11 @@ object ApplicationLauncher {
 //        }
         val appClassLoader = AppClassloader(Application::class.java.classLoader)
         Thread.currentThread().contextClassLoader = appClassLoader
+        appClassLoader.registerTransformer(
+            appClassLoader.loadClass("com.IceCreamQAQ.Yu.loader.enchant.EnchantManager").run {
+                getConstructor(IRainClassLoader::class.java).newInstance(appClassLoader)
+            } as ClassTransformer
+        )
         val applicationClass = appClassLoader.loadClass("com.IceCreamQAQ.Yu.Application")
         applicationClass.getMethod("start").invoke(applicationClass.newInstance())
     }

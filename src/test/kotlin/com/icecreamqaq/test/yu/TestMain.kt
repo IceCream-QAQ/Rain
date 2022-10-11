@@ -1,8 +1,8 @@
 package com.icecreamqaq.test.yu
 
-import com.IceCreamQAQ.Yu.ApplicationLauncher
+import com.IceCreamQAQ.Yu.FullStackApplicationLauncher
 
 fun main(args: Array<String>) {
-    ApplicationLauncher.launch(args)
+    FullStackApplicationLauncher.launch(args)
     Thread.sleep(1000000)
 }
