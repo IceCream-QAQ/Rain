@@ -20,8 +20,6 @@ import java.util.List;
 @Slf4j
 public class AppClassloader extends ClassLoader implements IRainClassLoader {
 
-//    private static AppClassloader instance;
-
     private final List<ClassTransformer> transformers = new ArrayList<>();
     private static File classOutLocation;
 
@@ -166,17 +164,6 @@ public class AppClassloader extends ClassLoader implements IRainClassLoader {
             if (name.startsWith(s)) return true;
         }
         return false;
-    }
-
-    @NotNull
-    @Override
-    public ClassTransformer getHook() {
-        return null;
-    }
-
-    @Override
-    public void setHook(@NotNull ClassTransformer classTransformer) {
-
     }
 
     @SneakyThrows
