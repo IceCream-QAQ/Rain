@@ -1,6 +1,5 @@
 package com.IceCreamQAQ.Yu.loader;
 
-import com.IceCreamQAQ.Yu.hook.YuHook;
 import com.IceCreamQAQ.Yu.loader.transformer.ClassTransformer;
 import com.IceCreamQAQ.Yu.util.IO;
 import lombok.SneakyThrows;
@@ -31,7 +30,6 @@ public class AppClassloader extends ClassLoader implements IRainClassLoader {
 
     public AppClassloader(ClassLoader parent) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         super(parent);
-        YuHook.init(this);
 
         for (String s : transformerList) {
             transformers.add((ClassTransformer) loadClass(s, true, false).newInstance());
@@ -113,8 +111,6 @@ public class AppClassloader extends ClassLoader implements IRainClassLoader {
         for (ClassTransformer transformer : transformers) {
             if (transformer.transform(node, name)) changed = true;
         }
-
-        if (YuHook.checkClass(name, node)) changed = true;
 
         if (changed) {
             ClassWriter ncw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
