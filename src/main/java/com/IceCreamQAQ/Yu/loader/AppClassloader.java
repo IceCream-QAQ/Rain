@@ -28,7 +28,7 @@ public class AppClassloader extends ClassLoader implements IRainClassLoader {
         classOutLocation.mkdirs();
     }
 
-    public AppClassloader(ClassLoader parent) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+    public AppClassloader(ClassLoader parent) throws InstantiationException, IllegalAccessException {
         super(parent);
 
         for (String s : transformerList) {
@@ -162,9 +162,9 @@ public class AppClassloader extends ClassLoader implements IRainClassLoader {
         return false;
     }
 
-    @SneakyThrows
     @NotNull
     @Override
+    @SneakyThrows
     public Class<?> forName(@NotNull String name, boolean initialize) {
         return loadClass(name, initialize);
     }
