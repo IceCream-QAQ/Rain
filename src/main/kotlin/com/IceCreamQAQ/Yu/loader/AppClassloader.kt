@@ -1,142 +1,122 @@
-package com.IceCreamQAQ.Yu.loader;
+package com.IceCreamQAQ.Yu.loader
 
-import com.IceCreamQAQ.Yu.loader.transformer.ClassTransformer;
-import com.IceCreamQAQ.Yu.util.IO;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import lombok.var;
-import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.tree.ClassNode;
+import com.IceCreamQAQ.Yu.loader.transformer.ClassTransformer
+import com.IceCreamQAQ.Yu.slf4j
+import com.IceCreamQAQ.Yu.util.IO.Companion.read
+import com.IceCreamQAQ.Yu.util.IO.Companion.tmpLocation
+import com.IceCreamQAQ.Yu.util.IO.Companion.writeFile
+import com.IceCreamQAQ.Yu.util.newFolder
+import lombok.SneakyThrows
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.tree.ClassNode
+import java.io.File
+import java.io.IOException
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainClassLoader {
 
-@Slf4j
-public class AppClassloader extends ClassLoader implements IRainClassLoader {
+    companion object {
+        private val log = slf4j<AppClassloader>()
 
-    private final List<ClassTransformer> transformers = new ArrayList<>();
-    private static File classOutLocation;
+        private var classOutLocation = newFolder(tmpLocation, "classOutput")
 
-    static {
-        classOutLocation = new File(IO.getTmpLocation(), "classOutput");
-        if (classOutLocation.exists()) classOutLocation.delete();
-        classOutLocation.mkdirs();
-    }
-
-    public AppClassloader(ClassLoader parent) throws InstantiationException, IllegalAccessException {
-        super(parent);
-
-        for (String s : transformerList) {
-            transformers.add((ClassTransformer) loadClass(s, true, false).newInstance());
+        private val transformerList: MutableList<String> = ArrayList()
+        @JvmStatic
+        fun registerTransformerList(className: String) {
+            transformerList.add(className)
         }
+
+        private val blackList: MutableList<String> = ArrayList()
+        @JvmStatic
+        fun registerBackList(packageName: List<String>?) {
+            blackList.addAll(packageName!!)
+        }
+
     }
 
-    private static final List<String> blackList = new ArrayList<>();
-    private static final List<String> transformerList = new ArrayList<>();
+    private val transformers: MutableList<ClassTransformer> = ArrayList()
+    private val blackPackages: MutableList<String> = ArrayList()
 
-    public static void registerBackList(List<String> packageName) {
-        blackList.addAll(packageName);
+    init {
+        for (s in transformerList) {
+            transformers.add(loadClass(s, true, false).newInstance() as ClassTransformer)
+        }
+
+        blackList.addAll(blackList)
     }
 
-    public static void registerTransformerList(String className) {
-        transformerList.add(className);
+    fun registerTransformer(className: String) {
+        transformers.add(loadClass(className, true, false).newInstance() as ClassTransformer)
     }
 
-    public void registerTransformer(String className) throws IllegalAccessException, InstantiationException {
-        transformers.add((ClassTransformer) loadClass(className, true, false).newInstance());
+    fun registerTransformer(transformer: ClassTransformer) {
+        transformers.add(transformer)
     }
 
-    public void registerTransformer(ClassTransformer transformer) throws IllegalAccessException, InstantiationException {
-        transformers.add(transformer);
+    public override fun loadClass(name: String, resolve: Boolean): Class<*> {
+        return loadClass(name, resolve, true)
     }
 
-    @SneakyThrows
-    public Class<?> loadClass(String name, boolean resolve) {
-        return loadClass(name, resolve, true);
-    }
-
-    @SneakyThrows
-    public Class<?> loadClass(String name, boolean resolve, boolean enhance) {
-        Class<?> c = findLoadedClass(name);
+    fun loadClass(name: String, resolve: Boolean, enhance: Boolean): Class<*> {
+        var c = findLoadedClass(name)
         if (c != null) {
-            return c;
+            return c
         }
-
-        if (isBlackListClass(name)) c = this.getParent().loadClass(name);
+        if (inBlackPackages(name)) c = parent.loadClass(name)
 
         try {
-            if (c == null) if (enhance) c = loadAppClass(name, resolve);
-        } catch (ClassNotFoundException e){
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("加载类: " + name + " 出错！", e);
+            if (c == null) if (enhance) c = loadAppClass(name, resolve)
+        } catch (e: ClassNotFoundException) {
+            throw e
+        } catch (e: Exception) {
+            throw RuntimeException("加载类: $name 出错！", e)
         }
-
-        if (null == c) c = super.loadClass(name, resolve);
-
-        val pkgName = name.substring(0, name.lastIndexOf("."));
-//        if (getParent())
+        if (null == c) c = super.loadClass(name, resolve)
+        val pkgName = name.substring(0, name.lastIndexOf("."))
+        //        if (getParent())
         if (getPackage(pkgName) == null) {
             try {
-                definePackage(pkgName, null, null, null, null, null, null, null);
-            } catch (IllegalArgumentException iae) {
-                throw new AssertionError("Cannot find package " +
-                        pkgName);
+                definePackage(pkgName, null, null, null, null, null, null, null)
+            } catch (iae: IllegalArgumentException) {
+                throw AssertionError("Cannot find package " + pkgName)
             }
         }
-        return c;
+        return c
     }
 
-    private Class<?> loadAppClass(String name, boolean resolve) throws IOException, ClassNotFoundException {
-        log.trace(String.format("Load Class: %s.", name));
-
-        val path = name.replace(".", "/") + ".class";
-
-        val in = this.getParent().getResourceAsStream(path);
-        if (in == null) throw new ClassNotFoundException(name);
-
-        var changed = false;
-
-        var bytes = IO.read(in, true);
-        ClassReader reader = new ClassReader(bytes);
-        ClassNode node = new ClassNode();
-        reader.accept(node, 0);
-
-
-        for (ClassTransformer transformer : transformers) {
-            if (transformer.transform(node, name)) changed = true;
+    private fun loadAppClass(name: String, resolve: Boolean): Class<*> {
+        log.trace(String.format("Load Class: %s.", name))
+        val path = name.replace(".", "/") + ".class"
+        val input = parent.getResourceAsStream(path) ?: throw ClassNotFoundException(name)
+        var changed = false
+        var bytes = read(input, true)
+        val reader = ClassReader(bytes)
+        val node = ClassNode()
+        reader.accept(node, 0)
+        for (transformer in transformers) {
+            if (transformer.transform(node, name)) changed = true
         }
-
         if (changed) {
-            ClassWriter ncw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-            node.accept(ncw);
-
-            bytes = ncw.toByteArray();
-            IO.writeFile(new File(classOutLocation, name + ".class"), bytes);
+            val ncw = ClassWriter(ClassWriter.COMPUTE_FRAMES)
+            node.accept(ncw)
+            bytes = ncw.toByteArray()
+            writeFile(File(classOutLocation, "$name.class"), bytes)
         }
-
-        val c = defineClass(name, bytes, 0, bytes.length);
-        if (resolve) resolveClass(c);
-        return c;
+        val c = defineClass(name, bytes, 0, bytes.size)
+        if (resolve) resolveClass(c)
+        return c
     }
 
-    @NotNull
-    public Class<?> define(@NotNull String name, @NotNull byte[] data) {
-        return defineClass(name, data, 0, data.length);
+    override fun define(name: String, data: ByteArray): Class<*> {
+        return defineClass(name, data, 0, data.size)
     }
 
-    @Override
-    protected Package getPackage(String name) {
-        return super.getPackage(name);
+    override fun getPackage(name: String): Package? {
+        return super.getPackage(name)
     }
 
-    public boolean isBlackListClass(String name) {
-        val b = name.startsWith("java.")
+    private fun inBlackPackages(name: String): Boolean {
+        val b = (name.startsWith("java.")
                 || name.startsWith("jdk.")
                 || name.startsWith("javax.")
                 || name.startsWith("kotlin")
@@ -153,19 +133,18 @@ public class AppClassloader extends ClassLoader implements IRainClassLoader {
                 || name.startsWith("ch.qos.logback.core.")
                 || name.startsWith("org.xml")
                 || name.startsWith("org.slf4j.")
-//                || name.startsWith("org.hibernate")
-                || name.startsWith("org.jboss");
-        if (b) return true;
-        for (String s : blackList) {
-            if (name.startsWith(s)) return true;
+                || name.startsWith("org.jboss"))
+        if (b) return true
+        for (s in blackPackages) {
+            if (name.startsWith(s)) return true
         }
-        return false;
+        return false
     }
 
-    @NotNull
-    @Override
     @SneakyThrows
-    public Class<?> forName(@NotNull String name, boolean initialize) {
-        return loadClass(name, initialize);
+    override fun forName(name: String, initialize: Boolean): Class<*> {
+        return loadClass(name, initialize)
     }
+
+
 }

@@ -4,6 +4,8 @@ import com.IceCreamQAQ.Yu.di.din
 import com.IceCreamQAQ.Yu.util.YuParaValueException
 import com.alibaba.fastjson2.JSON
 import okhttp3.internal.and
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.lang.reflect.*
 import java.nio.charset.Charset
 import java.security.MessageDigest
@@ -180,3 +182,6 @@ inline fun <T, K, V> Iterable<T>.mapMap(transform: (T) -> Pair<K, V>): Map<K, V>
 
 fun <K, V> mapOf(i: Iterable<Pair<K, V>>): Map<K, V> =
     HashMap<K, V>(if (i is Collection<*>) i.size else 10).apply { i.forEach { put(it.first, it.second) } }
+
+
+inline fun <reified T> slf4j():Logger = LoggerFactory.getLogger(T::class.java)
