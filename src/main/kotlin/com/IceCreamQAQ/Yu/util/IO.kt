@@ -14,14 +14,7 @@ class IO {
     companion object {
 
         @JvmStatic
-        val tmpLocation = File("tmp")
-
-        init {
-            if (!tmpLocation.exists() || !tmpLocation.isDirectory) {
-                tmpLocation.delete()
-                tmpLocation.mkdirs()
-            }
-        }
+        val tmpLocation = newFolder("tmp")
 
         @JvmStatic
         fun read(inputStream: InputStream, close: Boolean = true): ByteArray {

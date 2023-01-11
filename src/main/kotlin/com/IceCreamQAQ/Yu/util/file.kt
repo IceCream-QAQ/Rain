@@ -9,12 +9,14 @@ fun exists(vararg names: String): Boolean {
     return false
 }
 
-fun newFolder(name: String) {
-
-}
+fun newFolder(name: String): File =
+    File(name).apply {
+        if (exists()) delete()
+        mkdir()
+    }
 
 fun newFolder(file: File, child: String) =
-    File(file,child).apply {
+    File(file, child).apply {
         if (exists()) delete()
         mkdir()
     }
