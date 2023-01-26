@@ -21,12 +21,14 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainClassLoade
         private var classOutLocation = newFolder(tmpLocation, "classOutput")
 
         private val transformerList: MutableList<String> = ArrayList()
+
         @JvmStatic
         fun registerTransformerList(className: String) {
             transformerList.add(className)
         }
 
         private val blackList: MutableList<String> = ArrayList()
+
         @JvmStatic
         fun registerBackList(packageName: List<String>?) {
             blackList.addAll(packageName!!)
@@ -36,6 +38,7 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainClassLoade
 
     private val transformers: MutableList<ClassTransformer> = ArrayList()
     private val blackPackages: MutableList<String> = ArrayList()
+    private val whitePackages: MutableList<String> = ArrayList()
 
     init {
         for (s in transformerList) {
@@ -62,7 +65,7 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainClassLoade
         if (c != null) {
             return c
         }
-        if (inBlackPackages(name)) c = parent.loadClass(name)
+        if (!inWhitePackages(name) && inBlackPackages(name)) c = parent.loadClass(name)
 
         try {
             if (c == null) if (enhance) c = loadAppClass(name, resolve)
@@ -136,6 +139,13 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainClassLoade
                 || name.startsWith("org.jboss"))
         if (b) return true
         for (s in blackPackages) {
+            if (name.startsWith(s)) return true
+        }
+        return false
+    }
+
+    private fun inWhitePackages(name: String): Boolean {
+        for (s in whitePackages) {
             if (name.startsWith(s)) return true
         }
         return false

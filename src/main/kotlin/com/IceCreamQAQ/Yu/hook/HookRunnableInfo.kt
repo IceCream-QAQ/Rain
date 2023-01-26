@@ -1,8 +1,8 @@
 package com.IceCreamQAQ.Yu.hook
 
 data class HookRunnableInfo(
-    val name: String,
+    val className: String,
     val descriptor: String,
-    val instanceMode: Boolean,
+    val isInstanceMode: Boolean,
     val clazz: Class<out HookRunnable>
 )

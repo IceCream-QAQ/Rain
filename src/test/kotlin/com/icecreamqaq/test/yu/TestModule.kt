@@ -1,7 +1,5 @@
 package com.icecreamqaq.test.yu
 
-import com.IceCreamQAQ.Yu.hook.HookItem
-import com.IceCreamQAQ.Yu.hook.YuHook
 import com.IceCreamQAQ.Yu.loader.Module
 
 class TestModule : Module {

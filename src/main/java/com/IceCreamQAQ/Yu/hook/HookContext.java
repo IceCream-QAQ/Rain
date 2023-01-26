@@ -3,13 +3,13 @@ package com.IceCreamQAQ.Yu.hook;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HookMethod {
+public class HookContext {
 
     public HookInfo info;
 
     private Map<String,Object> saves;
 
-    public Object[] paras;
+    public Object[] params;
     public Object result;
     public Throwable error;
 

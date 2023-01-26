@@ -7,15 +7,15 @@ public interface HookRunnable {
     default void init(@NotNull HookInfo info) {
     }
 
-    default boolean preRun(@NotNull HookMethod method){
+    default boolean preRun(@NotNull HookContext method){
         return false;
     }
 
-    default void postRun(@NotNull HookMethod method){
+    default void postRun(@NotNull HookContext method){
 
     }
 
-    default boolean onError(@NotNull HookMethod method){
+    default boolean onError(@NotNull HookContext method){
         return false;
     }
 

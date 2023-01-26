@@ -22,20 +22,20 @@ public class HookInvokerRunnable {
         }
     }
 
-    public boolean preRun(HookMethod method) {
+    public boolean preRun(HookContext method) {
         for (HookRunnable runnable : runnables) {
             if (runnable.preRun(method)) return true;
         }
         return false;
     }
 
-    public void postRun(HookMethod method) {
+    public void postRun(HookContext method) {
         for (HookRunnable runnable : runnables) {
             runnable.postRun(method);
         }
     }
 
-    public boolean onError(HookMethod method) {
+    public boolean onError(HookContext method) {
         for (HookRunnable runnable : runnables) {
             if (runnable.onError(method)) return true;
         }

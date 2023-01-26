@@ -5,7 +5,7 @@ import com.IceCreamQAQ.Yu.loader.AppClassloader
 
 
 fun main(args: Array<String>) {
-    YuHook.put(HookItem("com.icecream.test.Tc", "f", "com.icecreamqaq.test.yu.HookTa"))
+    YuHook_Old.put(HookItem("com.icecream.test.Tc", "f", "com.icecreamqaq.test.yu.HookTa"))
 
     val appClassLoader = AppClassloader(Ta::class.java.classLoader)
 
@@ -32,16 +32,16 @@ class HookTa : HookRunnable {
 //        println(info.className + "." + info.methodName)
     }
 
-    override fun preRun(method: HookMethod): Boolean {
-        method.result = arrayListOf(5, 6, 7, 8)
+    override fun preRun(method: HookContext): Boolean {
+//        method.result = arrayListOf(5, 6, 7, 8)
 
         return true
     }
 
-    override fun postRun(method: HookMethod) {
+    override fun postRun(method: HookContext) {
     }
 
-    override fun onError(method: HookMethod): Boolean {
+    override fun onError(method: HookContext): Boolean {
         return true
     }
 }
