@@ -117,6 +117,9 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
                     (if (it.hookRunnableInfo.isInstanceMode) instanceHooks else standardHooks).add(it.hookRunnableInfo)
             }
 
+            // 判断 method 是否为静态方法，如果是静态方法则忽略所有 InstanceHook。
+            if (method.access shr 3 and 1 == 1) instanceHooks.clear()
+
             if (standardHooks.isNotEmpty() || instanceHooks.isNotEmpty())
                 instanceHookMethods.ifEmpty { standardHookMethods }
                     .add(
