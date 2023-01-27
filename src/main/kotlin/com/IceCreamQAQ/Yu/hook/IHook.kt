@@ -13,12 +13,12 @@ interface IHook : ClassTransformer {
         methodName: String,
         sourceMethodName: String,
         methodParas: Array<Class<*>>
-    ): HookInfo?
+    ): HookInfo
 
     fun createInstanceHookInfo(
         clazz: Class<*>,
         methodName: String,
         sourceMethodName: String,
         methodParas: Array<Class<*>>
-    ): HookInfo?
+    ): HookInfo
 }

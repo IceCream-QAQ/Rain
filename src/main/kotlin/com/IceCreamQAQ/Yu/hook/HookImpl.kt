@@ -52,7 +52,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
         methodName: String,
         sourceMethodName: String,
         methodParas: Array<Class<*>>
-    ): HookInfo? {
+    ): HookInfo {
         TODO("Not yet implemented")
     }
 
@@ -61,7 +61,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
         methodName: String,
         sourceMethodName: String,
         methodParas: Array<Class<*>>
-    ): HookInfo? {
+    ): HookInfo {
         TODO("Not yet implemented")
     }
 
