@@ -69,6 +69,8 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
         TODO()
     }
 
+    data class HookMethodInfo(val method: HookMethod, val node: MethodNode)
+
     override fun transform(node: ClassNode, className: String): Boolean {
         val classMatches = matchList.filter { it.checkClass(className, node) }
         if (classMatches.isEmpty()) return false
@@ -84,8 +86,9 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
          * 如 一个 Hook，同时 Hook 了当前类内的多个方法，则需要向多个方法的 HookInfo 内 put 本 Runnable。
          */
 
-        val standardHookMethods = ArrayList<HookMethod>()
-        val instanceHookMethods = ArrayList<HookMethod>()
+
+        val standardHookMethods = ArrayList<HookMethodInfo>()
+        val instanceHookMethods = ArrayList<HookMethodInfo>()
         val instanceHookRunnableInfos = HashMap<HookRunnableInfo, ArrayList<HookMethod>>()
 
         // 筛选部分，遍历原 Class 所有 Method，将符合条件 Method 分类收集。
@@ -117,15 +120,18 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
             if (standardHooks.isNotEmpty() || instanceHooks.isNotEmpty())
                 instanceHookMethods.ifEmpty { standardHookMethods }
                     .add(
-                        HookMethod(
-                            node,
-                            method,
-                            UUID.randomUUID().toString().replace("-", ""),
-                            standardHooks,
-                            instanceHooks
+                        HookMethodInfo(
+                            HookMethod(
+                                className,
+                                method.name,
+                                method.desc,
+                                UUID.randomUUID().toString().replace("-", ""),
+                                standardHooks,
+                                instanceHooks
+                            ), method
                         ).apply {
                             instanceHooks.forEach {
-                                instanceHookRunnableInfos.getOrPut(it) { ArrayList() }.add(this)
+                                instanceHookRunnableInfos.getOrPut(it) { ArrayList() }.add(this.method)
                             }
                         }
                     )
@@ -155,8 +161,8 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
                             classClass,
                             false
                         ) {
-                            node.fields.add(FieldNode(ACC_PRIVATE, it.identifier, fieldType, null, null))
-                            node.methods.add(hook(it, classOwner))
+                            node.fields.add(FieldNode(ACC_PRIVATE, it.method.identifier, fieldType, null, null))
+                            node.methods.add(hook(it.method, classOwner, it.node))
                         }
                     }
             )
@@ -230,8 +236,16 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
                         classClass,
                         false
                     ) {
-                        node.fields.add(FieldNode(ACC_PRIVATE or ACC_STATIC, it.identifier, hookInfoType, null, null))
-                        node.methods.add(hook(it, classOwner))
+                        node.fields.add(
+                            FieldNode(
+                                ACC_PRIVATE or ACC_STATIC,
+                                it.method.identifier,
+                                hookInfoType,
+                                null,
+                                null
+                            )
+                        )
+                        node.methods.add(hook(it.method, classOwner, it.node))
                     }
                 }
         }
@@ -241,11 +255,11 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
     }
 
     private fun MethodVisitor.createInitMethod(
-        methods: List<HookMethod>,
+        methods: List<HookMethodInfo>,
         classOwner: String,
         classType: Type,
         static: Boolean,
-        body: (HookMethod) -> Unit
+        body: (HookMethodInfo) -> Unit
     ) {
 
         visitCode()
@@ -271,10 +285,10 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
             visitVarInsn(ALOAD, infoParamIndex)
 
             visitLdcInsn(classType)
-            visitLdcInsn(it.name)
-            visitLdcInsn(it.changeToName)
+            visitLdcInsn(it.method.name)
+            visitLdcInsn(it.method.changeToName)
 
-            val params = toClassArray(it.method.desc)
+            val params = toClassArray(it.method.descriptor)
             visitIntInsn(params.size)
             visitTypeInsn(ANEWARRAY, "java/lang/Class")
 
@@ -296,8 +310,8 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
                 "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Class;)$hookInfoType",
                 false
             )
-            if (static) visitFieldInsn(PUTSTATIC, classOwner, it.identifier, hookInfoType)
-            else visitFieldInsn(PUTFIELD, classOwner, it.identifier, hookInfoType)
+            if (static) visitFieldInsn(PUTSTATIC, classOwner, it.method.identifier, hookInfoType)
+            else visitFieldInsn(PUTFIELD, classOwner, it.method.identifier, hookInfoType)
         }
 
         visitInsn(RETURN)
@@ -339,9 +353,8 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
     private fun hook(
         hook: HookMethod,
         classOwner: String,
+        sourceMethod: MethodNode,
     ): MethodNode {
-
-        val sourceMethod = hook.method
         val isStatic = sourceMethod.access shr 3 and 1 == 1
         val firstStack = if (isStatic) 0 else 1
 

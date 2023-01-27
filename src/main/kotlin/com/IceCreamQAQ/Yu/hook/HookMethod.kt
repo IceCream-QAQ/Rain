@@ -4,8 +4,11 @@ import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodNode
 
 data class HookMethod(
-    val clazz: ClassNode,
-    val method: MethodNode,
+//    val clazz: ClassNode,
+//    val method: MethodNode,
+    val clazz:String,
+    val name:String,
+    val descriptor:String,
     val identifier: String,
     val standardHooks: List<HookRunnableInfo>,
     val instanceHooks: List<HookRunnableInfo>
@@ -13,11 +16,11 @@ data class HookMethod(
     val isInstanceMode: Boolean
         inline get() = instanceHooks.isNotEmpty()
 
-    val name: String = method.name
+//    val name: String = method.name
 
     val changeToName: String = "${name}_YuHookV2_OldMethod_$identifier"
 
-    val descriptor: String = method.desc
+//    val descriptor: String = method.desc
 }
 
 //interface HookMethodContext
