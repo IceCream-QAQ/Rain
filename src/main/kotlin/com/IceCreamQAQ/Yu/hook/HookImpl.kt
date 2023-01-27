@@ -40,6 +40,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
     }
 
     private val matchList: ArrayList<IHookItem> = ArrayList()
+//    private val hookClass
 
 
     override fun registerHook(item: IHookItem) {
@@ -71,38 +72,6 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
     override fun transform(node: ClassNode, className: String): Boolean {
         val classMatches = matchList.filter { it.checkClass(className, node) }
         if (classMatches.isEmpty()) return false
-
-        /***
-         * Hook 实现思路。
-         *
-         * 将原本方法改名，并创建一个新的方法取代原方法。
-         * 将原方法所有方法注解，与参数注解删除，转移到新方法上。
-         *
-         * 新方法结构大致如下:
-         *     public ReturnType newMethod(params) throws Throwable {
-         *         HookContext context = new HookContext();
-         *         HookInfo info = infoField;
-         *         Object[] params = new Object[]{ params };
-         *         context.info = info;
-         *         context.params = params;
-         *
-         *         if (info.perRun(context)) {
-         *             return (String) context.result;
-         *         }
-         *         try {
-         *             context.result = this.oldMethod(hookMethod.paras[]);
-         *         } catch (Throwable error) {
-         *             context.error = error;
-         *             if (info.onError(context)) {
-         *                 return (ReturnType) context.result;
-         *             }
-         *             throw context.error;
-         *         }
-         *         info.postRun(context);
-         *         return (ReturnType) hookMethod.result;
-         *     }
-         *
-         */
 
         /***
          * 数据结构:
@@ -336,6 +305,37 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
         visitEnd()
     }
 
+    /*** Hook 实现思路
+     *
+     * 将原本方法改名，并创建一个新的方法取代原方法。
+     * 将原方法所有方法注解，与参数注解删除，转移到新方法上。
+     *
+     * 新方法结构大致如下:
+     *
+     *     public ReturnType newMethod(params) throws Throwable {
+     *         HookContext context = new HookContext();
+     *         HookInfo info = infoField;
+     *         Object[] params = new Object[]{ params };
+     *         context.info = info;
+     *         context.params = params;
+     *
+     *         if (info.perRun(context)) {
+     *             return (String) context.result;
+     *         }
+     *         try {
+     *             context.result = this.oldMethod(context.params[]);
+     *         } catch (Throwable error) {
+     *             context.error = error;
+     *             if (info.onError(context)) {
+     *                 return (ReturnType) context.result;
+     *             }
+     *             throw context.error;
+     *         }
+     *         info.postRun(context);
+     *         return (ReturnType) hookMethod.result;
+     *     }
+     *
+     */
     private fun hook(
         hook: HookMethod,
         classOwner: String,
@@ -348,12 +348,9 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
         val descSplit = sourceMethod.desc.split(")")
 
         val params = readPara(descSplit[0].substring(1), firstStack)
-//        var maxParams = paras.size
 
         val returnFlag = descSplit[1] == "V"
         val returnType = descSplit[1]
-
-//        if (!isStatic) maxParams += 1
 
         var stack = if (isStatic) 0 else 1
         params.forEach { stack += it.stackSize }
