@@ -155,7 +155,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
                             classClass,
                             false
                         ) {
-                            node.fields.add(FieldNode(access, it.identifier, fieldType, null, null))
+                            node.fields.add(FieldNode(ACC_PRIVATE, it.identifier, fieldType, null, null))
                             node.methods.add(hook(it, classOwner))
                         }
                     }
@@ -222,7 +222,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
 
             val initMethodName = "${identifier}standard"
 
-            MethodNode(ACC_PRIVATE shr ACC_STATIC, initMethodName, "()V", null, null)
+            MethodNode(ACC_PRIVATE or ACC_STATIC, initMethodName, "()V", null, null)
                 .apply {
                     createInitMethod(
                         standardHookMethods,
@@ -230,7 +230,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
                         classClass,
                         false
                     ) {
-                        node.fields.add(FieldNode(access, it.identifier, hookInfoType, null, null))
+                        node.fields.add(FieldNode(ACC_PRIVATE or ACC_STATIC, it.identifier, hookInfoType, null, null))
                         node.methods.add(hook(it, classOwner))
                     }
                 }
