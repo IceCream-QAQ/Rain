@@ -86,7 +86,6 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
          * 如 一个 Hook，同时 Hook 了当前类内的多个方法，则需要向多个方法的 HookInfo 内 put 本 Runnable。
          */
 
-
         val standardHookMethods = ArrayList<HookMethodInfo>()
         val instanceHookMethods = ArrayList<HookMethodInfo>()
         val instanceHookRunnableInfos = HashMap<HookRunnableInfo, ArrayList<HookMethod>>()
