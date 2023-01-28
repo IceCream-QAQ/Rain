@@ -1,4 +1,5 @@
 package com.IceCreamQAQ.Yu.util
+
 import com.IceCreamQAQ.Yu.hook.YuHook_Old
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
@@ -117,6 +118,25 @@ fun toClassArray(desc: String): List<ParamType> {
     }
     return list
 }
+
+fun toDesc(paramTypes: Array<Class<*>>) =
+    StringBuilder().apply {
+        paramTypes.forEach {
+            append(
+                when (it) {
+                    Byte::class.javaPrimitiveType -> "B"
+                    Short::class.javaPrimitiveType -> "S"
+                    Int::class.javaPrimitiveType -> "I"
+                    Long::class.javaPrimitiveType -> "J"
+                    Float::class.javaPrimitiveType -> "F"
+                    Double::class.javaPrimitiveType -> "D"
+                    Boolean::class.javaPrimitiveType -> "Z"
+                    Char::class.javaPrimitiveType -> "C"
+                    else -> it.name.replace(".", "/").let { s -> if (it.isArray) s else "L$s;" }
+                }
+            )
+        }
+    }.toString()
 
 fun MethodVisitor.visitIntInsn(num: Int) {
     visitIntInsn(BIPUSH, num)

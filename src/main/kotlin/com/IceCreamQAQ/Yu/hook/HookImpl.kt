@@ -2,7 +2,11 @@ package com.IceCreamQAQ.Yu.hook
 
 import com.IceCreamQAQ.Yu.annotation
 import com.IceCreamQAQ.Yu.annotation.HookBy
+import com.IceCreamQAQ.Yu.annotation.InstanceMode
+import com.IceCreamQAQ.Yu.hasAnnotation
 import com.IceCreamQAQ.Yu.loader.IRainClassLoader
+import com.IceCreamQAQ.Yu.nameWithParams
+import com.IceCreamQAQ.Yu.nameWithParamsFullClass
 import com.IceCreamQAQ.Yu.util.*
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
@@ -10,6 +14,8 @@ import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.*
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.collections.getOrPut
 
 
@@ -40,11 +46,13 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
     }
 
     private val matchList: ArrayList<IHookItem> = ArrayList()
-//    private val hookClass
+    private val hookClasses: ArrayList<HookClass> = ArrayList()
 
+    private val hookRunnableInfoMap: HashMap<String, HookRunnableInfo> = HashMap()
 
     override fun registerHook(item: IHookItem) {
-        TODO("Not yet implemented")
+        matchList.add(item)
+        hookRunnableInfoMap[item.hookRunnableInfo.className] = item.hookRunnableInfo
     }
 
     override fun findHookInfo(
@@ -52,9 +60,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
         methodName: String,
         sourceMethodName: String,
         methodParas: Array<Class<*>>
-    ): HookInfo {
-        TODO("Not yet implemented")
-    }
+    ): HookInfo = createInstanceHookInfo(clazz, methodName, sourceMethodName, methodParas)
 
     override fun createInstanceHookInfo(
         clazz: Class<*>,
@@ -62,12 +68,32 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
         sourceMethodName: String,
         methodParas: Array<Class<*>>
     ): HookInfo {
-        TODO("Not yet implemented")
+        val paramDesc = toDesc(methodParas)
+
+        val method = clazz.getMethod(methodName, *methodParas)
+        val sourceMethod = clazz.getMethod(methodName, *methodParas)
+        return let {
+            hookClasses.firstOrNull { it.clazz == clazz.name } ?: error("[YuHook] 未找到类: ${clazz.name} 的上下文！")
+        }.method
+            .run {
+                firstOrNull { it.name == methodName && it.paramDesc == paramDesc }
+                    ?: error("[YuHook] 未找到类: ${clazz.name}, 方法: ${method.nameWithParams} 的上下文！")
+            }
+            .let {
+                HookInfo(clazz.name, methodName, clazz, method, sourceMethod, methodParas)
+                    .apply {
+                        it.standardHooks.forEach { hri -> putRunnable(hri.instance) }
+                    }
+            }
     }
 
-    fun findHook(clazz: String): HookRunnableInfo {
-        TODO()
-    }
+    fun findHook(clazz: String): HookRunnableInfo =
+        hookRunnableInfoMap.getOrPut(clazz) { createHookRunnableInfo(clazz) }
+
+    private fun createHookRunnableInfo(clazz: String) =
+        classLoader.forName(clazz, false)
+            .let { HookRunnableInfo(clazz, it.hasAnnotation<InstanceMode>(), it as Class<out HookRunnable>) }
+
 
     data class HookMethodInfo(val method: HookMethod, val node: MethodNode)
 
