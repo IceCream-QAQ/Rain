@@ -2,11 +2,11 @@ package com.IceCreamQAQ.Yu.hook
 
 import com.IceCreamQAQ.Yu.loader.transformer.ClassTransformer
 
-interface IHook : ClassTransformer {
+interface IHook {
 
     val superHook: IHook?
 
-    fun registerHook(item: IHookItem)
+    fun registerHook(item: HookItem)
 
     fun findHookInfo(
         clazz: Class<*>,

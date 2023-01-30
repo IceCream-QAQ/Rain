@@ -5,8 +5,8 @@ import com.IceCreamQAQ.Yu.annotation.HookBy
 import com.IceCreamQAQ.Yu.annotation.InstanceMode
 import com.IceCreamQAQ.Yu.hasAnnotation
 import com.IceCreamQAQ.Yu.loader.IRainClassLoader
+import com.IceCreamQAQ.Yu.loader.transformer.ClassTransformer
 import com.IceCreamQAQ.Yu.nameWithParams
-import com.IceCreamQAQ.Yu.nameWithParamsFullClass
 import com.IceCreamQAQ.Yu.util.*
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
@@ -19,7 +19,7 @@ import kotlin.collections.HashMap
 import kotlin.collections.getOrPut
 
 
-class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?) : IHook {
+class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?) : IHook, ClassTransformer {
 
     companion object {
         private val systemMethod = arrayOf(
@@ -45,15 +45,28 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
         private const val hookRunnableType = "L$hookRunnableOwner;"
     }
 
+    init {
+        classLoader.forName("com.IceCreamQAQ.Yu.hook.YuHook", true)
+            .getDeclaredField("hookInstance")
+            .let {
+                it.isAccessible = true
+                it.set(null,this)
+            }
+    }
+
     private val matchList: ArrayList<IHookItem> = ArrayList()
     private val hookClasses: ArrayList<HookClass> = ArrayList()
 
     private val hookRunnableInfoMap: HashMap<String, HookRunnableInfo> = HashMap()
 
-    override fun registerHook(item: IHookItem) {
-        matchList.add(item)
-        hookRunnableInfoMap[item.hookRunnableInfo.className] = item.hookRunnableInfo
+    override fun registerHook(item: HookItem) {
+        item.toItem().let {
+            matchList.add(it)
+            hookRunnableInfoMap[it.hookRunnableInfo.className] = it.hookRunnableInfo
+        }
     }
+
+    fun HookItem.toItem(): IHookItem = TODO()
 
     override fun findHookInfo(
         clazz: Class<*>,
