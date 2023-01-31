@@ -45,7 +45,7 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainClassLoade
             transformers.add(loadClass(s, true, false).newInstance() as ClassTransformer)
         }
 
-        blackList.addAll(blackList)
+        blackPackages.addAll(blackList)
     }
 
     fun registerTransformer(className: String) {
@@ -130,9 +130,10 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainClassLoade
                 || name.startsWith("com.sun.")
                 || name.startsWith("net.sf.ehcache")
                 || name.startsWith("com.IceCreamQAQ.Yu.annotation.")
-                || name.startsWith("com.IceCreamQAQ.Yu.hook.")
-                || name.startsWith("com.IceCreamQAQ.Yu.loader.enchant.")
+//                || name.startsWith("com.IceCreamQAQ.Yu.hook.")
+                || name.startsWith("com.IceCreamQAQ.Yu.loader.IRainClassLoader")
                 || name.startsWith("com.IceCreamQAQ.Yu.loader.AppClassloader")
+                || name.startsWith("com.IceCreamQAQ.Yu.loader.enchant.")
                 || name.startsWith("ch.qos.logback.core.")
                 || name.startsWith("org.xml")
                 || name.startsWith("org.slf4j.")
