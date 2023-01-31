@@ -166,23 +166,25 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
             if (method.access shr 3 and 1 == 1) instanceHooks.clear()
 
             if (standardHooks.isNotEmpty() || instanceHooks.isNotEmpty())
-                instanceHookMethods.ifEmpty { standardHookMethods }
-                    .add(
-                        HookMethodInfo(
-                            HookMethod(
-                                className,
-                                method.name,
-                                method.desc,
-                                UUID.randomUUID().toString().replace("-", ""),
-                                standardHooks,
-                                instanceHooks
-                            ), method
-                        ).apply {
-                            instanceHooks.forEach {
-                                instanceHookRunnableInfos.getOrPut(it) { ArrayList() }.add(this.method)
-                            }
+                let {
+                    if (instanceHooks.isNotEmpty()) instanceHookMethods
+                    else standardHookMethods
+                }.add(
+                    HookMethodInfo(
+                        HookMethod(
+                            className,
+                            method.name,
+                            method.desc,
+                            UUID.randomUUID().toString().replace("-", ""),
+                            standardHooks,
+                            instanceHooks
+                        ), method
+                    ).apply {
+                        instanceHooks.forEach {
+                            instanceHookRunnableInfos.getOrPut(it) { ArrayList() }.add(this.method)
                         }
-                    )
+                    }
+                )
         }
 
         // 如果没有收集到任何符合条件的 Method，则当前 Class 不需要增强。
@@ -223,8 +225,12 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
                         if (insn is MethodInsnNode)
                             if (insn.opcode == INVOKESPECIAL && insn.owner == classOwner && insn.name == "<init>") return@forEach
                     }
-                    it.instructions.insert(VarInsnNode(ALOAD, 0))
-                    it.instructions.insert(MethodInsnNode(INVOKESTATIC, classOwner, initMethodName, "()V", false))
+                    it.instructions.remove(it.instructions.first { insn -> insn is InsnNode && insn.opcode == RETURN })
+                    it.instructions.add(VarInsnNode(ALOAD, 0))
+                    it.instructions.add(
+                        MethodInsnNode(INVOKEVIRTUAL, classOwner, initMethodName, "()V", false)
+                    )
+                    it.instructions.add(InsnNode(RETURN))
                 }
 
             // 为所有 InstanceHook 生成 Setter。
