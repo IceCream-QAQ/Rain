@@ -255,17 +255,22 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
         // 开始增强，判断有无 StandardHook
         if (standardHookMethods.isNotEmpty()) {
             // 向 <clinit> 内插入调用构建初始化函数的代码
-            (node.methods.firstOrNull { it.name == "<clinit>" }
-                ?: MethodNode(ACC_STATIC, "<clinit>", "()V", null, null).apply { node.methods.add(this) }
-                    ).instructions.insert(
-                    MethodInsnNode(
-                        INVOKESTATIC,
-                        classOwner,
-                        "${identifier}standard",
-                        "()V",
-                        false
-                    )
+            let {
+                node.methods.firstOrNull { it.name == "<clinit>" }
+                    ?: MethodNode(ACC_STATIC, "<clinit>", "()V", null, null)
+                        .apply {
+                            node.methods.add(this)
+                            instructions.insert(InsnNode(RETURN))
+                        }
+            }.instructions.insert(
+                MethodInsnNode(
+                    INVOKESTATIC,
+                    classOwner,
+                    "${identifier}standard",
+                    "()V",
+                    false
                 )
+            )
 
             val initMethodName = "${identifier}standard"
 
@@ -275,7 +280,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
                         standardHookMethods,
                         classOwner,
                         classClass,
-                        false
+                        true
                     ) {
                         node.fields.add(
                             FieldNode(
@@ -288,6 +293,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
                         )
                         node.methods.add(hook(it.method, classOwner, it.node))
                     }
+                    node.methods.add(this)
                 }
         }
 
@@ -349,7 +355,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
                 iHookOwner,
                 invokeMethod,
                 "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Class;)$hookInfoType",
-                false
+                true
             )
             if (static) visitFieldInsn(PUTSTATIC, classOwner, it.method.identifier, hookInfoType)
             else visitFieldInsn(PUTFIELD, classOwner, it.method.identifier, hookInfoType)
