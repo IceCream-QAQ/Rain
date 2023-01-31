@@ -409,7 +409,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
 
         val params = readPara(descSplit[0].substring(1), firstStack)
 
-        val returnFlag = descSplit[1] == "V"
+        val returnFlag = descSplit[1] != "V"
         val returnType = descSplit[1]
 
         var stack = if (isStatic) 0 else 1
@@ -438,7 +438,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
             apply {
                 visitTypeInsn(NEW, hookContextOwner)
                 visitInsn(DUP)
-                visitMethodInsn(INVOKESPECIAL, hookInfoOwner, "<init>", "()V", false)
+                visitMethodInsn(INVOKESPECIAL, hookContextOwner, "<init>", "()V", false)
                 visitVarInsn(ASTORE, hookContextStack)
             }
 
@@ -458,6 +458,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
                 visitTypeInsn(ANEWARRAY, "java/lang/Object")
 
                 // 向 Param Array 中写入 this，当方法为 static 时写入 null。
+                visitInsn(DUP)
                 visitInsn(ICONST_0)
                 if (isStatic) visitInsn(ACONST_NULL) else visitVarInsn(ALOAD, 0)
                 visitInsn(AASTORE)
@@ -488,19 +489,19 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
 
                 // 写入 Params Array
                 visitVarInsn(ALOAD, hookContextStack)
-                visitVarInsn(ALOAD, hookInfoStack)
+                visitVarInsn(ALOAD, paramsStack)
                 visitFieldInsn(PUTFIELD, hookContextOwner, "params", "[Ljava/lang/Object;")
             }
 
-            // perRun
+            // preRun
             apply {
                 // invoke
                 visitVarInsn(ALOAD, hookInfoStack)
                 visitVarInsn(ALOAD, hookContextStack)
-                visitMethodInsn(INVOKEVIRTUAL, hookInfoOwner, "perRun", "($hookContextType)Z", false)
+                visitMethodInsn(INVOKEVIRTUAL, hookInfoOwner, "preRun", "($hookContextType)Z", false)
 
                 // 读取 perRun 结果
-                // perRun 返回 true 则中断执行，向上返回 context 中的 result
+                // preRun 返回 true 则中断执行，向上返回 context 中的 result
                 visitJumpInsn(IFEQ, tryStart)
 
                 // 判断方法是否有返回值，如果有则返回 result，没有则直接返回。
@@ -548,8 +549,9 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
                 }
 
                 // try 结束部分
-                visitJumpInsn(GOTO, resultLabel)
                 visitLabel(tryEnd)
+                visitJumpInsn(GOTO, resultLabel)
+
             }
 
             // catch 部分
@@ -595,7 +597,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
                 // postRun
                 visitVarInsn(ALOAD, hookInfoStack)
                 visitVarInsn(ALOAD, hookContextStack)
-                visitMethodInsn(INVOKEVIRTUAL, hookInfoOwner, "postRun", "($hookContextType)Z", false)
+                visitMethodInsn(INVOKEVIRTUAL, hookInfoOwner, "postRun", "($hookContextType)V", false)
 
                 // return
                 if (returnFlag) {
