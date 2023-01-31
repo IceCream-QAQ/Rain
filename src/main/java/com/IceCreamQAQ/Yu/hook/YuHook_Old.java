@@ -20,7 +20,7 @@ public class YuHook_Old {
 
     public static void put(HookItem item) {
         if (!isInit) hooks.add(item);
-        else getInvoker(item.getClassName(), item.getMethodName()).put(getOrNewRunnable(item.getRunnable()));
+//        else getInvoker(item.getClassName(), item.getMethodName()).put(getOrNewRunnable(item.getRunnable()));
     }
 
     private static final Map<String, HookRunnable> hs = new HashMap<>();
@@ -50,7 +50,7 @@ public class YuHook_Old {
     public static void init(AppClassloader classloader) {
         isInit = true;
         YuHook_Old.classloader = classloader;
-        hooks.forEach(item -> getInvoker(item.getClassName(), item.getMethodName()).put(getOrNewRunnable(item.getRunnable())));
+//        hooks.forEach(item -> getInvoker(item.getClassName(), item.getMethodName()).put(getOrNewRunnable(item.getRunnable())));
     }
 
     public static HookInvokerRunnable getInvoker(String className, String methodName) {

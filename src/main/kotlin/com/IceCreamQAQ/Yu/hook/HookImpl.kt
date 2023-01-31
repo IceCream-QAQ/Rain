@@ -50,7 +50,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
             .getDeclaredField("hookInstance")
             .let {
                 it.isAccessible = true
-                it.set(null,this)
+                it.set(null, this)
             }
     }
 
@@ -66,7 +66,14 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
         }
     }
 
-    fun HookItem.toItem(): IHookItem = TODO()
+    fun HookItem.toItem(): IHookItem =
+        findHook(runnable).let { runnable ->
+            when (type) {
+                "method" -> FullMatchHookItem(basedClass, basedMethod!!, basedDesc, runnable)
+                else -> error("[YuHook] 未能解析的 HookItem 类型: $type。($this)")
+            }
+        }
+
 
     override fun findHookInfo(
         clazz: Class<*>,
@@ -297,6 +304,13 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
                 }
         }
 
+        HookClass(className).apply {
+            method.apply {
+                standardHookMethods.forEach { add(it.method) }
+                instanceHookMethods.forEach { add(it.method) }
+            }
+            hookClasses.add(this)
+        }
 
         return true
     }
@@ -433,6 +447,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
             val hookContextStack = stack++
             val hookInfoStack = stack++
             val paramsStack = stack++
+
 
             // new HookMethod
             apply {

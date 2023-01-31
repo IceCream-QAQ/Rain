@@ -5,21 +5,33 @@ import org.objectweb.asm.tree.MethodNode
 
 interface IHookItem {
     val hookRunnableInfo: HookRunnableInfo
-    fun checkClass(clazz: String, node: ClassNode): Boolean
-    fun checkMethod(method: String, descriptor: String, node: MethodNode): Boolean
+    val checkClass: IClassChecker
+    val checkMethod: IMethodChecker
 }
 
-class NoMatchHookItem @JvmOverloads constructor(
+fun interface IClassChecker {
+    operator fun invoke(clazz: String, node: ClassNode): Boolean
+}
+
+fun interface IMethodChecker {
+    operator fun invoke(method: String, descriptor: String, node: MethodNode): Boolean
+}
+
+open class ValHookItem(
     override val hookRunnableInfo: HookRunnableInfo,
-    private val clazz: String,
-    private val method: String,
-    private val descriptor: String? = null,
-) : IHookItem {
+    override val checkClass: IClassChecker,
+    override val checkMethod: IMethodChecker
+) : IHookItem
 
-    override fun checkClass(clazz: String, node: ClassNode): Boolean =
-        clazz == this.clazz
-
-    override fun checkMethod(method: String, descriptor: String, node: MethodNode): Boolean =
-        method == clazz && this.descriptor?.let { descriptor == it } ?: true
-
-}
+class FullMatchHookItem(
+    val className: String,
+    val methodName: String,
+    val descriptor: String?,
+    runnable: HookRunnableInfo
+) : ValHookItem(
+    runnable,
+    IClassChecker { clazz, node -> clazz == className},
+    IMethodChecker { method, desc, node ->
+        (method == methodName) && descriptor?.let { it == desc } ?: true
+    }
+)

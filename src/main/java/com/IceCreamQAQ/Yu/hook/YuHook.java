@@ -11,7 +11,7 @@ public class YuHook {
     }
 
     public static IHook findHook(){
-        return null;
+        return hookInstance;
     }
 
 }
