@@ -96,8 +96,7 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainAppClassLo
         if (
             name !in whiteClasses &&
             !inWhitePackages(name) &&
-            name in blackClasses ||
-            inBlackPackages(name)
+            (name in blackClasses || inBlackPackages(name))
         ) c = parent.loadClass(name)
 
         try {
