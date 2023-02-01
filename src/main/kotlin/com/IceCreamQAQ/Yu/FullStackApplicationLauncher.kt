@@ -50,6 +50,7 @@ object FullStackApplicationLauncher {
             registerBlackClass("com.IceCreamQAQ.Yu.hook.HookRunnable")
             registerBlackClass("com.IceCreamQAQ.Yu.hook.HookItem")
             registerBlackClass("com.IceCreamQAQ.Yu.hook.HookInfo")
+            registerBlackClass("com.IceCreamQAQ.Yu.hook.HookContext")
 
             registerTransformer(
                 loadClass("com.IceCreamQAQ.Yu.hook.HookImpl")
