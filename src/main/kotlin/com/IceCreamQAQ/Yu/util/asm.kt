@@ -1,6 +1,5 @@
 package com.IceCreamQAQ.Yu.util
 
-import com.IceCreamQAQ.Yu.hook.YuHook_Old
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 
