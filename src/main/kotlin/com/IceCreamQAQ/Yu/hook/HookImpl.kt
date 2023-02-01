@@ -631,7 +631,20 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
                 } else visitInsn(RETURN)
             }
 
-            visitMaxs(0, 0)
+            val minStacks = if (params.any { it.stackSize == 2 }) 5 else 4
+
+            var invokeStacks = 0
+            if (!isStatic) invokeStacks++
+            if (returnFlag) invokeStacks++
+
+            params.forEach { invokeStacks += it.stackSize }
+            if (params.last().stackSize == 1) invokeStacks++
+
+
+            visitMaxs(
+                if (invokeStacks > minStacks) invokeStacks else minStacks,
+                stack
+            )
             visitEnd()
         }
 

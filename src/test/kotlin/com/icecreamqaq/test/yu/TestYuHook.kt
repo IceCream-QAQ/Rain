@@ -13,7 +13,7 @@ import com.IceCreamQAQ.Yu.util.sout
 class TestHookTarget {
 
     fun instanceTargetMethod(who: String) = "Instance: Hello $who!"
-    fun standardTargetMethod(who: String) = "Standard: Hello $who!"
+    fun standardTargetMethod(who: String, b: Long, c: Long) = "Standard: Hello $who!"
 
 
 }
@@ -92,8 +92,13 @@ class TestYuHookMain {
                             getMethod("instanceTargetMethod", String::class.java).apply {
                                 invoke(instance, "World!").sout()
                             }
-                            getMethod("standardTargetMethod", String::class.java).apply {
-                                invoke(instance, "World!").sout()
+                            getMethod(
+                                "standardTargetMethod",
+                                String::class.java,
+                                Long::class.javaPrimitiveType,
+                                Long::class.javaPrimitiveType
+                            ).apply {
+                                invoke(instance, "World!",0,0).sout()
                             }
                         }
                     }
