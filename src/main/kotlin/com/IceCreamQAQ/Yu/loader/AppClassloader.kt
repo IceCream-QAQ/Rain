@@ -133,7 +133,7 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainAppClassLo
             if (transformer.transform(node, name)) changed = true
         }
         if (changed) {
-            val ncw = ClassWriter(ClassWriter.COMPUTE_FRAMES)
+            val ncw = ClassWriter(0)
             node.accept(ncw)
             bytes = ncw.toByteArray()
             writeFile(File(classOutLocation, "$name.class"), bytes)
