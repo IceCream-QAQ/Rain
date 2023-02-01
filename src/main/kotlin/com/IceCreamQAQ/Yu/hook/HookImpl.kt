@@ -14,8 +14,6 @@ import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.*
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 import kotlin.collections.getOrPut
 
 
@@ -537,6 +535,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
             // try 部分， invoke 原方法。
             apply {
                 visitLabel(tryStart)
+                visitFrame(F_APPEND, 3, arrayOf(hookContextOwner, hookInfoOwner, "[Ljava/lang/Object;"), 0, null)
 
                 // 如果有返回值就将 hookContext 压入栈，等待后续写入 result
                 if (returnFlag) visitVarInsn(ALOAD, hookContextStack)
@@ -578,6 +577,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
             // catch 部分
             apply {
                 visitLabel(catchLabel)
+                visitFrame(F_SAME1, 0, null, 1, arrayOf("java/lang/Throwable"))
                 val errorStack = stack++
                 visitVarInsn(ASTORE, errorStack)
 
@@ -606,6 +606,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
 
                 // throw 部分
                 visitLabel(throwLabel)
+                visitFrame(F_APPEND, 1, arrayOf("java/lang/Throwable"), 0, null)
                 visitVarInsn(ALOAD, hookContextStack)
                 visitFieldInsn(GETFIELD, hookContextOwner, "error", "Ljava/lang/Throwable;")
                 visitInsn(ATHROW)
@@ -614,6 +615,7 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
             // postRun & return
             apply {
                 visitLabel(resultLabel)
+                visitFrame(F_CHOP, 1, null, 0, null)
 
                 // postRun
                 visitVarInsn(ALOAD, hookInfoStack)
