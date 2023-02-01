@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.IceCreamQAQ"
-version = "0.3.0.DEV.0"
+version = "0.3.0.DEV.1"
 
 repositories {
     mavenLocal()
