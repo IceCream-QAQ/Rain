@@ -7,9 +7,9 @@ import java.util.TimeZone;
 
 public class DateUtil {
 
-    private ThreadLocal<SimpleDateFormat> sdfDate;
-    private ThreadLocal<SimpleDateFormat> sdfDateTime;
-    private ThreadLocal<SimpleDateFormat> sdfDateTimeSSS;
+    private final ThreadLocal<SimpleDateFormat> sdfDate;
+    private final ThreadLocal<SimpleDateFormat> sdfDateTime;
+    private final ThreadLocal<SimpleDateFormat> sdfDateTimeSSS;
 
     public DateUtil() {
         sdfDate = new ThreadLocal<>();

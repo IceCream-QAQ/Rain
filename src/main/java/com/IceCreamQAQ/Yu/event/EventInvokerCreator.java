@@ -1,6 +1,5 @@
 package com.IceCreamQAQ.Yu.event;
 
-import com.IceCreamQAQ.Yu.event.events.Event;
 import com.IceCreamQAQ.Yu.loader.SpawnClassLoader;
 import lombok.val;
 import org.objectweb.asm.ClassWriter;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.*;
-
 
 public class EventInvokerCreator {
 
