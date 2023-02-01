@@ -11,9 +11,8 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import java.io.File
-import java.io.IOException
 
-class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainClassLoader {
+class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainAppClassLoader {
 
     companion object {
         private val log = slf4j<AppClassloader>()
@@ -36,9 +35,14 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainClassLoade
 
     }
 
+    override val superApp: IRainAppClassLoader? = null
+
     private val transformers: MutableList<ClassTransformer> = ArrayList()
     private val blackPackages: MutableList<String> = ArrayList()
     private val whitePackages: MutableList<String> = ArrayList()
+
+    private val blackClasses: MutableList<String> = ArrayList()
+    private val whiteClasses: MutableList<String> = ArrayList()
 
     init {
         for (s in transformerList) {
@@ -46,14 +50,38 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainClassLoade
         }
 
         blackPackages.addAll(blackList)
+
+        blackClasses.apply {
+            add("com.IceCreamQAQ.Yu.loader.IRainClassLoader")
+            add("com.IceCreamQAQ.Yu.loader.IRainAppClassLoader")
+            add("com.IceCreamQAQ.Yu.loader.AppClassloader")
+
+            add("com.IceCreamQAQ.Yu.loader.transformer.ClassTransformer")
+        }
     }
 
-    fun registerTransformer(className: String) {
+    override fun registerTransformer(className: String) {
         transformers.add(loadClass(className, true, false).newInstance() as ClassTransformer)
     }
 
-    fun registerTransformer(transformer: ClassTransformer) {
+    override fun registerTransformer(transformer: ClassTransformer) {
         transformers.add(transformer)
+    }
+
+    override fun registerBlackClass(className: String) {
+        blackClasses.add(className)
+    }
+
+    override fun registerBlackPackage(packageName: String) {
+        blackPackages.add(packageName)
+    }
+
+    override fun registerWhiteClass(className: String) {
+        whiteClasses.add(className)
+    }
+
+    override fun registerWhitePackage(packageName: String) {
+        whitePackages.add(packageName)
     }
 
     public override fun loadClass(name: String, resolve: Boolean): Class<*> {
@@ -65,7 +93,12 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainClassLoade
         if (c != null) {
             return c
         }
-        if (!inWhitePackages(name) && inBlackPackages(name)) c = parent.loadClass(name)
+        if (
+            name !in whiteClasses &&
+            !inWhitePackages(name) &&
+            name in blackClasses ||
+            inBlackPackages(name)
+        ) c = parent.loadClass(name)
 
         try {
             if (c == null) if (enhance) c = loadAppClass(name, resolve)
@@ -122,22 +155,18 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainClassLoade
         val b = (name.startsWith("java.")
                 || name.startsWith("jdk.")
                 || name.startsWith("javax.")
-                || name.startsWith("kotlin")
+                || name.startsWith("kotlin.")
+                || name.startsWith("kotlinx.")
+                || name.startsWith("org.objectweb.asm.")
                 || name.startsWith("com.google.")
                 || name.startsWith("org.apache.")
                 || name.startsWith("org.w3c.")
                 || name.startsWith("sun.")
                 || name.startsWith("com.sun.")
-                || name.startsWith("net.sf.ehcache")
-                || name.startsWith("com.IceCreamQAQ.Yu.annotation.")
-//                || name.startsWith("com.IceCreamQAQ.Yu.hook.")
-                || name.startsWith("com.IceCreamQAQ.Yu.loader.IRainClassLoader")
-                || name.startsWith("com.IceCreamQAQ.Yu.loader.AppClassloader")
-                || name.startsWith("com.IceCreamQAQ.Yu.loader.enchant.")
                 || name.startsWith("ch.qos.logback.core.")
-                || name.startsWith("org.xml")
+                || name.startsWith("org.xml.")
                 || name.startsWith("org.slf4j.")
-                || name.startsWith("org.jboss"))
+                || name.startsWith("org.jboss."))
         if (b) return true
         for (s in blackPackages) {
             if (name.startsWith(s)) return true
