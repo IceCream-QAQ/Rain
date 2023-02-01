@@ -641,20 +641,17 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
             if (params.last().stackSize == 1) invokeStacks++
 
 
-            visitMaxs(
-                if (invokeStacks > minStacks) invokeStacks else minStacks,
-                stack
-            )
+            visitMaxs(if (invokeStacks > minStacks) invokeStacks else minStacks, stack)
             visitEnd()
         }
 
-        newMethod.visibleAnnotations = sourceMethod.visibleAnnotations;
+        newMethod.visibleAnnotations = sourceMethod.visibleAnnotations
         sourceMethod.visibleAnnotations = null
 
-        newMethod.invisibleAnnotations = sourceMethod.invisibleAnnotations;
+        newMethod.invisibleAnnotations = sourceMethod.invisibleAnnotations
         sourceMethod.invisibleAnnotations = null
 
-        newMethod.visibleParameterAnnotations = sourceMethod.visibleParameterAnnotations;
+        newMethod.visibleParameterAnnotations = sourceMethod.visibleParameterAnnotations
         sourceMethod.visibleParameterAnnotations = null
 
         sourceMethod.name = hook.changeToName

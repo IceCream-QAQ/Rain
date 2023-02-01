@@ -1,7 +1,5 @@
 package com.IceCreamQAQ.Yu.hook
 
-import com.IceCreamQAQ.Yu.loader.transformer.ClassTransformer
-
 interface IHook {
 
     val superHook: IHook?

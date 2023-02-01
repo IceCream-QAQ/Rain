@@ -1,7 +1,5 @@
 package com.IceCreamQAQ.Yu.hook
 
-import org.objectweb.asm.tree.ClassNode
-
 class UnsupportedClassLoaderHook : IHook {
 
     override val superHook: IHook? = null
