@@ -117,7 +117,6 @@ class HookImpl(val classLoader: IRainClassLoader, override val superHook: IHook?
 
     override fun transform(node: ClassNode, className: String): Boolean {
         val classMatches = matchList.filter { it.checkClass(className, node) }
-        if (classMatches.isEmpty()) return false
 
         /***
          * 数据结构:
