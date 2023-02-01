@@ -10,9 +10,43 @@ import javax.inject.Named
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.hasAnnotation
-import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.jvm.*
+
+private inline fun <T> makeJavaSetterMethodInvoker(
+    context: ContextImpl,
+    method: Method,
+    crossinline injectNullError: () -> Nothing
+): (T) -> Any? {
+    val named = method.annotation<Named>() ?: method.parameters.first().annotation()
+    val nullable = method.annotation<Nullable>() ?: method.parameters.first().annotation()
+
+    val dataReader =
+        method.annotation<Config>()?.let { config ->
+            context.getConfigReader(
+                config.value,
+                method.parameters.first().parameterizedType
+            )
+        } ?: context.getDataReader(method.parameters.first().parameterizedType)
+
+    return if (named == null)
+        if (nullable == null)
+            { instance: T ->
+                method.invoke(instance, dataReader())
+            }
+        else
+            { instance: T ->
+                method.invoke(instance, dataReader() ?: injectNullError())
+            }
+    else
+        if (nullable == null)
+            { instance: T ->
+                method.invoke(instance, dataReader(named.value))
+            }
+        else
+            { instance: T ->
+                method.invoke(instance, dataReader(named.value) ?: injectNullError())
+            }
+}
 
 class ReflectBeanInject<T>(
     val context: ContextImpl,
@@ -96,38 +130,9 @@ class ReflectBeanInject<T>(
                     clazz.allMethod
                         .filter { it.isPublic && it.name.startsWith("set") && (it.hasAnnotation<Inject>() || it.hasAnnotation<Config>()) && it.parameters.size == 1 && it.isExecutable }
                         .map {
-                            val named = it.annotation<Named>() ?: it.parameters.first().annotation()
-                            val nullable = it.annotation<Nullable>() ?: it.parameters.first().annotation()
-
-                            val dataReader =
-                                it.annotation<Config>()?.let { config ->
-                                    context.getConfigReader(
-                                        config.value,
-                                        it.parameters.first().parameterizedType
-                                    )
-                                } ?: context.getDataReader(it.parameters.first().parameterizedType)
-
-                            fun injectNullError(): Nothing =
+                            makeJavaSetterMethodInvoker(context, it) {
                                 error("在对类: ${clazz.name} 中的 Setter: ${it.nameWithParams} 注入时，注入值为空！")
-
-                            if (named == null)
-                                if (nullable == null)
-                                    { instance: T ->
-                                        it.invoke(instance, dataReader())
-                                    }
-                                else
-                                    { instance: T ->
-                                        it.invoke(instance, dataReader() ?: injectNullError())
-                                    }
-                            else
-                                if (nullable == null)
-                                    { instance: T ->
-                                        it.invoke(instance, dataReader(named.value))
-                                    }
-                                else
-                                    { instance: T ->
-                                        it.invoke(instance, dataReader(named.value) ?: injectNullError())
-                                    }
+                            }
                         }
                 )
             }
@@ -144,128 +149,132 @@ class KReflectBeanInject<T : Any>(
     val clazz: Class<T>
 ) : BeanInjector<T> {
 
-    val fields = clazz.allField.filter { it.hasAnnotation<Config>() || it.hasAnnotation<Inject>() }
-        .filter { it.kotlinProperty is KMutableProperty1<*, *> }
-        .mutableMap {
-            val kParam = it.kotlinProperty as KMutableProperty1<Any, Any?>
-            val nullable = kParam.returnType.isMarkedNullable
-            val accessible = kParam.visibility == KVisibility.PUBLIC
+    val fields: MutableList<(T) -> Any?> =
+        clazz.allField.filter { it.hasAnnotation<Config>() || it.hasAnnotation<Inject>() }
+            .filter { it.kotlinProperty is KMutableProperty1<*, *> }
+            .mutableMap {
+                val kParam = it.kotlinProperty as KMutableProperty1<Any, Any?>
+                val nullable = kParam.returnType.isMarkedNullable
+                val accessible = kParam.visibility == KVisibility.PUBLIC
 
-            val type = kParam.returnType.javaType
-            val reader = it.annotation<Config>()?.let { context.getConfigReader(it.value, type) }
-                ?: context.getDataReader(type)
+                val type = kParam.returnType.javaType
+                val reader = it.annotation<Config>()?.let { context.getConfigReader(it.value, type) }
+                    ?: context.getDataReader(type)
 
-            val name = it.annotation<Named>()?.value
+                val name = it.annotation<Named>()?.value
 
-            fun injectNullError(): Nothing =
-                error("在对 Kotlin 类: ${clazz.name} 中的 Property: ${it.name} 进行注入时，注入值为空！")
+                fun injectNullError(): Nothing =
+                    error("在对 Kotlin 类: ${clazz.name} 中的 Property: ${it.name} 进行注入时，注入值为空！")
 
-            if (nullable)
-                if (accessible)
-                    if (name == null)
-                        { instance: T -> reader()?.let { r -> it.set(instance, it) } }
-                    else
-                        { instance: T -> reader(name)?.let { r -> it.set(instance, it) } }
-                else
-                    if (name == null)
-                        { instance: T ->
-                            reader()?.let { r ->
-                                it.isAccessible = true
-                                it.set(instance, it)
-                            }
-                        }
-                    else
-                        { instance: T ->
-                            reader(name)?.let { r ->
-                                it.isAccessible = true
-                                it.set(instance, it)
-                            }
-                        }
-            else
-                if (accessible)
-                    if (name == null)
-                        { instance: T -> it.set(instance, reader() ?: injectNullError()) }
-                    else
-                        { instance: T -> it.set(instance, reader(name) ?: injectNullError()) }
-                else
-                    if (name == null)
-                        { instance: T ->
-                            it.isAccessible = true
-                            it.set(instance, reader() ?: injectNullError())
-                        }
-                    else
-                        { instance: T ->
-                            it.isAccessible = true
-                            it.set(instance, reader(name) ?: injectNullError())
-                        }
-        }.apply {
-            addAll(
-                clazz.kotlin.memberFunctions
-                    .filter {
-                        it.visibility == KVisibility.PUBLIC && it.name.startsWith("set")
-                                && (it.hasAnnotation<Inject>() || it.hasAnnotation<Config>())
-                                && it.parameters.size == 2
-                    }.map {
-                        val instanceParameter = it.parameters.first()
-                        val dataParameter = it.parameters.last()
-
-                        val type = dataParameter.type.javaType
-                        val nullable = dataParameter.type.isMarkedNullable
-                        val optional = dataParameter.isOptional
-
-                        val name = it.findAnnotation<Named>()?.value ?: dataParameter.findAnnotation<Named>()?.value
-
-                        val reader = it.findAnnotation<Config>()?.let { context.getConfigReader(it.value, type) }
-                            ?: context.getDataReader(type)
-
-                        fun injectNullError(): Nothing =
-                            error("在对 Kotlin 类: ${clazz.name} 中的 Setter: ${it.javaMethod?.nameWithParamsFullClass} 进行注入时，注入值为空！")
-
-                        if (optional)
-                            if (name == null)
-                                { instance: T ->
-                                    reader()?.let { r ->
-                                        it.callBy(mapOf(instanceParameter to instance, dataParameter to r))
-                                    }
-                                    Unit
-                                }
-                            else
-                                { instance: T ->
-                                    reader(name)?.let { r ->
-                                        it.callBy(mapOf(instanceParameter to instance, dataParameter to r))
-                                    }
-                                    Unit
-                                }
+                if (nullable)
+                    if (accessible)
+                        if (name == null)
+                            { instance: T -> reader()?.also { r -> it.set(instance, it) } }
                         else
-                            if (nullable)
-                                if (name == null)
-                                    { instance: T ->
-                                        reader()?.let { r ->
-                                            it.call(instance, r)
+                            { instance: T -> reader(name)?.let { r -> it.set(instance, it) } }
+                    else
+                        if (name == null)
+                            { instance: T ->
+                                reader()?.let { r ->
+                                    it.isAccessible = true
+                                    it.set(instance, it)
+                                }
+                            }
+                        else
+                            { instance: T ->
+                                reader(name)?.let { r ->
+                                    it.isAccessible = true
+                                    it.set(instance, it)
+                                }
+                            }
+                else
+                    if (accessible)
+                        if (name == null)
+                            { instance: T -> it.set(instance, reader() ?: injectNullError()) }
+                        else
+                            { instance: T -> it.set(instance, reader(name) ?: injectNullError()) }
+                    else
+                        if (name == null)
+                            { instance: T ->
+                                it.isAccessible = true
+                                it.set(instance, reader() ?: injectNullError())
+                            }
+                        else
+                            { instance: T ->
+                                it.isAccessible = true
+                                it.set(instance, reader(name) ?: injectNullError())
+                            }
+            }.apply {
+                addAll(
+                    clazz.allMethod
+                        .filter {
+                            it.isPublic && it.name.startsWith("set") &&
+                                    (it.hasAnnotation<Inject>() || it.hasAnnotation<Config>()) &&
+                                    it.parameters.size == 1
+                        }.map { method ->
+                            method.kotlinFunction?.let {
+                                val instanceParameter = it.parameters.first()
+                                val dataParameter = it.parameters.last()
+
+                                val type = dataParameter.type.javaType
+                                val nullable = dataParameter.type.isMarkedNullable
+                                val optional = dataParameter.isOptional
+
+                                val name =
+                                    it.findAnnotation<Named>()?.value ?: dataParameter.findAnnotation<Named>()?.value
+
+                                val reader =
+                                    it.findAnnotation<Config>()?.let { context.getConfigReader(it.value, type) }
+                                        ?: context.getDataReader(type)
+
+                                fun injectNullError(): Nothing =
+                                    error("在对 Kotlin 类: ${clazz.name} 中的 Setter: ${it.javaMethod?.nameWithParamsFullClass} 进行注入时，注入值为空！")
+
+                                if (optional)
+                                    if (name == null)
+                                        { instance: T ->
+                                            reader()?.let { r ->
+                                                it.callBy(mapOf(instanceParameter to instance, dataParameter to r))
+                                            }
+                                            Unit
                                         }
-                                        Unit
-                                    }
-                                else
-                                    { instance: T ->
-                                        reader(name)?.let { r ->
-                                            it.call(instance, r)
+                                    else
+                                        { instance: T ->
+                                            reader(name)?.let { r ->
+                                                it.callBy(mapOf(instanceParameter to instance, dataParameter to r))
+                                            }
+                                            Unit
                                         }
-                                        Unit
-                                    }
-                            else
-                                if (name == null)
-                                    { instance: T ->
-                                        it.call(instance, reader() ?: injectNullError())
-                                        Unit
-                                    }
                                 else
-                                    { instance: T ->
-                                        it.call(instance, reader(name) ?: injectNullError())
-                                        Unit
-                                    }
-                    }
-            )
-        }
+                                    if (nullable)
+                                        if (name == null)
+                                            { instance: T ->
+                                                reader()?.let { r ->
+                                                    it.call(instance, r)
+                                                }
+                                                Unit
+                                            }
+                                        else
+                                            { instance: T ->
+                                                reader(name)?.let { r ->
+                                                    it.call(instance, r)
+                                                }
+                                            }
+                                    else
+                                        if (name == null)
+                                            { instance: T ->
+                                                it.call(instance, reader() ?: injectNullError())
+                                            }
+                                        else
+                                            { instance: T ->
+                                                it.call(instance, reader(name) ?: injectNullError())
+                                            }
+                            } ?: makeJavaSetterMethodInvoker(context, method) {
+                                error("在对 Kotlin 类: ${clazz.name} 中的非 Kotlin Setter: ${method.nameWithParamsFullClass} 进行注入时，注入值为空！")
+                            }
+                        }
+                )
+            }
 
     override fun invoke(bean: T): T = bean.apply { fields.forEach { it(this) } }
 
