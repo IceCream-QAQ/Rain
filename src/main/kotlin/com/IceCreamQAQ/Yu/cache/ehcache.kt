@@ -81,6 +81,7 @@ class EhcacheHelpFactory : BeanFactory<EhcacheHelp<*>>, ApplicationService {
 
     private var cmDefaultMap = ConcurrentHashMap<String, CacheManager>()
 
+    @Deprecated("过时方法", replaceWith = ReplaceWith("priority"))
     override fun width() = 5
     override val type = EhcacheHelp::class.java
 
