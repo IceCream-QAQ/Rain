@@ -1,8 +1,13 @@
 package com.IceCreamQAQ.Yu.validation
 
+import com.IceCreamQAQ.Yu.annotation.HookBy
 import kotlin.reflect.KClass
 
 annotation class Valid
+
+@HookBy(value = "com.IceCreamQAQ.Yu.validation.global.ValidationHook")
+annotation class ValidHook
+annotation class NoValidHook
 
 annotation class ValidateBy(
     val value: KClass<out Validator>

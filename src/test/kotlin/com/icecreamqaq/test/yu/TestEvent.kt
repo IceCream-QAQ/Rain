@@ -12,6 +12,8 @@ import com.IceCreamQAQ.Yu.fullName
 import com.IceCreamQAQ.Yu.job.JobManager
 import com.IceCreamQAQ.Yu.job.JobManagerImpl
 import com.IceCreamQAQ.Yu.util.Web
+import com.IceCreamQAQ.Yu.validation.Min
+import com.IceCreamQAQ.Yu.validation.ValidHook
 import javax.inject.Inject
 
 class CustomEvent : com.IceCreamQAQ.Yu.event.events.Event() {
@@ -43,6 +45,12 @@ class TestEvent {
         jobManager.registerTimer(1000) {
             error("Test Job Error!")
         }
+        testParamValid(51)
+        testParamValid(50)
+    }
+
+    fun testParamValid(@Min(50) a: Int) {
+        println(a)
     }
 
     @Event
