@@ -4,7 +4,6 @@ import com.IceCreamQAQ.Yu.annotation.Action
 import com.IceCreamQAQ.Yu.annotation.DefaultController
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.IceCreamQAQ.Yu.di.YuContext
-import com.IceCreamQAQ.Yu.error.InvokerClassCreateException
 import com.IceCreamQAQ.Yu.loader.AppClassloader
 import com.IceCreamQAQ.Yu.util.classMaker.*
 import com.IceCreamQAQ.Yu.util.sout
@@ -141,7 +140,7 @@ object ClassMakerCompiler {
 
                 if (it.hasErrors()) {
 
-                    throw InvokerClassCreateException("Create Invoker Class $className",it.problems)
+//                    throw InvokerClassCreateException("Create Invoker Class $className",it.problems)
                 }
                 for (c in it.classFiles) {
                     val cc = classLoader.define(className, c.bytes)
