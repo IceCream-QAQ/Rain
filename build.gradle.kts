@@ -22,7 +22,7 @@ dependencies {
     api("com.squareup.okhttp3:okhttp:4.10.0")
     // Logback 1.4+ 最低支持 Java 11。
     api("ch.qos.logback:logback-classic:1.3.1")
-    api("com.alibaba.fastjson2:fastjson2:2.0.14")
+    api("com.alibaba.fastjson2:fastjson2:2.0.23")
     // ECJ 当前版本为最后支持 Java8 的版本，应停留在本版本。
     api("org.eclipse.jdt:ecj:3.26.0")
     api("org.ehcache:ehcache:3.10.1")
