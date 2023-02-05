@@ -40,6 +40,14 @@ object FullStackApplicationLauncher {
             )
         }
 
+        // 注入参数验证方法 ValidHook 注解添加 Transformer
+        appClassLoader.apply {
+            registerTransformer(
+                loadClass("com.IceCreamQAQ.Yu.validation.global.ValidHookAddTransformer").run {
+                    getConstructor(IRainClassLoader::class.java).newInstance(appClassLoader)
+                } as ClassTransformer
+            )
+        }
 
         // 初始化 YuHook
         appClassLoader.apply {
