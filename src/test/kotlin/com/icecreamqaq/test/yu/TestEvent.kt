@@ -24,9 +24,6 @@ class CustomEvent : com.IceCreamQAQ.Yu.event.events.Event() {
 class TestEvent {
 
     @Inject
-    private lateinit var testInterface: TestInterface
-
-    @Inject
     private lateinit var jobManager: JobManager
 
     @Inject
@@ -101,15 +98,3 @@ class TestEvent {
 
 }
 
-
-@AutoBind
-interface TestInterface {
-    fun a()
-}
-
-class TestInterfaceImpl : TestInterface {
-    override fun a() {
-        println("1231231231323")
-    }
-
-}
