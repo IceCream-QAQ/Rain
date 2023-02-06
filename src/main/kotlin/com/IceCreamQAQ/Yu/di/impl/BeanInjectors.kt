@@ -169,22 +169,22 @@ class KReflectBeanInject<T : Any>(
                 if (nullable)
                     if (accessible)
                         if (name == null)
-                            { instance: T -> reader()?.also { r -> it.set(instance, it) } }
+                            { instance: T -> reader()?.also { r -> it.set(instance, r) } }
                         else
-                            { instance: T -> reader(name)?.let { r -> it.set(instance, it) } }
+                            { instance: T -> reader(name)?.let { r -> it.set(instance, r) } }
                     else
                         if (name == null)
                             { instance: T ->
                                 reader()?.let { r ->
                                     it.isAccessible = true
-                                    it.set(instance, it)
+                                    it.set(instance, r)
                                 }
                             }
                         else
                             { instance: T ->
                                 reader(name)?.let { r ->
                                     it.isAccessible = true
-                                    it.set(instance, it)
+                                    it.set(instance, r)
                                 }
                             }
                 else
