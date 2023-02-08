@@ -67,6 +67,9 @@ object FullStackApplicationLauncher {
             )
         }
 
+        // 注册 Kotlin ByInject 实现
+        appClassLoader.registerTransformer("com.IceCreamQAQ.Yu.di.kotlin.YuContextKotlinInjectTransformer")
+
 
         val applicationClass = appClassLoader.loadClass("com.IceCreamQAQ.Yu.Application")
         applicationClass.getMethod("start").invoke(applicationClass.newInstance())
