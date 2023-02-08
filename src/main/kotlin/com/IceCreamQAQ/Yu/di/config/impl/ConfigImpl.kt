@@ -48,6 +48,8 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
             ((rootNode.getOrPut("yu", ObjectNode()) as ObjectNode)
                 .getOrPut("scanPackages", ArrayNode()) as ArrayNode).add(StringNode(it))
         }
+        (rootNode.getOrPut("yu", ObjectNode()) as ObjectNode)["runMode"] = StringNode(runMode!!)
+
         log.info("[配置管理器] 初始化完成。")
 
         return this
