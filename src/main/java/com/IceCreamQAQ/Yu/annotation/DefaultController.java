@@ -1,6 +1,6 @@
 package com.IceCreamQAQ.Yu.annotation;
 
-import com.IceCreamQAQ.Yu.controller.DefaultControllerLoaderImpl;
+import com.IceCreamQAQ.Yu.controller.old.DefaultControllerLoaderImpl;
 import com.IceCreamQAQ.Yu.loader.enchant.MethodParaNamedEnchanter;
 
 import javax.inject.Named;

@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.Yu.controller
+package com.IceCreamQAQ.Yu.controller.old
 
 import com.IceCreamQAQ.Yu.annotation.*
 import com.IceCreamQAQ.Yu.di.YuContext

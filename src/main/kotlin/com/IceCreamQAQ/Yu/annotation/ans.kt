@@ -1,8 +1,8 @@
 package com.IceCreamQAQ.Yu.annotation
 
-import com.IceCreamQAQ.Yu.controller.ActionManager
-import com.IceCreamQAQ.Yu.controller.PathManager
-import com.IceCreamQAQ.Yu.controller.SynonymManager
+import com.IceCreamQAQ.Yu.controller.old.ActionManager
+import com.IceCreamQAQ.Yu.controller.old.PathManager
+import com.IceCreamQAQ.Yu.controller.old.SynonymManager
 import com.IceCreamQAQ.Yu.job.JobManagerImpl
 import com.IceCreamQAQ.Yu.loader.Loader
 import kotlin.reflect.KClass
