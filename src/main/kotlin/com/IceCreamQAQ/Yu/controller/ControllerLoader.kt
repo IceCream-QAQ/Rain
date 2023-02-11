@@ -8,7 +8,7 @@ import com.IceCreamQAQ.Yu.loader.Loader
 import com.IceCreamQAQ.Yu.named
 import java.lang.reflect.Method
 
-abstract class ControllerLoader<T : ActionContext, R : RootRouterProcessFlowInfo<T>>(
+abstract class ControllerLoader<T : ActionContext, R : Router, RootRouterInfo : RootRouterProcessFlowInfo<T, R>>(
     val context: YuContext
 ) : Loader {
 
@@ -32,10 +32,10 @@ abstract class ControllerLoader<T : ActionContext, R : RootRouterProcessFlowInfo
     abstract fun postLoad()
 
 
-    abstract fun findRootRouter(name: String): R?
-    abstract fun controllerInfo(root: R): ControllerProcessFlowInfo<T>?
+    abstract fun findRootRouter(name: String): RootRouterInfo?
+    abstract fun controllerInfo(root: RootRouterInfo): ControllerProcessFlowInfo<T>?
     abstract fun actionToRouter(
-        rootRouter: RootRouter,
+        rootRouter: RootRouterInfo,
         controllerRouter: Router,
         actionMethod: Method
     ): ProcessInvoker<T>?
