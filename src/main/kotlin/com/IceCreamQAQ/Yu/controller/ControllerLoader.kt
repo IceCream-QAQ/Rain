@@ -66,8 +66,8 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
 
 
                 makeAction(rootRouter, controllerFlow, type, m, getter)
-                    ?.let { antion ->
-                        controllerFlow.actions.add(antion)
+                    ?.let { action ->
+                        controllerFlow.actions.add(action)
                         // 后续应该做出扫描 Action方法 所有注解，并扫描注解是否具有 BeforeBy 等注解，然后根据相应工厂类，创建 Before 等 Process。
                     }
             }
