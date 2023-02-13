@@ -25,6 +25,7 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
      *
      * 与上一代不同的是，新路由在根路由后新增了 ChannelRouter 作为通道分流。
      * 方便在同一根路由下直接构建 GET/POST 等不同通道的路由分流。
+     * 上代路由如果想实现通道分流则需要创建多个 RootRouter。
      *
      * 同时对上一代 Action 处理链路中的拦截器进行改进，改进为流程。
      * 保留上一代 Before，After，Catch 特性的同时，引入外部流程。
