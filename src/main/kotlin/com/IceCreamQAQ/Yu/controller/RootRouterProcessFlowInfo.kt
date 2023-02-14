@@ -1,8 +1,8 @@
 package com.IceCreamQAQ.Yu.controller
 
 open class RootRouterProcessFlowInfo<T : ActionContext, R : Router>(
-    val controllers: MutableList<ControllerProcessFlowInfo<T>> = arrayListOf(),
-    val channels: Map<String, R> = hashMapOf(),
+    open val controllers: MutableList<ControllerProcessFlowInfo<T>> = arrayListOf(),
+    open val channels: Map<String, R> = hashMapOf(),
     beforeProcesses: MutableList<ProcessInfo<T>> = arrayListOf(),
     afterProcesses: MutableList<ProcessInfo<T>> = arrayListOf(),
     catchProcesses: MutableList<ProcessInfo<T>> = arrayListOf()

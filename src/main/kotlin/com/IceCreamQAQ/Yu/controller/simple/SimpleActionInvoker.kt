@@ -9,10 +9,10 @@ import com.IceCreamQAQ.Yu.controller.special.SkipMe
 import com.IceCreamQAQ.Yu.toLowerCaseFirstOne
 
 open class SimpleActionInvoker<CTX : ActionContext>(
-    val action: ProcessInvoker<CTX>,
-    val beforeProcesses: Array<ProcessInvoker<CTX>>,
-    val aftersProcesses: Array<ProcessInvoker<CTX>>,
-    val catchsProcesses: Array<ProcessInvoker<CTX>>
+    open val action: ProcessInvoker<CTX>,
+    open val beforeProcesses: Array<ProcessInvoker<CTX>>,
+    open val aftersProcesses: Array<ProcessInvoker<CTX>>,
+    open val catchsProcesses: Array<ProcessInvoker<CTX>>
 ) : ActionInvoker<CTX> {
 
     override fun invoke(context: CTX): Boolean {

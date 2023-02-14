@@ -1,7 +1,7 @@
 package com.IceCreamQAQ.Yu.controller
 
 open class ActionProcessFlowInfo<CTX : ActionContext>(
-    val invoker: ActionInvoker<CTX>,
+    open val invoker: ActionInvoker<CTX>,
     beforeProcesses: MutableList<ProcessInfo<CTX>> = arrayListOf(),
     afterProcesses: MutableList<ProcessInfo<CTX>> = arrayListOf(),
     catchProcesses: MutableList<ProcessInfo<CTX>> = arrayListOf()
