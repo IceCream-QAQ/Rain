@@ -14,12 +14,9 @@ import java.lang.reflect.Method
  *
  * 路由做了基础的静态匹配与动态匹配分离。
  */
-open class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>, RootInfo : RootRouterProcessFlowInfo<CTX, ROT>>(
+abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>, RootInfo : RootRouterProcessFlowInfo<CTX, ROT>>(
     context: YuContext
 ) : ControllerLoader<CTX, ROT, RootInfo>(context) {
-    override fun postLoad() {
-        TODO("Not yet implemented")
-    }
 
     override fun findRootRouter(name: String): RootInfo? {
         TODO("Not yet implemented")
