@@ -14,7 +14,7 @@ import java.lang.reflect.Method
  *
  * 路由做了基础的静态匹配与动态匹配分离。
  */
-abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>, RootInfo : RootRouterProcessFlowInfo<CTX, ROT>>(
+abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>, RootInfo : RootRouterProcessFlowInfo<CTX, ROT>, PI : ProcessInvoker<CTX>>(
     context: YuContext
 ) : ControllerLoader<CTX, ROT, RootInfo>(context) {
 
@@ -27,27 +27,28 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         controllerClass: Class<*>,
         beforeMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ProcessInfo<CTX>? {
-        TODO("Not yet implemented")
-    }
+    ): ProcessInfo<CTX>? =
+        createMethodInvoker(controllerClass, beforeMethod, instanceGetter)
+            ?.let { ProcessInfo(beforeAnnotation.weight, beforeAnnotation.except, beforeAnnotation.only, it) }
+
 
     override fun makeAfter(
-        beforeAnnotation: After,
+        afterAnnotation: After,
         controllerClass: Class<*>,
         afterMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ProcessInfo<CTX>? {
-        TODO("Not yet implemented")
-    }
+    ): ProcessInfo<CTX>? =
+        createMethodInvoker(controllerClass, afterMethod, instanceGetter)
+            ?.let { ProcessInfo(afterAnnotation.weight, afterAnnotation.except, afterAnnotation.only, it) }
 
     override fun makeCatch(
-        beforeAnnotation: Catch,
+        catchAnnotation: Catch,
         controllerClass: Class<*>,
         catchMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ProcessInfo<CTX>? {
-        TODO("Not yet implemented")
-    }
+    ): ProcessInfo<CTX>? =
+        createCatchMethodInvoker(catchAnnotation.error.java, controllerClass, catchMethod, instanceGetter)
+            ?.let { ProcessInfo(catchAnnotation.weight, catchAnnotation.except, catchAnnotation.only, it) }
 
     override fun makeAction(
         rootRouter: RootInfo,
@@ -67,5 +68,18 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         TODO("Not yet implemented")
     }
 
+
+    abstract fun createMethodInvoker(
+        controllerClass: Class<*>,
+        targetMethod: Method,
+        instanceGetter: ControllerInstanceGetter
+    ): PI?
+
+    abstract fun createCatchMethodInvoker(
+        throwableType: Class<out Throwable>,
+        controllerClass: Class<*>,
+        targetMethod: Method,
+        instanceGetter: ControllerInstanceGetter
+    ): PI?
 
 }

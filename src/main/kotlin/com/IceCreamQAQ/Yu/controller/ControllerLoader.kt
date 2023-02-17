@@ -102,14 +102,14 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
     ): ProcessInfo<CTX>?
 
     abstract fun makeAfter(
-        beforeAnnotation: After,
+        afterAnnotation: After,
         controllerClass: Class<*>,
         afterMethod: Method,
         instanceGetter: ControllerInstanceGetter
     ): ProcessInfo<CTX>?
 
     abstract fun makeCatch(
-        beforeAnnotation: Catch,
+        catchAnnotation: Catch,
         controllerClass: Class<*>,
         catchMethod: Method,
         instanceGetter: ControllerInstanceGetter
