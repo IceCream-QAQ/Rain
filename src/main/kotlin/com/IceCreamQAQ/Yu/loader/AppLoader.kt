@@ -16,7 +16,6 @@ import com.IceCreamQAQ.Yu.named
 import com.IceCreamQAQ.Yu.util.findClassByPackage
 import com.IceCreamQAQ.Yu.util.getOrPut
 import com.IceCreamQAQ.Yu.util.type.RelType
-import javax.inject.Inject
 import javax.inject.Named
 
 open class AppLoader(
@@ -74,13 +73,12 @@ open class AppLoader(
                     }
                 }
             }
-
             registers.forEach { it.register(clazz) }
             searchLoadBy(clazz, clazz, loadItemsMap)
         }
 
         bindMap.mapMap { (clazz, binds) ->
-            NoInstanceClassContext(clazz).also { context.registerClass(it) } to binds
+            NoInstanceClassContext(context,clazz).also { context.registerClass(it) } to binds
         }.forEach { (ctx, binds) ->
             ctx.putBinds(binds.mapMap { (named, bindClass) -> named to context.findContext(bindClass) })
         }
