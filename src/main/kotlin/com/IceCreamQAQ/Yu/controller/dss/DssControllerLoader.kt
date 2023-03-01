@@ -7,7 +7,11 @@ import com.IceCreamQAQ.Yu.annotation.Catch
 import com.IceCreamQAQ.Yu.annotation.Path
 import com.IceCreamQAQ.Yu.controller.*
 import com.IceCreamQAQ.Yu.controller.dss.router.DssRouter
+import com.IceCreamQAQ.Yu.controller.dss.router.NamedVariableMatcher
+import com.IceCreamQAQ.Yu.controller.dss.router.RegexMatcher
+import com.IceCreamQAQ.Yu.controller.dss.router.RouterMatcher
 import com.IceCreamQAQ.Yu.di.YuContext
+import com.IceCreamQAQ.Yu.mapMap
 import java.lang.reflect.Method
 
 /** 动静分离 ControllerLoader
@@ -54,14 +58,85 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         annotation: Annotation?,
         controllerClass: Class<*>,
         instanceGetter: ControllerInstanceGetter
-    ): ControllerProcessFlowInfo<CTX,ROT>? {
-        TODO("Not yet implemented")
+    ): ControllerProcessFlowInfo<CTX, ROT>? {
+        val channels = controllerChannel(annotation, controllerClass)
+        val paths = controllerClass.annotation<Path>()?.value?.split("/")
+        val controllerRouterMap = channels.mapMap {
+            val channelRouter = getChannelRouter(root, it)
+            it to if (paths != null) {
+                var controllerRouter = channelRouter
+                paths.forEach { path ->
+                    val realPathBuilder = StringBuilder()
+                    val psb = StringBuilder()
+
+                    var csb = realPathBuilder
+                    var matchFlag = false
+                    var regexFlag = false
+
+                    var locationFlag = false
+
+                    val matchList = ArrayList<Pair<String, String?>>()
+                    var i = 0
+
+                    var cName = ""
+
+
+                    while (i < path.length) {
+                        var c = path[i]
+
+                        fun end() {
+                            if (c == '\\') c = path[++i]
+                            csb.append(c)
+                        }
+
+                        if (!matchFlag) {
+                            if (c == '{') {
+                                matchFlag = true
+                                csb = psb
+                            } else {
+                                locationFlag = true
+                                end()
+                            }
+                        } else {
+                            if (c == ':') {
+                                cName = psb.toString()
+                                psb.clear()
+                                regexFlag = true
+                            } else if (c == '}') {
+                                val (name, regex) = if (regexFlag) cName to psb.toString() else psb.toString() to ".*"
+                                matchList.add(name to regex)
+                                psb.clear()
+                                matchFlag = false
+                                regexFlag = false
+                                csb = realPathBuilder
+                                realPathBuilder.append("($regex)")
+                            } else end()
+                        }
+                        i++
+                    }
+
+                    controllerRouter = if (matchList.isEmpty()) getSubStaticRouter(controllerRouter, path)
+                    else {
+                        getSubDynamicRouter(channelRouter,
+                            if (!locationFlag && matchList.size == 1 && matchList[0].second == ".*")
+                                NamedVariableMatcher(matchList[0].first)
+                            else RegexMatcher(
+                                realPathBuilder.toString(),
+                                matchList.map { item -> item.first }.toTypedArray()
+                            )
+                        )
+                    }
+                }
+                controllerRouter
+            } else channelRouter
+        }
+        return ControllerProcessFlowInfo(controllerRouterMap)
     }
 
 
     override fun makeAction(
         rootRouter: RootInfo,
-        controllerFlow: ControllerProcessFlowInfo<CTX,ROT>,
+        controllerFlow: ControllerProcessFlowInfo<CTX, ROT>,
         controllerClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter
@@ -69,9 +144,11 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         TODO("Not yet implemented")
     }
 
-
-    abstract fun controllerChannel(annotation: Annotation?, controllerClass: Class<*>): Array<String>
-    abstract fun actionChannel(actionMethod: Method): Array<String>?
+    abstract fun getChannelRouter(root: RootInfo, channel: String): ROT
+    abstract fun getSubStaticRouter(router: ROT, subPath: String): ROT
+    abstract fun getSubDynamicRouter(router: ROT, matcher: RouterMatcher<CTX>): ROT
+    abstract fun controllerChannel(annotation: Annotation?, controllerClass: Class<*>): List<String>
+    abstract fun actionChannel(actionMethod: Method): List<String>?
     abstract fun createMethodInvoker(
         controllerClass: Class<*>,
         targetMethod: Method,
