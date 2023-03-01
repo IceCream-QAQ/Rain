@@ -1,8 +1,10 @@
 package com.IceCreamQAQ.Yu.controller.dss
 
+import com.IceCreamQAQ.Yu.annotation
 import com.IceCreamQAQ.Yu.annotation.After
 import com.IceCreamQAQ.Yu.annotation.Before
 import com.IceCreamQAQ.Yu.annotation.Catch
+import com.IceCreamQAQ.Yu.annotation.Path
 import com.IceCreamQAQ.Yu.controller.*
 import com.IceCreamQAQ.Yu.controller.dss.router.DssRouter
 import com.IceCreamQAQ.Yu.di.YuContext
@@ -18,9 +20,6 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
     context: YuContext
 ) : ControllerLoader<CTX, ROT, RootInfo>(context) {
 
-    override fun findRootRouter(name: String): RootInfo? {
-        TODO("Not yet implemented")
-    }
 
     override fun makeBefore(
         beforeAnnotation: Before,
@@ -50,9 +49,19 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         createCatchMethodInvoker(catchAnnotation.error.java, controllerClass, catchMethod, instanceGetter)
             ?.let { ProcessInfo(catchAnnotation.weight, catchAnnotation.except, catchAnnotation.only, it) }
 
+    override fun controllerInfo(
+        root: RootInfo,
+        annotation: Annotation?,
+        controllerClass: Class<*>,
+        instanceGetter: ControllerInstanceGetter
+    ): ControllerProcessFlowInfo<CTX,ROT>? {
+        TODO("Not yet implemented")
+    }
+
+
     override fun makeAction(
         rootRouter: RootInfo,
-        controllerFlow: ControllerProcessFlowInfo<CTX>,
+        controllerFlow: ControllerProcessFlowInfo<CTX,ROT>,
         controllerClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter
@@ -60,15 +69,9 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         TODO("Not yet implemented")
     }
 
-    override fun controllerInfo(
-        root: RootInfo,
-        controllerClass: Class<*>,
-        instanceGetter: ControllerInstanceGetter
-    ): ControllerProcessFlowInfo<CTX>? {
-        TODO("Not yet implemented")
-    }
 
-
+    abstract fun controllerChannel(annotation: Annotation?, controllerClass: Class<*>): Array<String>
+    abstract fun actionChannel(actionMethod: Method): Array<String>?
     abstract fun createMethodInvoker(
         controllerClass: Class<*>,
         targetMethod: Method,

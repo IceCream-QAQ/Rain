@@ -44,7 +44,7 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
             val getter = ControllerInstanceGetter { instance }
 
             val rootRouter = findRootRouter(it.clazz.named) ?: return@forEach
-            val controllerFlow = controllerInfo(rootRouter, type, getter) ?: return@forEach
+            val controllerFlow = controllerInfo(rootRouter, it.annotation, type, getter) ?: return@forEach
 
             // 后续应该做出扫描 Controller类 所有注解，并扫描注解是否具有 BeforeBy 等注解，然后根据相应工厂类，创建 Before 等 Process。
 
@@ -82,13 +82,14 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
     abstract fun findRootRouter(name: String): RootInfo?
     abstract fun controllerInfo(
         root: RootInfo,
+        annotation: Annotation?,
         controllerClass: Class<*>,
         instanceGetter: ControllerInstanceGetter
-    ): ControllerProcessFlowInfo<CTX>?
+    ): ControllerProcessFlowInfo<CTX,ROT>?
 
     abstract fun makeAction(
         rootRouter: RootInfo,
-        controllerFlow: ControllerProcessFlowInfo<CTX>,
+        controllerFlow: ControllerProcessFlowInfo<CTX,ROT>,
         controllerClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter
