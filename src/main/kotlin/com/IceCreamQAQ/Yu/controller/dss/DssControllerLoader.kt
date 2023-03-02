@@ -98,26 +98,33 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
                                 end()
                             }
                         } else {
-                            if (c == ':') {
-                                cName = psb.toString()
-                                psb.clear()
-                                regexFlag = true
-                            } else if (c == '}') {
-                                val (name, regex) = if (regexFlag) cName to psb.toString() else psb.toString() to ".*"
-                                matchList.add(name to regex)
-                                psb.clear()
-                                matchFlag = false
-                                regexFlag = false
-                                csb = realPathBuilder
-                                realPathBuilder.append("($regex)")
-                            } else end()
+                            when (c) {
+                                ':' -> {
+                                    cName = psb.toString()
+                                    psb.clear()
+                                    regexFlag = true
+                                }
+
+                                '}' -> {
+                                    val (name, regex) = if (regexFlag) cName to psb.toString() else psb.toString() to ".*"
+                                    matchList.add(name to regex)
+                                    psb.clear()
+                                    matchFlag = false
+                                    regexFlag = false
+                                    csb = realPathBuilder
+                                    realPathBuilder.append("($regex)")
+                                }
+
+                                else -> end()
+                            }
                         }
                         i++
                     }
 
                     controllerRouter = if (matchList.isEmpty()) getSubStaticRouter(controllerRouter, path)
                     else {
-                        getSubDynamicRouter(channelRouter,
+                        getSubDynamicRouter(
+                            channelRouter,
                             if (!locationFlag && matchList.size == 1 && matchList[0].second == ".*")
                                 NamedVariableMatcher(matchList[0].first)
                             else RegexMatcher(
@@ -130,7 +137,7 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
                 controllerRouter
             } else channelRouter
         }
-        return ControllerProcessFlowInfo(controllerRouterMap)
+        return ControllerProcessFlowInfo(channels, controllerRouterMap)
     }
 
 
@@ -148,7 +155,7 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
     abstract fun getSubStaticRouter(router: ROT, subPath: String): ROT
     abstract fun getSubDynamicRouter(router: ROT, matcher: RouterMatcher<CTX>): ROT
     abstract fun controllerChannel(annotation: Annotation?, controllerClass: Class<*>): List<String>
-    abstract fun actionChannel(actionMethod: Method): List<String>?
+    abstract fun actionInfo(controllerChannel: List<String>, actionMethod: Method): Pair<String, List<String>>?
     abstract fun createMethodInvoker(
         controllerClass: Class<*>,
         targetMethod: Method,
