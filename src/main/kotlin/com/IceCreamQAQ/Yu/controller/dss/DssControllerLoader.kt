@@ -52,6 +52,65 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         createCatchMethodInvoker(catchAnnotation.error.java, controllerClass, catchMethod, instanceGetter)
             ?.let { ProcessInfo(catchAnnotation.weight, catchAnnotation.except, catchAnnotation.only, it) }
 
+    open fun <R> makePathMatcher(path: String, body: (path: String, matchers: List<Pair<String, String?>>) -> R): R {
+        val realPathBuilder = StringBuilder()
+        val psb = StringBuilder()
+
+        var csb = realPathBuilder
+        var matchFlag = false
+        var regexFlag = false
+
+        var locationFlag = false
+
+        val matchList = ArrayList<Pair<String, String?>>()
+        var i = 0
+
+        var cName = ""
+
+
+        while (i < path.length) {
+            var c = path[i]
+
+            fun end() {
+                if (c == '\\') c = path[++i]
+                csb.append(c)
+            }
+
+            if (!matchFlag) {
+                if (c == '{') {
+                    matchFlag = true
+                    csb = psb
+                } else {
+                    locationFlag = true
+                    end()
+                }
+            } else {
+                when (c) {
+                    ':' -> {
+                        cName = psb.toString()
+                        psb.clear()
+                        regexFlag = true
+                    }
+
+                    '}' -> {
+                        val (name, regex) = if (regexFlag) cName to psb.toString() else psb.toString() to ".*"
+                        matchList.add(name to regex)
+                        psb.clear()
+                        matchFlag = false
+                        regexFlag = false
+                        csb = realPathBuilder
+                        realPathBuilder.append("($regex)")
+                    }
+
+                    else -> end()
+                }
+            }
+            i++
+        }
+
+        return body(if (locationFlag) realPathBuilder.toString() else "", matchList)
+    }
+
     override fun controllerInfo(
         root: RootInfo,
         annotation: Annotation?,
@@ -60,60 +119,17 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
     ): ControllerProcessFlowInfo<CTX, ROT>? {
         val channels = controllerChannel(annotation, controllerClass)
         var controllerRouter = root.router
-        controllerClass.annotation<Path>()?.value?.split("/")?.forEach { path ->
-            val realPathBuilder = StringBuilder()
-            val psb = StringBuilder()
-
-            var csb = realPathBuilder
-            var matchFlag = false
-            var regexFlag = false
-
-            var locationFlag = false
-
-            val matchList = ArrayList<Pair<String, String?>>()
-            var i = 0
-
-            var cName = ""
-
-
-            while (i < path.length) {
-                var c = path[i]
-
-                fun end() {
-                    if (c == '\\') c = path[++i]
-                    csb.append(c)
+        controllerClass.annotation<Path>()?.value?.split("/")?.forEach {
+            controllerRouter = makePathMatcher(it) { path, matchers ->
+                if (matchers.isEmpty())    getSubStaticRouter(controllerRouter, path)
+                else {
+                    getSubDynamicRouter(
+                        controllerRouter,
+                        if (path.isEmpty() && matchers.size == 1 && matchers[0].second == ".*")
+                            NamedVariableMatcher(matchers[0].first)
+                        else RegexMatcher(path, matchers.map { item -> item.first }.toTypedArray())
+                    )
                 }
-
-                if (!matchFlag) {
-                    if (c == '{') {
-                        matchFlag = true
-                        csb = psb
-                    } else {
-                        locationFlag = true
-                        end()
-                    }
-                } else {
-                    when (c) {
-                        ':' -> {
-                            cName = psb.toString()
-                            psb.clear()
-                            regexFlag = true
-                        }
-
-                        '}' -> {
-                            val (name, regex) = if (regexFlag) cName to psb.toString() else psb.toString() to ".*"
-                            matchList.add(name to regex)
-                            psb.clear()
-                            matchFlag = false
-                            regexFlag = false
-                            csb = realPathBuilder
-                            realPathBuilder.append("($regex)")
-                        }
-
-                        else -> end()
-                    }
-                }
-                i++
             }
         }
 
