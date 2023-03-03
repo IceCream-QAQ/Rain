@@ -52,7 +52,7 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         createCatchMethodInvoker(catchAnnotation.error.java, controllerClass, catchMethod, instanceGetter)
             ?.let { ProcessInfo(catchAnnotation.weight, catchAnnotation.except, catchAnnotation.only, it) }
 
-    open fun <R> makePathMatcher(path: String, body: (path: String, matchers: List<Pair<String, String?>>) -> R): R {
+    open fun makePathMatcher(path: String): Pair<String, ArrayList<Pair<String, String?>>> {
         val realPathBuilder = StringBuilder()
         val psb = StringBuilder()
 
@@ -108,7 +108,7 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
             i++
         }
 
-        return body(if (locationFlag) realPathBuilder.toString() else "", matchList)
+        return (if (locationFlag) realPathBuilder.toString() else "") to matchList
     }
 
     override fun controllerInfo(
@@ -120,8 +120,8 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         val channels = controllerChannel(annotation, controllerClass)
         var controllerRouter = root.router
         controllerClass.annotation<Path>()?.value?.split("/")?.forEach {
-            controllerRouter = makePathMatcher(it) { path, matchers ->
-                if (matchers.isEmpty())    getSubStaticRouter(controllerRouter, path)
+            controllerRouter = makePathMatcher(it).let { (path, matchers) ->
+                if (matchers.isEmpty()) getSubStaticRouter(controllerRouter, path)
                 else {
                     getSubDynamicRouter(
                         controllerRouter,
