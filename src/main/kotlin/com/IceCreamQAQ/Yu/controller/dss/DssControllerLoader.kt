@@ -217,7 +217,7 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         beforeProcesses: Array<ProcessInfo<CTX>>,
         afterProcesses: Array<ProcessInfo<CTX>>,
         catchProcesses: Array<ProcessInfo<CTX>>,
-    ): ActionInvoker<CTX>
+    ): DssActionInvoker<CTX>
 
     abstract fun createMethodInvoker(
         controllerClass: Class<*>,
