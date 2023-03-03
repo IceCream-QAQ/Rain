@@ -6,12 +6,10 @@ import com.IceCreamQAQ.Yu.annotation.Before
 import com.IceCreamQAQ.Yu.annotation.Catch
 import com.IceCreamQAQ.Yu.annotation.Path
 import com.IceCreamQAQ.Yu.controller.*
-import com.IceCreamQAQ.Yu.controller.dss.router.DssRouter
-import com.IceCreamQAQ.Yu.controller.dss.router.NamedVariableMatcher
-import com.IceCreamQAQ.Yu.controller.dss.router.RegexMatcher
-import com.IceCreamQAQ.Yu.controller.dss.router.RouterMatcher
+import com.IceCreamQAQ.Yu.controller.dss.router.*
 import com.IceCreamQAQ.Yu.di.YuContext
 import java.lang.reflect.Method
+import kotlin.reflect.KProperty1
 
 /** 动静分离 ControllerLoader
  * 这是一个简单的 Controller 实现，用以技术性验证。
@@ -143,7 +141,7 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         controllerClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ActionProcessFlowInfo<CTX, ROT>? {
+    ): ActionProcessFlowInfo<CTX>? {
         TODO("Not yet implemented")
     }
 
