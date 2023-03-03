@@ -11,8 +11,8 @@ open class DssRouter<CTX : PathActionContext>(
     val staticSubrouter = HashMap<String, DssRouter<CTX>>()
     val dynamicSubrouter = ArrayList<DynamicRouter<CTX>>()
 
-    val staticActions = HashMap<String, MutableList<ActionInvoker<PathActionContext>>>()
-    val dynamicActions = ArrayList<Pair<RouterMatcher<CTX>, MutableList<ActionInvoker<PathActionContext>>>>()
+    val staticActions = HashMap<String, MutableList<ActionInvoker<CTX>>>()
+    val dynamicActions = ArrayList<Pair<RouterMatcher<CTX>, MutableList<ActionInvoker<CTX>>>>()
 
     operator fun invoke(context: CTX): Boolean {
         val path = context.path[level]

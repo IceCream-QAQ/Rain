@@ -142,13 +142,83 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter
     ): ActionProcessFlowInfo<CTX>? {
-        TODO("Not yet implemented")
+        var (pathString, channels) = actionInfo(controllerFlow.controllerChannels, actionMethod) ?: return null
+        val rootFlag = if (pathString.first() == '/') {
+            pathString = pathString.substring(1)
+            true
+        } else false
+
+
+        val actionName = actionMethod.name
+
+        val paths = pathString.split("/")
+
+        val actionRouter = (if (rootFlag) rootRouter.router else controllerFlow.controllerRouter)
+
+        val actionMatchers = paths.map {
+            makePathMatcher(it).let { (path, matchers) ->
+                if (path.isEmpty()) StaticActionMatcher<CTX>(it)
+                else if (path.isEmpty() && matchers.size == 1 && matchers[0].second == ".*")
+                    NamedVariableMatcher(matchers[0].first)
+                else RegexMatcher(path, matchers.map { item -> item.first }.toTypedArray())
+
+            }
+        }
+
+        val actionFlow = ActionProcessFlowInfo<CTX>()
+
+        fun checkPf(property: KProperty1<ProcessFlowInfo<CTX>, MutableList<ProcessInfo<CTX>>>): Array<ProcessInfo<CTX>> =
+            ArrayList<ProcessInfo<CTX>>()
+                .apply {
+                    val checkPi = { it: ProcessInfo<CTX> ->
+                        if (actionName !in it.except && it.only.isNotEmpty() && actionName in it.only) add(it)
+                    }
+                    property.get(rootRouter).forEach(checkPi)
+                    property.get(controllerFlow).forEach(checkPi)
+                    property.get(actionFlow).forEach(checkPi)
+                    sortBy { it.priority }
+                }
+                .toTypedArray()
+
+        actionFlow.creator = ActionInvokerCreator {
+            createActionInvoker(
+                actionRouter.level + 1,
+                actionMatchers.subList(1, actionMatchers.size),
+                checkPf(ProcessFlowInfo<CTX>::beforeProcesses),
+                checkPf(ProcessFlowInfo<CTX>::afterProcesses),
+                checkPf(ProcessFlowInfo<CTX>::catchProcesses)
+            ).apply {
+                actionMatchers.first().let { first ->
+                    if (first is StaticActionMatcher)
+                        actionRouter.staticActions.getOrPut(paths[0]) { ArrayList() }.add(this)
+                    else
+                        let {
+                            actionRouter.dynamicActions.firstOrNull { it.first == first }
+                                ?: let {
+                                    first to ArrayList<ActionInvoker<CTX>>()
+                                }.apply { actionRouter.dynamicActions.add(this) }
+                        }.second.add(this)
+                }
+
+            }
+        }
+
+        return actionFlow
     }
 
     abstract fun getSubStaticRouter(router: ROT, subPath: String): ROT
     abstract fun getSubDynamicRouter(router: ROT, matcher: RouterMatcher<CTX>): ROT
     abstract fun controllerChannel(annotation: Annotation?, controllerClass: Class<*>): List<String>
     abstract fun actionInfo(controllerChannel: List<String>, actionMethod: Method): Pair<String, List<String>>?
+
+    abstract fun createActionInvoker(
+        level: Int,
+        matchers: List<RouterMatcher<CTX>>,
+        beforeProcesses: Array<ProcessInfo<CTX>>,
+        afterProcesses: Array<ProcessInfo<CTX>>,
+        catchProcesses: Array<ProcessInfo<CTX>>,
+    ): ActionInvoker<CTX>
+
     abstract fun createMethodInvoker(
         controllerClass: Class<*>,
         targetMethod: Method,
