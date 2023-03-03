@@ -92,7 +92,7 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
         controllerClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ActionProcessFlowInfo<CTX>?
+    ): ActionProcessFlowInfo<CTX,ROT>?
 
     abstract fun makeBefore(
         beforeAnnotation: Before,

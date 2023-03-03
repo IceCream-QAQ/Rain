@@ -115,19 +115,6 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
                 }
                 i++
             }
-
-            controllerRouter = if (matchList.isEmpty()) getSubStaticRouter(controllerRouter, path)
-            else {
-                getSubDynamicRouter(
-                    controllerRouter,
-                    if (!locationFlag && matchList.size == 1 && matchList[0].second == ".*")
-                        NamedVariableMatcher(matchList[0].first)
-                    else RegexMatcher(
-                        realPathBuilder.toString(),
-                        matchList.map { item -> item.first }.toTypedArray()
-                    )
-                )
-            }
         }
 
         return ControllerProcessFlowInfo(channels, controllerRouter)
@@ -140,11 +127,10 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         controllerClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ActionProcessFlowInfo<CTX>? {
+    ): ActionProcessFlowInfo<CTX, ROT>? {
         TODO("Not yet implemented")
     }
 
-    abstract fun getChannelRouter(root: RootInfo, channel: String): ROT
     abstract fun getSubStaticRouter(router: ROT, subPath: String): ROT
     abstract fun getSubDynamicRouter(router: ROT, matcher: RouterMatcher<CTX>): ROT
     abstract fun controllerChannel(annotation: Annotation?, controllerClass: Class<*>): List<String>
