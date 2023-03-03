@@ -17,7 +17,7 @@ import kotlin.reflect.KProperty1
  *
  * 路由做了基础的静态匹配与动态匹配分离。
  */
-abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>, RootInfo : RootRouterProcessFlowInfo<CTX, ROT>, PI : ProcessInvoker<CTX>>(
+abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>, RootInfo : RootRouterProcessFlowInfo<CTX, ROT>>(
     context: YuContext
 ) : ControllerLoader<CTX, ROT, RootInfo>(context) {
 
@@ -153,13 +153,13 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         controllerClass: Class<*>,
         targetMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): PI?
+    ): ProcessInfo<CTX>?
 
     abstract fun createCatchMethodInvoker(
         throwableType: Class<out Throwable>,
         controllerClass: Class<*>,
         targetMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): PI?
+    ): ProcessInfo<CTX>?
 
 }
