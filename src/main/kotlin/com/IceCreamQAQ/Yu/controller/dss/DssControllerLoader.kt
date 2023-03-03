@@ -153,13 +153,13 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         controllerClass: Class<*>,
         targetMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ProcessInfo<CTX>?
+    ): ProcessInvoker<CTX>?
 
     abstract fun createCatchMethodInvoker(
         throwableType: Class<out Throwable>,
         controllerClass: Class<*>,
         targetMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ProcessInfo<CTX>?
+    ): ProcessInvoker<CTX>?
 
 }
