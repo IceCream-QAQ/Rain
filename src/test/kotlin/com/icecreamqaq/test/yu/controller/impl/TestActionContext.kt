@@ -1,4 +1,5 @@
 package com.icecreamqaq.test.yu.controller.impl
 
-class TestActionContext {
-}
+import com.IceCreamQAQ.Yu.controller.dss.PathActionContext
+
+class TestActionContext(val channel: String, path: Array<String>) : PathActionContext(path)

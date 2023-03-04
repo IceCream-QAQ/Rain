@@ -4,7 +4,6 @@ import com.IceCreamQAQ.Yu.annotation
 import com.IceCreamQAQ.Yu.controller.*
 import com.IceCreamQAQ.Yu.controller.dss.DssActionInvoker
 import com.IceCreamQAQ.Yu.controller.dss.DssControllerLoader
-import com.IceCreamQAQ.Yu.controller.dss.PathActionContext
 import com.IceCreamQAQ.Yu.controller.dss.router.DssRouter
 import com.IceCreamQAQ.Yu.controller.dss.router.DynamicRouter
 import com.IceCreamQAQ.Yu.controller.dss.router.RouterMatcher
@@ -13,30 +12,30 @@ import java.lang.reflect.Method
 
 class TestControllerLoader(
     context: YuContext
-) : DssControllerLoader<PathActionContext, DssRouter<PathActionContext>, RootRouterProcessFlowInfo<PathActionContext, DssRouter<PathActionContext>>>(
+) : DssControllerLoader<TestActionContext, DssRouter<TestActionContext>, RootRouterProcessFlowInfo<TestActionContext, DssRouter<TestActionContext>>>(
     context
 ) {
 
-    val root = RootRouterProcessFlowInfo<PathActionContext, DssRouter<PathActionContext>>(DssRouter(0))
+    val root = RootRouterProcessFlowInfo<TestActionContext, DssRouter<TestActionContext>>(DssRouter(0))
 
-    lateinit var rootRouter: RootRouter<DssRouter<PathActionContext>>
+    lateinit var rootRouter: RootRouter<DssRouter<TestActionContext>>
 
-    override fun findRootRouter(name: String): RootRouterProcessFlowInfo<PathActionContext, DssRouter<PathActionContext>> =
+    override fun findRootRouter(name: String): RootRouterProcessFlowInfo<TestActionContext, DssRouter<TestActionContext>> =
         root
 
 
     override fun getSubStaticRouter(
-        router: DssRouter<PathActionContext>,
+        router: DssRouter<TestActionContext>,
         subPath: String
-    ): DssRouter<PathActionContext> =
+    ): DssRouter<TestActionContext> =
         router.staticSubrouter.getOrPut(subPath) {
             DssRouter(router.level + 1)
         }
 
     override fun getSubDynamicRouter(
-        router: DssRouter<PathActionContext>,
-        matcher: RouterMatcher<PathActionContext>
-    ): DssRouter<PathActionContext> =
+        router: DssRouter<TestActionContext>,
+        matcher: RouterMatcher<TestActionContext>
+    ): DssRouter<TestActionContext> =
         let {
             router.dynamicSubrouter.firstOrNull { it.matcher == matcher }
                 ?: DynamicRouter(matcher, DssRouter(router.level + 1))
@@ -59,7 +58,7 @@ class TestControllerLoader(
         controllerClass: Class<*>,
         targetMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ProcessInvoker<PathActionContext> =
+    ): ProcessInvoker<TestActionContext> =
         TestMethodInvoker(targetMethod, instanceGetter)
 
     override fun createCatchMethodInvoker(
@@ -67,21 +66,22 @@ class TestControllerLoader(
         controllerClass: Class<*>,
         targetMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ProcessInvoker<PathActionContext> =
+    ): ProcessInvoker<TestActionContext> =
         TestCatchMethodInvoker(targetMethod, instanceGetter, throwableType)
 
     override fun createActionInvoker(
         channels: List<String>,
         level: Int,
-        matchers: List<RouterMatcher<PathActionContext>>,
+        matchers: List<RouterMatcher<TestActionContext>>,
         actionClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter,
-        beforeProcesses: Array<ProcessInvoker<PathActionContext>>,
-        afterProcesses: Array<ProcessInvoker<PathActionContext>>,
-        catchProcesses: Array<ProcessInvoker<PathActionContext>>
-    ): DssActionInvoker<PathActionContext> =
-        DssActionInvoker(
+        beforeProcesses: Array<ProcessInvoker<TestActionContext>>,
+        afterProcesses: Array<ProcessInvoker<TestActionContext>>,
+        catchProcesses: Array<ProcessInvoker<TestActionContext>>
+    ): DssActionInvoker<TestActionContext> =
+        TestActionInvoker(
+            channels,
             level,
             matchers,
             TestMethodInvoker(actionMethod, instanceGetter),

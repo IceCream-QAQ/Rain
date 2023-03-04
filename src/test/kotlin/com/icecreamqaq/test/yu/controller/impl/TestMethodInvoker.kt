@@ -8,12 +8,12 @@ import java.lang.reflect.Method
 open class TestMethodInvoker(
     method: Method,
     instance: ControllerInstanceGetter
-) : SimpleKJReflectMethodInvoker<PathActionContext, PathActionContext.() -> Any?>(method, instance) {
-    override fun initParam(params: Array<MethodParam<PathActionContext.() -> Any?>>) {
+) : SimpleKJReflectMethodInvoker<TestActionContext, TestActionContext.() -> Any?>(method, instance) {
+    override fun initParam(params: Array<MethodParam<TestActionContext.() -> Any?>>) {
         params.forEach { it.attachment = { saves[it.name] } }
     }
 
-    override fun getParam(param: MethodParam<PathActionContext.() -> Any?>, context: PathActionContext): Any? =
+    override fun getParam(param: MethodParam<TestActionContext.() -> Any?>, context: TestActionContext): Any? =
         param.attachment?.invoke(context)
 
 }
