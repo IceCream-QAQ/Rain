@@ -91,7 +91,7 @@ class TestControllerLoader(
         )
 
     override fun postLoad() {
-        val actionList = ArrayList<ActionInfo>()
+        val actionList = ArrayList<ActionInfo<TestActionContext>>()
         root.controllers.forEach {
             it.actions.forEach {
                 actionList.add(
