@@ -131,7 +131,7 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
             }
         }
 
-        return ControllerProcessFlowInfo(channels, controllerRouter)
+        return ControllerProcessFlowInfo(controllerClass, channels, controllerRouter)
     }
 
 
@@ -165,7 +165,7 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
             }
         }
 
-        val actionFlow = ActionProcessFlowInfo<CTX>()
+        val actionFlow = ActionProcessFlowInfo<CTX>(controllerClass, actionMethod)
 
         fun checkPf(property: KProperty1<ProcessFlowInfo<CTX>, MutableList<ProcessInfo<CTX>>>): Array<ProcessInvoker<CTX>> =
             ArrayList<ProcessInfo<CTX>>()
