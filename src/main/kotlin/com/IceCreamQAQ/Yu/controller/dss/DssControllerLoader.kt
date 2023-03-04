@@ -183,8 +183,10 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
 
         actionFlow.creator = ActionInvokerCreator {
             createActionInvoker(
+                channels,
                 actionRouter.level + 1,
                 actionMatchers.subList(1, actionMatchers.size),
+                controllerClass,
                 actionMethod,
                 instanceGetter,
                 checkPf(ProcessFlowInfo<CTX>::beforeProcesses),
@@ -215,8 +217,10 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
     abstract fun actionInfo(controllerChannel: List<String>, actionMethod: Method): Pair<String, List<String>>?
 
     abstract fun createActionInvoker(
+        channels: List<String>,
         level: Int,
         matchers: List<RouterMatcher<CTX>>,
+        actionClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter,
         beforeProcesses: Array<ProcessInvoker<CTX>>,

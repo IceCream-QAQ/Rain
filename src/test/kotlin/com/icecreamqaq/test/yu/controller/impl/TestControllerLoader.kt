@@ -71,8 +71,10 @@ class TestControllerLoader(
         TestCatchMethodInvoker(targetMethod, instanceGetter, throwableType)
 
     override fun createActionInvoker(
+        channels: List<String>,
         level: Int,
         matchers: List<RouterMatcher<PathActionContext>>,
+        actionClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter,
         beforeProcesses: Array<ProcessInvoker<PathActionContext>>,
