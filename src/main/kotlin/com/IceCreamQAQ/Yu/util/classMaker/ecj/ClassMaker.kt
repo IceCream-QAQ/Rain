@@ -1,7 +1,6 @@
 package com.IceCreamQAQ.Yu.util.classMaker.ecj
 
 import com.IceCreamQAQ.Yu.annotation.Action
-import com.IceCreamQAQ.Yu.annotation.DefaultController
 import com.IceCreamQAQ.Yu.cache.EhcacheHelp
 import com.IceCreamQAQ.Yu.di.YuContext
 import com.IceCreamQAQ.Yu.loader.AppClassloader
@@ -179,7 +178,7 @@ fun <T> makeClass(
 fun main() {
 
     makeClass<Any>("com.IceCreamQAQ.make.test.Test") {
-        annotation<DefaultController>()
+//        annotation<DefaultController>()
 
         field<EhcacheHelp<String>>("sessionContext") {
             annotation<Inject>()
