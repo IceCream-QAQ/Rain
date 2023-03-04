@@ -167,7 +167,7 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
 
         val actionFlow = ActionProcessFlowInfo<CTX>()
 
-        fun checkPf(property: KProperty1<ProcessFlowInfo<CTX>, MutableList<ProcessInfo<CTX>>>): Array<ProcessInfo<CTX>> =
+        fun checkPf(property: KProperty1<ProcessFlowInfo<CTX>, MutableList<ProcessInfo<CTX>>>): Array<ProcessInvoker<CTX>> =
             ArrayList<ProcessInfo<CTX>>()
                 .apply {
                     val checkPi = { it: ProcessInfo<CTX> ->
@@ -178,12 +178,15 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
                     property.get(actionFlow).forEach(checkPi)
                     sortBy { it.priority }
                 }
+                .map { it.invoker }
                 .toTypedArray()
 
         actionFlow.creator = ActionInvokerCreator {
             createActionInvoker(
                 actionRouter.level + 1,
                 actionMatchers.subList(1, actionMatchers.size),
+                actionMethod,
+                instanceGetter,
                 checkPf(ProcessFlowInfo<CTX>::beforeProcesses),
                 checkPf(ProcessFlowInfo<CTX>::afterProcesses),
                 checkPf(ProcessFlowInfo<CTX>::catchProcesses)
@@ -214,9 +217,11 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
     abstract fun createActionInvoker(
         level: Int,
         matchers: List<RouterMatcher<CTX>>,
-        beforeProcesses: Array<ProcessInfo<CTX>>,
-        afterProcesses: Array<ProcessInfo<CTX>>,
-        catchProcesses: Array<ProcessInfo<CTX>>,
+        actionMethod: Method,
+        instanceGetter: ControllerInstanceGetter,
+        beforeProcesses: Array<ProcessInvoker<CTX>>,
+        afterProcesses: Array<ProcessInvoker<CTX>>,
+        catchProcesses: Array<ProcessInvoker<CTX>>,
     ): DssActionInvoker<CTX>
 
     abstract fun createMethodInvoker(
