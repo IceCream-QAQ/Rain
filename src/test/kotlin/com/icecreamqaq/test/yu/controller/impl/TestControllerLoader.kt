@@ -104,7 +104,6 @@ class TestControllerLoader(
             }
         }
         rootRouter = RootRouter(root.router, actionList)
-        println(rootRouter)
     }
 
 
