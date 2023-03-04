@@ -44,7 +44,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
         var attachment: ATT? = null
     }
 
-    lateinit var invoker: () -> Any?
+    lateinit var invoker: (CTX) -> Any?
 
     val resultFlag = method.returnType == Unit::class.javaPrimitiveType
 
@@ -66,12 +66,12 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
                 )
             }.also { initParam(it.toTypedArray()) }
                 .let {
-                    invoker = {
+                    invoker = { context ->
                         val paramMap = HashMap<KParameter, Any?>(kFun.parameters.size)
                         paramMap[instanceParam!!] = instance()
                         it.forEach {
                             paramMap[it.kReflectParam!!] =
-                                getParam(it)
+                                getParam(it, context)
                                     .also { v -> if (v == null && !it.nullable && !it.optional) error("") }
                         }
                         kFun.callBy(paramMap)
@@ -89,10 +89,10 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
             )
         }.also { initParam(it.toTypedArray()) }
             .let {
-                invoker = {
+                invoker = { context ->
                     method.invoke(
                         instance(),
-                        it.arrayMap { getParam(it).apply { if (this == null && !it.nullable) error("") } }
+                        it.arrayMap { getParam(it, context).apply { if (this == null && !it.nullable) error("") } }
                     )
                 }
             }
@@ -100,11 +100,11 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
     }
 
     abstract fun initParam(params: Array<MethodParam<ATT>>)
-    abstract fun getParam(param: MethodParam<ATT>): Any?
+    abstract fun getParam(param: MethodParam<ATT>, context: CTX): Any?
 
     override fun invoke(context: CTX): Any? {
-        if (resultFlag) return invoker()
-        invoker()
+        if (resultFlag) return invoker(context)
+        invoker(context)
         return null
     }
 
