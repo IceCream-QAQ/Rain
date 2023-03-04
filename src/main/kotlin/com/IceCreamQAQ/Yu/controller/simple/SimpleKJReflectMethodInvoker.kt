@@ -46,7 +46,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
 
     lateinit var invoker: (CTX) -> Any?
 
-    val resultFlag = method.returnType == Unit::class.javaPrimitiveType
+    val resultFlag = method.returnType.name != "void"
 
     init {
         method.kotlinFunction?.let { kFun ->
