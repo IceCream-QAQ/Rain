@@ -18,7 +18,7 @@ class TestControllerLoader(
 
     val root = RootRouterProcessFlowInfo<TestActionContext, DssRouter<TestActionContext>>(DssRouter(0))
 
-    lateinit var rootRouter: RootRouter<DssRouter<TestActionContext>>
+    lateinit var rootRouter: RootRouter<TestActionContext,DssRouter<TestActionContext>>
 
     override fun findRootRouter(name: String): RootRouterProcessFlowInfo<TestActionContext, DssRouter<TestActionContext>> =
         root
