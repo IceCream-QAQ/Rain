@@ -157,7 +157,7 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
 
         val actionMatchers = paths.map {
             makePathMatcher(it).let { (path, matchers) ->
-                if (path.isEmpty()) StaticActionMatcher<CTX>(it)
+                if (matchers.isEmpty()) StaticActionMatcher<CTX>(it)
                 else if (path.isEmpty() && matchers.size == 1 && matchers[0].second == ".*")
                     NamedVariableMatcher(matchers[0].first)
                 else RegexMatcher(path, matchers.map { item -> item.first }.toTypedArray())
