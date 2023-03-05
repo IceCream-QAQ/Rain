@@ -11,6 +11,7 @@ import com.IceCreamQAQ.Yu.util.type.RelType
 import java.lang.reflect.Method
 import java.lang.reflect.Parameter
 import kotlin.reflect.KParameter
+import kotlin.reflect.full.callSuspendBy
 import kotlin.reflect.jvm.javaType
 import kotlin.reflect.jvm.kotlinFunction
 
@@ -44,7 +45,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
         var attachment: ATT? = null
     }
 
-    lateinit var invoker: (CTX) -> Any?
+    lateinit var invoker: suspend (CTX) -> Any?
 
     val resultFlag = method.returnType.name != "void"
 
@@ -74,7 +75,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
                                 getParam(it, context)
                                     .also { v -> if (v == null && !it.nullable && !it.optional) error("") }
                         }
-                        kFun.callBy(paramMap)
+                        kFun.callSuspendBy(paramMap)
                     }
                 }
         } ?: method.parameters.mapNotNull {
