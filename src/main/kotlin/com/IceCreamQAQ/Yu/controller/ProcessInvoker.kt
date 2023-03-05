@@ -2,6 +2,6 @@ package com.IceCreamQAQ.Yu.controller
 
 interface ProcessInvoker<T : ActionContext> {
 
-    operator fun invoke(context: T): Any?
+    suspend operator fun invoke(context: T): Any?
 
 }

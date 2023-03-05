@@ -13,7 +13,7 @@ open class DssActionInvoker<CTX : PathActionContext>(
     catchsProcesses: Array<ProcessInvoker<CTX>>
 ) : SimpleActionInvoker<CTX>(action, beforeProcesses, aftersProcesses, catchsProcesses) {
 
-    override fun invoke(context: CTX): Boolean {
+    override suspend fun invoke(context: CTX): Boolean {
         matchers.forEachIndexed { i, matcher ->
             if (!matcher(context.path[i + level],context)) return false
         }

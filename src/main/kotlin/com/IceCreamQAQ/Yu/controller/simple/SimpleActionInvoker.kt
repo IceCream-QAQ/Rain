@@ -15,7 +15,7 @@ open class SimpleActionInvoker<CTX : ActionContext>(
     open val catchsProcesses: Array<ProcessInvoker<CTX>>
 ) : ActionInvoker<CTX> {
 
-    override fun invoke(context: CTX): Boolean {
+    override suspend fun invoke(context: CTX): Boolean {
         kotlin.runCatching {
             if (beforeProcesses.any { onProcessResult(context, it(context)) }) return@runCatching
             if (onActionResult(context, action(context))) return@runCatching

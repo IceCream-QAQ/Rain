@@ -14,7 +14,7 @@ open class DssRouter<CTX : PathActionContext>(
     val staticActions = HashMap<String, MutableList<ActionInvoker<CTX>>>()
     val dynamicActions = ArrayList<Pair<RouterMatcher<CTX>, MutableList<ActionInvoker<CTX>>>>()
 
-    operator fun invoke(context: CTX): Boolean {
+    operator suspend fun invoke(context: CTX): Boolean {
         val path = context.path[level]
         if (staticSubrouter[path]?.invoke(context) == true) return true
         if (dynamicSubrouter.any { it.matcher(path, context) && it.router(context) }) return true

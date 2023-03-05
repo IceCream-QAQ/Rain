@@ -14,7 +14,7 @@ class TestActionInvoker(
     catchsProcesses: Array<ProcessInvoker<TestActionContext>>
 ) : DssActionInvoker<TestActionContext>(level, matchers, action, beforeProcesses, aftersProcesses, catchsProcesses) {
 
-    override fun invoke(context: TestActionContext): Boolean {
+    override suspend fun invoke(context: TestActionContext): Boolean {
         if (context.channel !in channels) return false
         return super.invoke(context)
     }

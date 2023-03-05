@@ -102,7 +102,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
     abstract fun initParam(params: Array<MethodParam<ATT>>)
     abstract fun getParam(param: MethodParam<ATT>, context: CTX): Any?
 
-    override fun invoke(context: CTX): Any? {
+    override suspend fun invoke(context: CTX): Any? {
         if (resultFlag) return invoker(context)
         invoker(context)
         return null
