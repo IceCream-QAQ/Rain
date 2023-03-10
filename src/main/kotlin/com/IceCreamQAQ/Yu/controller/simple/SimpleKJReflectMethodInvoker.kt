@@ -43,6 +43,12 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
     ) {
         // 附件参数，一般可用于存储下游生成信息。
         var attachment: ATT? = null
+
+        fun <T:Annotation> annotation(type:Class<T>):T? = reflectParam?.getAnnotation(type)
+            ?: kReflectParam?.annotations?.firstOrNull { type.isInstance(it) } as T?
+
+        inline fun <reified T : Annotation> annotaton(): T? = reflectParam?.getAnnotation(T::class.java)
+            ?: kReflectParam?.annotations?.firstOrNull { it is T } as T?
     }
 
     lateinit var invoker: suspend (CTX) -> Any?
@@ -65,7 +71,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
                     null,
                     it
                 )
-            }.also { initParam(it.toTypedArray()) }
+            }.also { initParam(method, it.toTypedArray()) }
                 .let {
                     invoker = { context ->
                         val paramMap = HashMap<KParameter, Any?>(kFun.parameters.size)
@@ -88,7 +94,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
                 it,
                 null
             )
-        }.also { initParam(it.toTypedArray()) }
+        }.also { initParam(method, it.toTypedArray()) }
             .let {
                 invoker = { context ->
                     method.invoke(
@@ -100,7 +106,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
 
     }
 
-    abstract fun initParam(params: Array<MethodParam<ATT>>)
+    abstract fun initParam(method: Method, params: Array<MethodParam<ATT>>)
     abstract fun getParam(param: MethodParam<ATT>, context: CTX): Any?
 
     override suspend fun invoke(context: CTX): Any? {
