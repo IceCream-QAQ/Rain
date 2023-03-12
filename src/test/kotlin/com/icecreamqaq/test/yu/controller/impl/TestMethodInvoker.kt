@@ -9,7 +9,7 @@ open class TestMethodInvoker(
     method: Method,
     instance: ControllerInstanceGetter
 ) : SimpleKJReflectMethodInvoker<TestActionContext, TestActionContext.() -> Any?>(method, instance) {
-    override fun initParam(params: Array<MethodParam<TestActionContext.() -> Any?>>) {
+    override fun initParam(method: Method, params: Array<MethodParam<TestActionContext.() -> Any?>>) {
         params.forEach { it.attachment = { saves[it.name] } }
     }
 
