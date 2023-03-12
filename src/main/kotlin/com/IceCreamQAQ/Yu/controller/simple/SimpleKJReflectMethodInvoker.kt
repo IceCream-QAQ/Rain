@@ -6,6 +6,7 @@ import com.IceCreamQAQ.Yu.controller.ActionContext
 import com.IceCreamQAQ.Yu.controller.ControllerInstanceGetter
 import com.IceCreamQAQ.Yu.controller.ProcessInvoker
 import com.IceCreamQAQ.Yu.hasAnnotation
+import com.IceCreamQAQ.Yu.nameWithParamsFullClass
 import com.IceCreamQAQ.Yu.named
 import com.IceCreamQAQ.Yu.util.type.RelType
 import java.lang.reflect.Method
@@ -23,13 +24,20 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
     val method: Method,
     val instance: ControllerInstanceGetter
 ) : ProcessInvoker<CTX> {
+    class MethodParameterInjectFailedException(
+        val parameter: MethodParam<*>,
+        cause: Throwable
+    ) : RuntimeException("在为调用方法: ${parameter.method.nameWithParamsFullClass} 准备参数 ${parameter.fullName} 值时遇到问题。", cause)
+
+    val fullName: String = method.nameWithParamsFullClass
 
     // 方法参数映射对象
     class MethodParam<ATT>(
+        val method: Method,
         // 参数名，Java 参数获取 Named 注解。Kotlin 参数优先尝试获取 Named 注解，不存在则获取参数名。
         val name: String,
         // 参数类型
-        val type: RelType<*>,
+        val relType: RelType<*>,
         // 参数是否可空，Java 参数根据是否标记 Nullable 注解确定，Kotlin 参数则直接获取是否声明可空。一般下游实现无需关心本参数。
         val nullable: Boolean,
         // 是否可选参数，如果 Kotlin 参数具有默认值，则本项为 true，否则为 false。一般下游实现无需关心本参数。
@@ -42,16 +50,44 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
         val kReflectParam: KParameter?
     ) {
         // 附件参数，一般可用于存储下游生成信息。
+        val type: Class<*> = relType.realClass
+        val fullName = StringBuilder(name)
+            .apply {
+                append(": ")
+                append(relType)
+                if (nullable) append("?")
+                if (optional) append(" = DefaultValue")
+            }.toString()
+
         var attachment: ATT? = null
+        var valueChecker: ((Any?) -> Any?) = {
+            kotlin.runCatching {
+                if (it == null)
+                    if (!nullable) throw NullPointerException("参数 $name 不能为空。")
+                    else null
+                else if (!type.isInstance(it)) throw IllegalArgumentException("参数 $name 类型不匹配，需求类型: ${type.name}，实际类型: ${it::class.java.name}。")
+                else it
+            }.getOrElse {
+                throw MethodParameterInjectFailedException(this, it)
+            }
+        }
 
-        fun <T : Annotation> annotation(type: Class<T>): T? = reflectParam?.getAnnotation(type)
-            ?: kReflectParam?.annotations?.firstOrNull { type.isInstance(it) } as T?
+        companion object {
+            inline fun <reified T : Annotation> MethodParam<*>.annotaton(): T? = annotation(T::class.java)
 
-        inline fun <reified T : Annotation> annotaton(): T? = reflectParam?.getAnnotation(T::class.java)
-            ?: kReflectParam?.annotations?.firstOrNull { it is T } as T?
+            inline fun <reified T : Annotation> MethodParam<*>.annotation(body: T.() -> Unit): T? =
+                annotation(T::class.java)?.apply(body)
+
+            inline fun <reified T : Annotation> MethodParam<*>.hasAnnotation(): Boolean = annotaton<T>() != null
+
+        }
+
+        fun <T : Annotation> annotation(type: Class<T>): T? =
+            reflectParam?.getAnnotation(type)
+                ?: kReflectParam?.annotations?.firstOrNull { type.isInstance(it) } as T?
+
 
         fun <T : Annotation> hasAnnotation(type: Class<T>): Boolean = annotation(type) != null
-        inline fun <reified T : Annotation> hasAnnotation(): Boolean = annotaton<T>() != null
     }
 
     lateinit var invoker: suspend (CTX) -> Any?
@@ -66,6 +102,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
                     instanceParam = it
                     null
                 } else MethodParam<ATT>(
+                    method,
                     it.name ?: "",
                     RelType.create(it.type.javaType),
                     it.type.isMarkedNullable,
@@ -80,15 +117,14 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
                         val paramMap = HashMap<KParameter, Any?>(kFun.parameters.size)
                         paramMap[instanceParam!!] = instance()
                         it.forEach {
-                            paramMap[it.kReflectParam!!] =
-                                getParam(it, context)
-                                    .also { v -> if (v == null && !it.nullable && !it.optional) error("") }
+                            paramMap[it.kReflectParam!!] = it.valueChecker(getParam(it, context))
                         }
                         kFun.callSuspendBy(paramMap)
                     }
                 }
         } ?: method.parameters.mapNotNull {
             MethodParam<ATT>(
+                method,
                 it.named,
                 RelType.create(it.type),
                 it.hasAnnotation<Nullable>(),
@@ -102,7 +138,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
                 invoker = { context ->
                     method.invoke(
                         instance(),
-                        it.arrayMap { getParam(it, context).apply { if (this == null && !it.nullable) error("") } }
+                        it.arrayMap { it.valueChecker(getParam(it, context)) }
                     )
                 }
             }
