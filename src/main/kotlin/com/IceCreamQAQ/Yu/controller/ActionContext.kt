@@ -6,6 +6,6 @@ interface ActionContext {
     var result: Any?
 
     operator fun get(name: String): Any?
-    operator fun set(name: String, obj: Any)
+    operator fun set(name: String, obj: Any?)
     fun remove(name: String): Any?
 }

@@ -10,8 +10,9 @@ open class PathActionContext(val path: Array<String>) : ActionContext {
 
     override fun get(name: String) = saves[name]
 
-    override fun set(name: String, obj: Any) {
-        saves[name] = obj
+    override fun set(name: String, obj: Any?) {
+        if (obj != null) saves[name] = obj
+        saves.remove(obj)
     }
 
     override fun remove(name: String) = saves.remove(name)
