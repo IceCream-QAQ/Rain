@@ -24,10 +24,30 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
     val method: Method,
     val instance: ControllerInstanceGetter
 ) : ProcessInvoker<CTX> {
+
+    companion object{
+        fun Class<*>.checkSimple(): Class<*> {
+            return when (this) {
+                Char::class.javaPrimitiveType -> Char::class.javaObjectType
+                Boolean::class.java -> Boolean::class.javaObjectType
+                Byte::class.java -> Byte::class.javaObjectType
+                Short::class.java -> Short::class.javaObjectType
+                Int::class.java -> Int::class.javaObjectType
+                Float::class.java -> Float::class.javaObjectType
+                Long::class.java -> Long::class.javaObjectType
+                Double::class.java -> Double::class.javaObjectType
+                else -> this
+            }
+        }
+    }
+
     class MethodParameterInjectFailedException(
         val parameter: MethodParam<*>,
         cause: Throwable
-    ) : RuntimeException("在为调用方法: ${parameter.method.nameWithParamsFullClass} 准备参数 ${parameter.fullName} 值时遇到问题。", cause)
+    ) : RuntimeException(
+        "在为调用方法: ${parameter.method.nameWithParamsFullClass} 准备参数 ${parameter.fullName} 值时遇到问题。",
+        cause
+    )
 
     val fullName: String = method.nameWithParamsFullClass
 
@@ -50,7 +70,8 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
         val kReflectParam: KParameter?
     ) {
         // 附件参数，一般可用于存储下游生成信息。
-        val type: Class<*> = relType.realClass
+        val type: Class<*> = relType.realClass.checkSimple()
+
         val fullName = StringBuilder(name)
             .apply {
                 append(": ")
@@ -153,5 +174,34 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
         invoker(context)
         return null
     }
+
+
+    open fun <T> Class<T>.simpleClassValueOf(): (String) -> T {
+        fun m(body: (String) -> Any) = body as (String) -> T
+        return when (this) {
+            Char::class.java -> m { it[0] }
+            Boolean::class.java -> m { it.toBoolean() }
+            Byte::class.java -> m { it.toByte() }
+            Short::class.java -> m { it.toShort() }
+            Int::class.java -> m { it.toInt() }
+            Float::class.java -> m { it.toFloat() }
+            Long::class.java -> m { it.toLong() }
+            Double::class.java -> m { it.toDouble() }
+            else -> error("遇到了不支持的类型: ${this.name}。")
+        }
+    }
+
+    open fun String.stringAsSimple(type: Class<*>): Any? =
+        when (type) {
+            Boolean::class.java, Boolean::class.javaObjectType -> toBoolean()
+            Byte::class.java, Byte::class.javaObjectType -> toByte()
+            Short::class.java, Short::class.javaObjectType -> toShort()
+            Int::class.java, Int::class.javaObjectType -> toInt()
+            Long::class.java, Long::class.javaObjectType -> toLong()
+            Char::class.java, Char::class.javaObjectType -> get(0)
+            Float::class.java, Float::class.javaObjectType -> toFloat()
+            Double::class.java, Double::class.javaObjectType -> toDouble()
+            else -> null
+        }
 
 }
