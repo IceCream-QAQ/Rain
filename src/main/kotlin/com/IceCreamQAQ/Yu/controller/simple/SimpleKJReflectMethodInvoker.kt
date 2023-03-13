@@ -9,6 +9,7 @@ import com.IceCreamQAQ.Yu.hasAnnotation
 import com.IceCreamQAQ.Yu.nameWithParamsFullClass
 import com.IceCreamQAQ.Yu.named
 import com.IceCreamQAQ.Yu.util.type.RelType
+import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.Parameter
 import kotlin.reflect.KParameter
@@ -170,9 +171,14 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
     abstract fun getParam(param: MethodParam<ATT>, context: CTX): Any?
 
     override suspend fun invoke(context: CTX): Any? {
-        if (resultFlag) return invoker(context)
-        invoker(context)
-        return null
+        kotlin.runCatching {
+            if (resultFlag) return invoker(context)
+            invoker(context)
+            return null
+        }.getOrElse {
+            if (it is InvocationTargetException) throw it.targetException
+            else throw it
+        }
     }
 
 
