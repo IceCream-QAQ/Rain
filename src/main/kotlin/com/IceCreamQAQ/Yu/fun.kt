@@ -80,9 +80,24 @@ val Executable.nameWithParams: String
         }.append(")")
         .toString()
 
-val Executable.nameWithParamsFullClass: String
+val Constructor<*>.nameWithParamsFullClass: String
+    inline get() = StringBuilder(declaringClass.name)
+        .append("(")
+        .apply {
+            parameterTypes.let { parameterTypes ->
+                val max = parameterTypes.size - 1
+                parameterTypes.forEachIndexed { i, it ->
+                    append(it.name)
+                    if (i < max) append(", ")
+                }
+            }
+        }.append(")")
+        .toString()
+
+val Method.nameWithParamsFullClass: String
     inline get() = StringBuilder(declaringClass.name)
         .append(".")
+        .append(name)
         .append("(")
         .apply {
             parameterTypes.let { parameterTypes ->
