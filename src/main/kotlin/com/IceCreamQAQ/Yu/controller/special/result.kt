@@ -7,4 +7,4 @@ object SkipMe
 
 open class ActionResult(val result: Any) : RuntimeException()
 object DoNoneThrowable : ActionResult(DoNone)
-object SkipMeThrowable : ActionResult(DoNone)
+object SkipMeThrowable : ActionResult(SkipMe)
