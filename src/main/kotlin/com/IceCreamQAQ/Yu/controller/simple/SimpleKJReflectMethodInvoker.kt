@@ -26,7 +26,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
     val instance: ControllerInstanceGetter
 ) : ProcessInvoker<CTX> {
 
-    companion object{
+    companion object {
         fun Class<*>.checkSimple(): Class<*> {
             return when (this) {
                 Char::class.javaPrimitiveType -> Char::class.javaObjectType
@@ -85,7 +85,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
         var valueChecker: ((Any?) -> Any?) = {
             kotlin.runCatching {
                 if (it == null)
-                    if (!nullable) throw NullPointerException("参数 $name 不能为空。")
+                    if (!optional && !nullable) throw NullPointerException("参数 $name 不能为空。")
                     else null
                 else if (!type.isInstance(it)) throw IllegalArgumentException("参数 $name 类型不匹配，需求类型: ${type.name}，实际类型: ${it::class.java.name}。")
                 else it
@@ -139,7 +139,8 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
                         val paramMap = HashMap<KParameter, Any?>(kFun.parameters.size)
                         paramMap[instanceParam!!] = instance()
                         it.forEach {
-                            paramMap[it.kReflectParam!!] = it.valueChecker(getParam(it, context))
+                            it.valueChecker(getParam(it, context))
+                                ?.let { value -> paramMap[it.kReflectParam!!] = value }
                         }
                         kFun.callSuspendBy(paramMap)
                     }
