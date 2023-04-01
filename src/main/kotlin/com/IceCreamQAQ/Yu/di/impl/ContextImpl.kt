@@ -31,18 +31,18 @@ open class ContextImpl(
 
     open fun init(): ContextImpl {
         log.info("[上下文管理器] 初始化。")
-        contextMap[ClassLoader::class.java] = NoInstanceClassContext(ClassLoader::class.java)
+        contextMap[ClassLoader::class.java] = NoInstanceClassContext(this,ClassLoader::class.java)
             .apply {
                 putBinds("appClassloader", LocalInstanceClassContext(classloader))
             }
 
-        contextMap[YuContext::class.java] = NoInstanceClassContext(YuContext::class.java)
+        contextMap[YuContext::class.java] = NoInstanceClassContext(this,YuContext::class.java)
             .apply {
                 putBinds(din, LocalInstanceClassContext(this@ContextImpl).apply {
                     contextMap[ContextImpl::class.java] = this
                 })
             }
-        contextMap[ConfigManager::class.java] = NoInstanceClassContext(ConfigManager::class.java)
+        contextMap[ConfigManager::class.java] = NoInstanceClassContext(this,ConfigManager::class.java)
             .apply {
                 putBinds(din, LocalInstanceClassContext(configManager).apply {
                     contextMap[configManager::class.java] = this
@@ -61,7 +61,7 @@ open class ContextImpl(
             if (clazz.isBean) {
                 clazz as Class<Any>
                 InstanceAbleClassContext(this, clazz)
-            } else NoInstanceClassContext(clazz)
+            } else NoInstanceClassContext(this,clazz)
         } as ClassContext<T>
 
     override fun <T> getBean(clazz: Class<T>, instanceName: String): T? =

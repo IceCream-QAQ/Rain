@@ -27,4 +27,9 @@ class RelType<T>(
     }
 
     fun isAssignableFrom(otherType: RelType<*>): Boolean = realClass.isAssignableFrom(otherType.realClass)
+
+    override fun toString(): String {
+        return if (generics == null) realClass.name
+        else realClass.name + generics.arrayMap { it.toString() }.joinToString(",", "<", ">")
+    }
 }

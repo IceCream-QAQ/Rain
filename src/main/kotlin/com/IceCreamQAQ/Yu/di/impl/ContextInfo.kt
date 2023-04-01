@@ -1,6 +1,7 @@
 package com.IceCreamQAQ.Yu.di.impl
 
 import com.IceCreamQAQ.Yu.di.*
+import com.IceCreamQAQ.Yu.di.config.ConfigManager.Companion.getConfig
 
 
 open class BeanFactoryClassContext<T>(
@@ -35,7 +36,14 @@ open class BeanFactoryClassContext<T>(
     private val factory: BeanFactory<T>
         get() = _factory ?: recreateBeanFactory()
 
-    override fun getBean(name: String): T? = factory.createBean(name)
+    private fun getConfigName(name: String): String{
+        return if(name.startsWith("{") && name.endsWith("}")){
+            context.configManager.getConfig<String>(name.substring(1,name.length - 1)) ?: name
+        }else{
+            name
+        }
+    }
+    override fun getBean(name: String): T? = factory.createBean(getConfigName(name))
     override fun putBinds(name: String, cc: ClassContext<out T>) {
         error("您无法向一个由 BeanFactory(${factory::class.java.name}) 管理的上下文 (${this.name}) 中提交绑定类。")
     }
@@ -64,7 +72,10 @@ abstract class BindableClassContext<T> : ClassContext<T> {
     }
 }
 
-open class NoInstanceClassContext<T>(override val clazz: Class<T>) : BindableClassContext<T>() {
+open class NoInstanceClassContext<T>(
+    val context: ContextImpl,
+    override val clazz: Class<T>
+) : BindableClassContext<T>() {
 
     override val multi: Boolean
         get() = false
@@ -82,8 +93,16 @@ open class NoInstanceClassContext<T>(override val clazz: Class<T>) : BindableCla
     override fun getBean(): T? =
         bindMap[din]?.getBean()
 
+    private fun getConfigName(name: String): String{
+        return if(name.startsWith("{") && name.endsWith("}")){
+            context.configManager.getConfig<String>(name.substring(1,name.length - 1)) ?: name
+
+        }else{
+            name
+        }
+    }
     override fun getBean(name: String): T? =
-        bindMap[name]?.getBean()
+        bindMap[getConfigName(name)]?.getBean()
 
     override fun putBean(name: String, instance: T): T {
         instance as Any
@@ -124,8 +143,16 @@ open class InstanceAbleClassContext<T>(
     override fun getBean(): T? =
         defaultInstance ?: newBean().apply { defaultInstance = this }
 
+    private fun getConfigName(name: String): String{
+        println("getConfigName $name")
+        return if(name.startsWith("{") && name.endsWith("}")){
+            context.configManager.getConfig<String>(name.substring(1,name.length - 1)) ?: name
+        }else{
+            name
+        }
+    }
     override fun getBean(name: String): T? =
-        if (name == din) getBean() else instanceMap[name]
+        if (name == din) getBean() else instanceMap[getConfigName(name)]
 
     override fun newBean(): T =
         kotlin.runCatching { injector(creator()) }

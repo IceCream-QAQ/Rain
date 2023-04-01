@@ -54,7 +54,7 @@ fun String.toLowerCaseFirstOne(): String {
 
 inline fun <reified T : Annotation> Method.annotation(body: T.() -> Unit) = getAnnotation(T::class.java)?.apply(body)
 
-val Method.fullName: String
+val Executable.fullName: String
     get() {
         val nameBuilder = StringBuilder(this.declaringClass.name).append(".").append(this.name).append("(")
         val max = parameterCount - 1
@@ -80,8 +80,24 @@ val Executable.nameWithParams: String
         }.append(")")
         .toString()
 
-val Executable.nameWithParamsFullClass: String
-    inline get() = StringBuilder(name)
+val Constructor<*>.nameWithParamsFullClass: String
+    inline get() = StringBuilder(declaringClass.name)
+        .append("(")
+        .apply {
+            parameterTypes.let { parameterTypes ->
+                val max = parameterTypes.size - 1
+                parameterTypes.forEachIndexed { i, it ->
+                    append(it.name)
+                    if (i < max) append(", ")
+                }
+            }
+        }.append(")")
+        .toString()
+
+val Method.nameWithParamsFullClass: String
+    inline get() = StringBuilder(declaringClass.name)
+        .append(".")
+        .append(name)
         .append("(")
         .apply {
             parameterTypes.let { parameterTypes ->
