@@ -1,5 +1,6 @@
 package com.IceCreamQAQ.Yu.util.classMaker.asm
 
+import com.IceCreamQAQ.Yu.loader.IRainClassLoader
 import com.IceCreamQAQ.Yu.util.classMaker.Access
 import com.IceCreamQAQ.Yu.util.classMaker.Access.*
 import jdk.internal.org.objectweb.asm.Type
@@ -29,4 +30,5 @@ fun countAccess(
     return r
 }
 
-val Class<*>.descriptor:String get() = Type.getDescriptor(this)
+val Class<*>.descriptor: String get() = Type.getDescriptor(this)
+

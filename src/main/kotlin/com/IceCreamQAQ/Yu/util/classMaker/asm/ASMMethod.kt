@@ -8,14 +8,6 @@ class ASMMethod(
     name: String
 ) : MMethod(name), ASMAnnotationAble {
 
-    companion object {
-        inline fun <reified T> ASMMethod.parameter(name: String) = parameter(name, T::class.java)
-        inline fun <reified T> ASMMethod.parameter(name: String, block: ASMMethodParameter<T>.() -> Unit): ASMMethod {
-            parameters.add(ASMMethodParameter(name, T::class.java).apply(block))
-            return this
-        }
-    }
-
     override val parameters: MutableList<MMethodParameter<*>> = ArrayList()
     override var returnType: MMethodParameter<*>? = null
 
@@ -32,15 +24,17 @@ class ASMMethod(
         return this
     }
 
-    fun parameter(name: String, type: Class<*>): ASMMethod {
-        parameters.add(ASMMethodParameter(name, type))
+    inline fun <reified T> parameter(name: String): ASMMethod {
+        parameters.add(ASMMethodParameter(name, T::class.java))
         return this
     }
 
-    fun parameter(name: String, type: Class<*>, annotationWriter: ASMAnnotationWriter): ASMMethod {
-        parameters.add(ASMMethodParameter(name, type).apply { annotationWriter.write(this) })
+    inline fun <reified T> parameter(name: String, annotationWriter: ASMAnnotationWriter): ASMMethod {
+        parameters.add(ASMMethodParameter(name, T::class.java).apply { annotationWriter.write(this) })
         return this
     }
+
+    
 
     fun build(clazz: ASMClass<*>, visitor: ClassVisitor) {
         val mv = visitor.visitMethod(countAccess(access, static, final, abstract), name, descriptor(), null, null)
@@ -57,4 +51,4 @@ class ASMMethod(
 
 }
 
-class ASMMethodParameter<T>(name: String, type: Class<T>) : MMethodParameter<T>(name, type), ASMAnnotationAble
+class ASMMethodParameter<T>(override val name: String, type: Class<T>) : ASMVariable<T>(type), MMethodParameter<T>

@@ -6,11 +6,19 @@ import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
 
 class ASMClass<T>(
-    val classloader: IRainClassLoader,
     name: String,
     superClass: Class<T>
-) : MClass<T>(name, superClass),
-    ASMAnnotationAble {
+) : MClass<T>(name, superClass), ASMAnnotationAble {
+
+    companion object{
+        fun <T> ASMClass<T>.make(classLoader: IRainClassLoader): Class<out T> {
+            return classLoader.define(name, build()) as Class<out T>
+        }
+
+        inline fun <reified T> makeClass(name: String, body: ASMClass<T>.() -> Unit): ASMClass<T> {
+            return ASMClass(name, T::class.java).apply(body)
+        }
+    }
 
     override val interfaceClass: MutableList<Class<*>> = ArrayList()
 
@@ -23,7 +31,11 @@ class ASMClass<T>(
     override val fields: MutableList<ASMField<*>> = ArrayList()
     override val methods: MutableList<ASMMethod> = ArrayList()
 
-    override fun make(): Class<out T> {
+    fun method(name: String, body: ASMMethod.() -> Unit): ASMMethod {
+        return ASMMethod(name).apply(body).apply { methods.add(this) }
+    }
+
+    fun build(): ByteArray {
         val cw = ClassWriter(0)
         cw.visit(
             Opcodes.V1_8,
@@ -38,6 +50,6 @@ class ASMClass<T>(
         methods.forEach { it.build(this, cw) }
 
         cw.visitEnd()
-        return classloader.define(name, cw.toByteArray()) as Class<out T>
+        return cw.toByteArray()
     }
 }

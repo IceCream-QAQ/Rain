@@ -21,7 +21,7 @@ abstract class MClass<T>(
     abstract val fields: MutableList<out MField<*>>
     abstract val methods: MutableList<out MMethod>
 
-    abstract fun make(): Class<out T>
+//    abstract fun make(): Class<out T>
 }
 
 abstract class MInitBlock

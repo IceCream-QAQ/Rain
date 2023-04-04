@@ -16,9 +16,7 @@ abstract class MMethod(
 
 }
 
-abstract class MMethodParameter<T>(
-    val name: String,
+interface MMethodParameter<T>: AnnotationAble {
+    val name: String
     val type: Class<T>
-) : AnnotationAble {
-    override val annotations: MutableList<MAnnotation<*>> = ArrayList()
 }
