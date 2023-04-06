@@ -25,8 +25,9 @@ dependencies {
     api("com.alibaba.fastjson2:fastjson2:2.0.23")
     // SnakeYAML 默认不向后传递。
     implementation("org.yaml:snakeyaml:2.0")
-    // ECJ 当前版本为最后支持 Java8 的版本，应停留在本版本。
-    api("org.eclipse.jdt:ecj:3.26.0")
+    // ECJ 不再默认向后传递。
+    // 此版本为 ECJ 最后的支持 Java
+    implementation("org.eclipse.jdt:ecj:3.26.0")
     api("org.ehcache:ehcache:3.10.1")
 
     api("org.ow2.asm:asm-commons:9.3")
