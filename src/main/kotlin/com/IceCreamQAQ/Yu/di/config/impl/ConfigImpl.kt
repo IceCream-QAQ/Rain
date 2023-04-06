@@ -12,6 +12,7 @@ import com.alibaba.fastjson2.JSON
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
 import org.slf4j.LoggerFactory
+import org.yaml.snakeyaml.Yaml
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
@@ -132,10 +133,9 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
         when {
             name.endsWith(".properties") -> loadConfigByProperties(node, inputStream)
             name.endsWith(".json") -> loadConfigByJSON(node, inputStream)
-//            name.endsWith(".yml") || name.endsWith(".yaml") -> loadConfigByYaml(jo, inputStream)
+            name.endsWith(".yml") || name.endsWith(".yaml") -> loadConfigByYaml(node, inputStream)
         }
     }
-
 
     protected open fun loadConfigByProperties(node: ObjectNode, inputStream: InputStream) {
         val properties = Properties()
@@ -204,6 +204,34 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
                 when (value) {
                     is JSONObject -> ObjectNode().also { readJSONObject(it, value) }
                     is JSONArray -> ArrayNode().also { readJSONArray(it, value) }
+                    else -> StringNode(value.toString())
+                }
+            )
+    }
+
+    private fun loadConfigByYaml(node: ObjectNode, inputStream: InputStream) {
+        val yaml = Yaml()
+        val map = yaml.load(inputStream) as Map<String, Any>
+        readYamlObject(node, map)
+    }
+
+    private fun readYamlObject(node: ObjectNode, map: Map<String, Any>) {
+        for ((key, value) in map)
+            when (value) {
+                is Map<*, *> ->
+                    readYamlObject(node.getOrPut(key) { ObjectNode() } as ObjectNode, value as Map<String, Any>)
+
+                is List<*> -> readYamlArray(node.getOrPut(key) { ArrayNode() } as ArrayNode, value as List<Any>)
+                else -> node[key] = StringNode(value.toString())
+            }
+    }
+
+    private fun readYamlArray(node: ArrayNode, list: List<Any>) {
+        for (value in list)
+            node.add(
+                when (value) {
+                    is Map<*, *> -> ObjectNode().also { readYamlObject(it, value as Map<String, Any>) }
+                    is List<*> -> ArrayNode().also { readYamlArray(it, value as List<Any>) }
                     else -> StringNode(value.toString())
                 }
             )
