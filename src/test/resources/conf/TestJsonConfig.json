@@ -1,0 +1,27 @@
+{
+    "testString": "test",
+    "testObject": {
+        "field1": "value1",
+        "field2": "value2"
+    },
+    "testArray": [
+        "value1",
+        "value2"
+    ],
+    "complicated": {
+        "array": [
+            {
+                "field1": "value1",
+                "field2": "value2"
+            },
+            {
+                "field1": "value1",
+                "field2": "value2"
+            }
+        ],
+        "object": {
+            "field1": "value1",
+            "field2": "value2"
+        }
+    }
+}

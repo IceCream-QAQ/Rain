@@ -8,6 +8,9 @@ import com.IceCreamQAQ.Yu.util.dataNode.ObjectNode
 import com.IceCreamQAQ.Yu.util.dataNode.StringNode
 import com.IceCreamQAQ.Yu.util.getOrPut
 import com.IceCreamQAQ.Yu.util.type.RelType
+import com.alibaba.fastjson2.JSON
+import com.alibaba.fastjson2.JSONArray
+import com.alibaba.fastjson2.JSONObject
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
@@ -128,10 +131,11 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
 
         when {
             name.endsWith(".properties") -> loadConfigByProperties(node, inputStream)
-//            name.endsWith(".json") -> loadConfigByJSON(jo, inputStream)
+            name.endsWith(".json") -> loadConfigByJSON(node, inputStream)
 //            name.endsWith(".yml") || name.endsWith(".yaml") -> loadConfigByYaml(jo, inputStream)
         }
     }
+
 
     protected open fun loadConfigByProperties(node: ObjectNode, inputStream: InputStream) {
         val properties = Properties()
@@ -178,6 +182,31 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
             else ArrayNode(last).apply { if (valueNode is ArrayNode) addAll(valueNode) else add(valueNode) }
                 .apply { o[lastName] = this }
         }
+    }
+
+    private fun loadConfigByJSON(node: ObjectNode, inputStream: InputStream) {
+        val jo = JSON.parseObject(inputStream)
+        readJSONObject(node, jo)
+    }
+
+    private fun readJSONObject(node: ObjectNode, jo: JSONObject) {
+        for (name in jo.keys)
+            when (val value = jo[name]!!) {
+                is JSONObject -> readJSONObject(let { node.getOrPut(name) { ObjectNode() } as ObjectNode }, value)
+                is JSONArray -> readJSONArray(node.getOrPut(name) { ArrayNode() } as ArrayNode, value)
+                else -> node[name] = StringNode(value.toString())
+            }
+    }
+
+    private fun readJSONArray(node: ArrayNode, ja: JSONArray) {
+        for (value in ja)
+            node.add(
+                when (value) {
+                    is JSONObject -> ObjectNode().also { readJSONObject(it, value) }
+                    is JSONArray -> ArrayNode().also { readJSONArray(it, value) }
+                    else -> StringNode(value.toString())
+                }
+            )
     }
 
     protected open fun getConfigNode(name: String): DataNode? {
