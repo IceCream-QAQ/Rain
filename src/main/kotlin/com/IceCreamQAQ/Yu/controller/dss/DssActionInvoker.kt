@@ -4,7 +4,7 @@ import com.IceCreamQAQ.Yu.controller.ProcessInvoker
 import com.IceCreamQAQ.Yu.controller.dss.router.RouterMatcher
 import com.IceCreamQAQ.Yu.controller.simple.SimpleActionInvoker
 
-open class DssActionInvoker<CTX : PathActionContext>(
+abstract class DssActionInvoker<CTX : PathActionContext>(
     val level: Int,
     val matchers: List<RouterMatcher<CTX>>,
     action: ProcessInvoker<CTX>,

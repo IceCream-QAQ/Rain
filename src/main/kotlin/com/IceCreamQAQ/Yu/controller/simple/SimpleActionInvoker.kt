@@ -8,7 +8,7 @@ import com.IceCreamQAQ.Yu.controller.special.DoNone
 import com.IceCreamQAQ.Yu.controller.special.SkipMe
 import com.IceCreamQAQ.Yu.toLowerCaseFirstOne
 
-open class SimpleActionInvoker<CTX : ActionContext>(
+abstract class SimpleActionInvoker<CTX : ActionContext>(
     open val action: ProcessInvoker<CTX>,
     open val beforeProcesses: Array<ProcessInvoker<CTX>>,
     open val aftersProcesses: Array<ProcessInvoker<CTX>>,
@@ -16,6 +16,7 @@ open class SimpleActionInvoker<CTX : ActionContext>(
 ) : ActionInvoker<CTX> {
 
     override suspend fun invoke(context: CTX): Boolean {
+        if (!checkChannel(context)) return false
         kotlin.runCatching {
             if (beforeProcesses.any { onProcessResult(context, it(context)) }) return@runCatching
             if (onActionResult(context, action(context))) return@runCatching
@@ -27,11 +28,12 @@ open class SimpleActionInvoker<CTX : ActionContext>(
             } else onProcessResult(context, it.result)
         }
 
-        if (checkActionResult(context)) return true
-        return false
+        return checkActionResult(context)
     }
 
-    open fun checkResult(context: CTX, result: Any): Boolean {
+    abstract suspend fun checkChannel(context: CTX): Boolean
+
+    open suspend fun checkResult(context: CTX, result: Any): Boolean {
         if (result is DoNone || result is SkipMe) {
             context.result = result
             return true
@@ -39,7 +41,7 @@ open class SimpleActionInvoker<CTX : ActionContext>(
         return false
     }
 
-    open fun onProcessResult(context: CTX, result: Any?): Boolean {
+    open suspend fun onProcessResult(context: CTX, result: Any?): Boolean {
         if (result == null) return false
         if (checkResult(context, result)) return true
 
@@ -47,7 +49,7 @@ open class SimpleActionInvoker<CTX : ActionContext>(
         return false
     }
 
-    open fun onActionResult(context: CTX, result: Any?): Boolean {
+    open suspend fun onActionResult(context: CTX, result: Any?): Boolean {
         if (result == null) return false
         if (checkResult(context, result)) return true
 
@@ -55,7 +57,7 @@ open class SimpleActionInvoker<CTX : ActionContext>(
         return false
     }
 
-    open fun checkActionResult(context: CTX): Boolean {
+    open suspend fun checkActionResult(context: CTX): Boolean {
         if (context.result is SkipMe) return false
         return true
     }
