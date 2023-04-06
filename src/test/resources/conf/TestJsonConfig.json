@@ -1,27 +1,29 @@
 {
-    "testString": "test",
-    "testObject": {
-        "field1": "value1",
-        "field2": "value2"
-    },
-    "testArray": [
-        "value1",
-        "value2"
-    ],
-    "complicated": {
-        "array": [
-            {
-                "field1": "value1",
-                "field2": "value2"
-            },
-            {
+    "json": {
+        "testString": "test",
+        "testObject": {
+            "field1": "value1",
+            "field2": "value2"
+        },
+        "testArray": [
+            "value1",
+            "value2"
+        ],
+        "complicated": {
+            "array": [
+                {
+                    "field1": "obj1-val1",
+                    "field2": "obj1-val2"
+                },
+                {
+                    "field1": "obj2-val1",
+                    "field2": "obj2-val2"
+                }
+            ],
+            "object": {
                 "field1": "value1",
                 "field2": "value2"
             }
-        ],
-        "object": {
-            "field1": "value1",
-            "field2": "value2"
         }
     }
 }

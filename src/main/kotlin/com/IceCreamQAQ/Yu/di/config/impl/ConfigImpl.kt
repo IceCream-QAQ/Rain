@@ -190,9 +190,9 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
     }
 
     private fun readJSONObject(node: ObjectNode, jo: JSONObject) {
-        for (name in jo.keys)
-            when (val value = jo[name]!!) {
-                is JSONObject -> readJSONObject(let { node.getOrPut(name) { ObjectNode() } as ObjectNode }, value)
+        for ((name, value) in jo)
+            when (value) {
+                is JSONObject -> readJSONObject(node.getOrPut(name) { ObjectNode() } as ObjectNode, value)
                 is JSONArray -> readJSONArray(node.getOrPut(name) { ArrayNode() } as ArrayNode, value)
                 else -> node[name] = StringNode(value.toString())
             }
