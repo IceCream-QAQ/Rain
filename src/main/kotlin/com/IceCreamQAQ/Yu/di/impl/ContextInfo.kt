@@ -141,7 +141,7 @@ open class InstanceAbleClassContext<T>(
     var instanceMap: MutableMap<String, T> = HashMap()
 
     override fun getBean(): T? =
-        defaultInstance ?: newBean().apply { defaultInstance = this }
+        defaultInstance ?: injector(creator().apply { defaultInstance = this })
 
     private fun getConfigName(name: String): String{
         println("getConfigName $name")
