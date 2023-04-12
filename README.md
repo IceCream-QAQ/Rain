@@ -66,6 +66,7 @@ Rain 是一个功能相对复杂的开发框架，以 "后端开发" 为基础�
 * [okhttp3](https://square.github.io/okhttp/) ([Apache-2.0 license](https://github.com/square/okhttp/blob/master/LICENSE.txt))
 * [logback](http://logback.qos.ch/) ([Logback LICENSE](https://github.com/qos-ch/logback/blob/master/LICENSE.txt))
 * [fastjson2](https://github.com/alibaba/fastjson2) ([Apache-2.0 license](https://github.com/alibaba/fastjson2/blob/main/LICENSE))
+* [snakeyaml](https://bitbucket.org/snakeyaml/snakeyaml) ([Apache-2.0 license](https://bitbucket.org/snakeyaml/snakeyaml/src/master/LICENSE.txt))
 * [ecj](http://www.eclipse.org/jdt/) ([Eclipse Public License 2.0](https://projects.eclipse.org/projects/eclipse.jdt))
 * [ehcache3](https://github.com/ehcache/ehcache3) ([Apache-2.0 license](https://www.ehcache.org/about/license.html))
 * [asm](https://asm.ow2.org/) ([License](https://asm.ow2.io/license.html))
