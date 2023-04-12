@@ -23,8 +23,7 @@ dependencies {
     // Logback 1.4+ 最低支持 Java 11。
     api("ch.qos.logback:logback-classic:1.3.1")
     api("com.alibaba.fastjson2:fastjson2:2.0.23")
-    // SnakeYAML 默认不向后传递。
-    implementation("org.yaml:snakeyaml:2.0")
+    api("org.yaml:snakeyaml:2.0")
     // ECJ 不再默认向后传递。
     // 此版本为 ECJ 最后的支持 Java
     implementation("org.eclipse.jdt:ecj:3.26.0")
