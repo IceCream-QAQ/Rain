@@ -104,8 +104,10 @@ open class KInjectConstructorBeanCreator<T>(
 
     override fun invoke(): T =
         constructor.callBy(
-            HashMap<KParameter, Any>().apply {
-                readers.forEach { (param, reader) -> reader()?.let { put(param, it) } }
+            HashMap<KParameter, Any?>().apply {
+                readers.forEach { (param, reader) ->
+                    reader().let { if (it != null || !param.isOptional) put(param, it) }
+                }
             }
         )
 
