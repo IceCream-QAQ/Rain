@@ -32,5 +32,7 @@ class StringNode(var content: String) : BaseNode() {
     override fun <T> asArray(type: RelType<T>): List<T> =
         listOf(asObject(type))
 
+    override fun <T> asMap(type: RelType<T>): Map<String, T> = error("无法将一个 StringNode 转换为 Map！")
+
     override fun toString(): String = "StringNode: $content"
 }

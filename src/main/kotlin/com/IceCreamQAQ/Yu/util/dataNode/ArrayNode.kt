@@ -41,6 +41,8 @@ open class ArrayNode() : BaseNode(), MutableIterable<DataNode> {
 
     override fun asString(): String = error("无法将一个 Array 数据节点转化为 String！")
 
+    override fun <T> asMap(type: RelType<T>): Map<String, T> = error("无法将一个 Array 数据节点转化为 Map！")
+
     override fun <T> castTo(type: RelType<T>): T {
         return list.first().asObject(type)
     }

@@ -260,6 +260,10 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
         return getConfigNode(name)?.asArray(type) ?: emptyList()
     }
 
+    override fun <T> getMap(name: String, type: RelType<T>): Map<String, T> {
+        return getConfigNode(name)?.asMap(type) ?: emptyMap()
+    }
+
     override fun <T> getConfigReader(name: String, type: RelType<T>): ConfigReader<T> =
         if (type.realClass == List::class.java) ConfigArrayReader(this, name, type.generics!![0])
         else ConfigNodeReader(this, name, type)

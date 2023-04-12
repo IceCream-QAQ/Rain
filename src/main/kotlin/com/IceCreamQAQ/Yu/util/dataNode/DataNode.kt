@@ -17,6 +17,7 @@ interface DataNode {
     fun <T> asEnum(enumClass: RelType<T>): T
     fun <T> asObject(type: RelType<T>): T
     fun <T> asArray(type: RelType<T>): List<T>
+    fun <T> asMap(type: RelType<T>): Map<String, T>
 }
 
 

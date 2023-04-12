@@ -18,8 +18,12 @@ interface ConfigManager {
     fun <T> getArray(name: String, type: Class<T>): List<T> =
         this.getArray(name, RelType.create(type))
 
+    fun <T> getMap(name: String, type: Class<T>): Map<String, T> =
+        this.getMap(name, RelType.create(type))
+
     fun <T> getConfig(name: String, type: RelType<T>): T?
     fun <T> getArray(name: String, type: RelType<T>): List<T>
+    fun <T> getMap(name: String, type: RelType<T>): Map<String, T>
     fun <T> getConfigReader(name: String, type: RelType<T>): ConfigReader<T>
     fun <T> getConfigWriter(name: String, type: RelType<T>): ConfigReader<T>
 

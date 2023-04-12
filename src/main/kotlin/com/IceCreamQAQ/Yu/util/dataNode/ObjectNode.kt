@@ -118,4 +118,8 @@ open class ObjectNode : BaseNode(), MutableIterable<Map.Entry<String, DataNode>>
     override fun <T> asArray(type: RelType<T>): List<T> {
         return arrayListOf(asObject(type))
     }
+
+    override fun <T> asMap(type: RelType<T>): Map<String, T> {
+        return dataMap.mapValues { it.value.asObject(type) }
+    }
 }
