@@ -30,6 +30,7 @@ open class ContextImpl(
     open val dataReaderFactory: DataReaderFactory = ObjectDataReaderFactory(this, RelType.create(Any::class.java))
         .apply {
             register(ListDataReaderFactory(this@ContextImpl, RelType.create(List::class.java)))
+            register(MapDataReaderFactory(this@ContextImpl, RelType.create(Map::class.java)))
         }
 
     open fun init(): ContextImpl {

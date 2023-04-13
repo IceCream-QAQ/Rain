@@ -12,7 +12,7 @@ import javax.inject.Named
 /***
  * @description : Todo
  * @author : 梦某人
- * @date : 2023/2/17 17:26 
+ * @date : 2023/2/17 17:26
  */
 @AutoBind
 interface TestNamed {
@@ -20,18 +20,18 @@ interface TestNamed {
 }
 
 @Named("test")
-class TestNamedImpl: TestNamed {
+class TestNamedImpl : TestNamed {
     override fun invoke() = "Test1"
 }
 
 
 @Named("test2")
-class TestNamedImpl2: TestNamed {
+class TestNamedImpl2 : TestNamed {
     override fun invoke() = "Test2"
 }
 
 @EventListener
-class NamedInjectTest{
+class NamedInjectTest {
 
     @Inject
     @field:Named("{test.named}")
@@ -41,10 +41,11 @@ class NamedInjectTest{
     @Inject
     private lateinit var namedList: List<TestNamed>
 
-
+    @Inject
+    private lateinit var namedMap: Map<String, TestNamed>
 
     @Event
-    fun onStart(e: AppStartEvent){
+    fun onStart(e: AppStartEvent) {
         println("On Start! in NamedInject")
         println("[Di - Named Inject ${testNamed()}]")
     }
