@@ -3,6 +3,7 @@ package com.icecreamqaq.test.yu.di
 import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.annotation.Event
 import com.IceCreamQAQ.Yu.annotation.EventListener
+import com.IceCreamQAQ.Yu.di.kotlin.inject
 import com.IceCreamQAQ.Yu.event.events.AppStartEvent
 import javax.inject.Inject
 
@@ -35,6 +36,12 @@ class NamedInjectTest{
     @Inject
     @field:Named("{test.named}")
     private lateinit var testNamed: TestNamed
+
+
+    @Inject
+    private lateinit var namedList: List<TestNamed>
+
+
 
     @Event
     fun onStart(e: AppStartEvent){

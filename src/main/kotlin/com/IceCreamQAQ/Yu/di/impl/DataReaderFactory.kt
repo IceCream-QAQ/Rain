@@ -1,5 +1,6 @@
 package com.IceCreamQAQ.Yu.di.impl
 
+import com.IceCreamQAQ.Yu.di.ClassContext
 import com.IceCreamQAQ.Yu.di.DataReader
 import com.IceCreamQAQ.Yu.di.impl.ContextImpl
 import com.IceCreamQAQ.Yu.util.type.RelType
@@ -29,6 +30,36 @@ open class ObjectDataReaderFactory(context: ContextImpl, type: RelType<*>) : Dat
 
 }
 
-//open class ListDataReaderFactory(context: ContextImpl, type: RelType<*>) : DataReaderFactory(context, type) {
-//
-//}
+open class ListDataReaderFactory(context: ContextImpl, type: RelType<*>) : DataReaderFactory(context, type) {
+    class ArrayDataReader<T>(val context: ClassContext<T>) : DataReader<List<T>> {
+        override fun invoke(): List<T>? {
+            val instanceList = ArrayList<T>()
+
+            if (context is LocalInstanceClassContext) {
+                instanceList.add(context.instance)
+            }
+
+            if (context is BindableClassContext) {
+                context.bindMap.forEach { (_, v) ->
+                    v.getBean()?.let { instanceList.add(it) }
+                }
+            }
+
+            if (context is InstanceAbleClassContext) {
+                context.instanceMap.forEach { (_, v) ->
+                    instanceList.add(v)
+                }
+                context.defaultInstance?.let { instanceList.add(it) }
+            }
+
+            return instanceList
+        }
+
+        override fun invoke(name: String): List<T>? = invoke()
+    }
+
+    override fun <T> localDataReader(type: RelType<T>): DataReader<T> {
+        return ArrayDataReader(context.findContext(type.generics!![0].realClass)) as DataReader<T>
+    }
+
+}

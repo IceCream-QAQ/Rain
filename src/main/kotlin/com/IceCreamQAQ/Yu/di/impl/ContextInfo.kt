@@ -65,7 +65,7 @@ abstract class BindableClassContext<T> : ClassContext<T> {
         }
     }
 
-    protected open val bindMap: MutableMap<String, ClassContext<out T>> = HashMap()
+    open val bindMap: MutableMap<String, ClassContext<out T>> = HashMap()
 
     override fun putBinds(name: String, cc: ClassContext<out T>) {
         bindMap[name] = cc
