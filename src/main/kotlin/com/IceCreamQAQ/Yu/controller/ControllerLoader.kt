@@ -56,11 +56,11 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
                 }
                 m.annotation<After> {
                     makeAfter(this, type, m, getter)
-                        ?.let { p -> controllerFlow.beforeProcesses.add(p) }
+                        ?.let { p -> controllerFlow.afterProcesses.add(p) }
                 }
                 m.annotation<Catch> {
                     makeCatch(this, type, m, getter)
-                        ?.let { p -> controllerFlow.beforeProcesses.add(p) }
+                        ?.let { p -> controllerFlow.catchProcesses.add(p) }
                 }
 
 
