@@ -11,8 +11,8 @@ public @interface After {
 
     int weight() default 0;
 
-    String[] except() default "";
+    String[] except() default {};
 
-    String[] only() default "";
+    String[] only() default {};
 
 }

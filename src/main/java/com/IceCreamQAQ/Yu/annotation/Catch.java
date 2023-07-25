@@ -13,8 +13,8 @@ public @interface Catch {
 
     Class<? extends Throwable> error();
 
-    String[] except() default "";
+    String[] except() default {};
 
-    String[] only() default "";
+    String[] only() default {};
 
 }
