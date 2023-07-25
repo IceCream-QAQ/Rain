@@ -171,7 +171,7 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
             ArrayList<ProcessInfo<CTX>>()
                 .apply {
                     val checkPi = { it: ProcessInfo<CTX> ->
-                        if (actionName !in it.except && it.only.isNotEmpty() && actionName in it.only) add(it)
+                        if (actionName !in it.except && (it.only.isEmpty() || actionName in it.only)) add(it)
                     }
                     property.get(rootRouter).forEach(checkPi)
                     property.get(controllerFlow).forEach(checkPi)
