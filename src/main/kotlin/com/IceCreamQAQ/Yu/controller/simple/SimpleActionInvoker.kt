@@ -26,10 +26,15 @@ abstract class SimpleActionInvoker<CTX : ActionContext>(
                 context.runtimeError = it
                 kotlin.runCatching { catchsProcesses.any { onProcessResult(context, it(context)) } }
                     .getOrElse { exception ->
-                        if (exception is ActionResult) onActionResult(context, exception.result)
-                        else throw it
+                        if (exception is ActionResult) {
+                            context.runtimeError = null
+                            onActionResult(context, exception.result)
+                        } else throw it
                     }
-            } else onActionResult(context, it.result)
+            } else {
+                context.runtimeError = null
+                onActionResult(context, it.result)
+            }
         }
 
         return checkActionResult(context)
