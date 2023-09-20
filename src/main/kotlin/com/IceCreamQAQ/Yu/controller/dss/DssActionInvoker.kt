@@ -15,7 +15,7 @@ abstract class DssActionInvoker<CTX : PathActionContext>(
 
     override suspend fun invoke(context: CTX): Boolean {
         matchers.forEachIndexed { i, matcher ->
-            if (!matcher(context.path[i + level],context)) return false
+            if (!matcher(runCatching { context.path[i + level] }.getOrNull(), context)) return false
         }
         return super.invoke(context)
     }
