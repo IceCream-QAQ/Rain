@@ -107,15 +107,19 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainAppClassLo
             throw RuntimeException("加载类: $name 出错！", e)
         }
         if (null == c) c = super.loadClass(name, resolve)
-        val pkgName = name.substring(0, name.lastIndexOf("."))
-        //        if (getParent())
-        if (getPackage(pkgName) == null) {
-            try {
-                definePackage(pkgName, null, null, null, null, null, null, null)
-            } catch (iae: IllegalArgumentException) {
-                throw AssertionError("Cannot find package " + pkgName)
+        name.lastIndexOf(".").let {
+            if (it != -1){
+                val pkgName = name.substring(0, it)
+                if (getPackage(pkgName) == null) {
+                    try {
+                        definePackage(pkgName, null, null, null, null, null, null, null)
+                    } catch (iae: IllegalArgumentException) {
+                        throw AssertionError("Cannot find package " + pkgName)
+                    }
+                }
             }
         }
+
         return c
     }
 
