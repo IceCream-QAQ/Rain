@@ -3,7 +3,7 @@ package com.icecreamqaq.test.yu.di
 import com.IceCreamQAQ.Yu.annotation.Event
 import com.IceCreamQAQ.Yu.annotation.EventListener
 import com.IceCreamQAQ.Yu.di.kotlin.config
-import com.IceCreamQAQ.Yu.event.events.AppStartEvent
+import com.IceCreamQAQ.Yu.event.events.AppStatusEvent
 
 @EventListener
 class KotlinByInject {
@@ -12,7 +12,7 @@ class KotlinByInject {
 
 
     @Event
-    fun onStart(e: AppStartEvent) {
+    fun onStart(e: AppStatusEvent.AppStarted) {
         println("[Di - KotlinByInject] OK!($runMode)")
     }
 

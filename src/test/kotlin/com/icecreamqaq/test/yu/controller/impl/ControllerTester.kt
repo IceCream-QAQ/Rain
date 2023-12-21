@@ -3,8 +3,7 @@ package com.icecreamqaq.test.yu.controller.impl
 import com.IceCreamQAQ.Yu.annotation.Event
 import com.IceCreamQAQ.Yu.annotation.EventListener
 import com.IceCreamQAQ.Yu.di.kotlin.inject
-import com.IceCreamQAQ.Yu.event.events.AppStartEvent
-import com.IceCreamQAQ.Yu.util.sout
+import com.IceCreamQAQ.Yu.event.events.AppStatusEvent
 import kotlinx.coroutines.runBlocking
 
 @EventListener
@@ -13,7 +12,7 @@ class ControllerTester {
     val controllerLoader by inject<TestControllerLoader>()
 
     @Event
-    fun onStart(e: AppStartEvent) {
+    fun onStart(e: AppStatusEvent.AppStarted) {
         runBlocking {
             println("---------------- Controller Test ----------------")
 

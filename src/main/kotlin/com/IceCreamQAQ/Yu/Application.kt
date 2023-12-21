@@ -6,8 +6,7 @@ import com.IceCreamQAQ.Yu.di.config.impl.ConfigImpl
 import com.IceCreamQAQ.Yu.di.getBean
 import com.IceCreamQAQ.Yu.di.impl.ContextImpl
 import com.IceCreamQAQ.Yu.event.EventBus
-import com.IceCreamQAQ.Yu.event.events.AppStartEvent
-import com.IceCreamQAQ.Yu.event.events.AppStopEvent
+import com.IceCreamQAQ.Yu.event.events.AppStatusEvent
 import com.IceCreamQAQ.Yu.loader.AppLoader
 import com.IceCreamQAQ.Yu.util.exists
 import java.util.*
@@ -32,13 +31,13 @@ class Application {
 
         asLoader.start()
         eventBus = context.getBean()!!
-        eventBus.post(AppStartEvent())
+        eventBus.post(AppStatusEvent.AppStarted())
 
         Runtime.getRuntime().addShutdownHook(Thread { stop() })
     }
 
     fun stop() {
-        eventBus.post(AppStopEvent())
+        eventBus.post(AppStatusEvent.AppStopping())
         asLoader.stop()
     }
 

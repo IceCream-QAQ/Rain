@@ -4,7 +4,7 @@ import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.annotation.Event
 import com.IceCreamQAQ.Yu.annotation.EventListener
 import com.IceCreamQAQ.Yu.di.kotlin.inject
-import com.IceCreamQAQ.Yu.event.events.AppStartEvent
+import com.IceCreamQAQ.Yu.event.events.AppStatusEvent
 import javax.inject.Inject
 
 import javax.inject.Named
@@ -45,7 +45,7 @@ class NamedInjectTest {
     private lateinit var namedMap: Map<String, TestNamed>
 
     @Event
-    fun onStart(e: AppStartEvent) {
+    fun onStart(e: AppStatusEvent.AppStarted) {
         println("On Start! in NamedInject")
         println("[Di - Named Inject ${testNamed()}]")
     }

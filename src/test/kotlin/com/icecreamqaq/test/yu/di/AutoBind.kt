@@ -3,7 +3,7 @@ package com.icecreamqaq.test.yu.di
 import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.annotation.Event
 import com.IceCreamQAQ.Yu.annotation.EventListener
-import com.IceCreamQAQ.Yu.event.events.AppStartEvent
+import com.IceCreamQAQ.Yu.event.events.AppStatusEvent
 import javax.inject.Inject
 
 @EventListener
@@ -13,7 +13,7 @@ class TestAutoBind {
     private lateinit var testInterface: TestInterface
 
     @Event
-    fun onStart(e: AppStartEvent) {
+    fun onStart(e: AppStatusEvent.AppStarted) {
         println("[Di - AutoBind] ${testInterface()}")
     }
 

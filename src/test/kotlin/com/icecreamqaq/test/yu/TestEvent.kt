@@ -1,24 +1,16 @@
 package com.icecreamqaq.test.yu
 
-import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.annotation.Event
 import com.IceCreamQAQ.Yu.annotation.EventListener
 import com.IceCreamQAQ.Yu.event.EventBus
-import com.IceCreamQAQ.Yu.event.events.AppStartEvent
-import com.IceCreamQAQ.Yu.event.events.AppStopEvent
-import com.IceCreamQAQ.Yu.event.events.EventListenerRunExceptionEvent
-import com.IceCreamQAQ.Yu.event.events.JobRunExceptionEvent
+import com.IceCreamQAQ.Yu.event.events.*
 import com.IceCreamQAQ.Yu.fullName
 import com.IceCreamQAQ.Yu.job.JobManager
-import com.IceCreamQAQ.Yu.job.JobManagerImpl
 import com.IceCreamQAQ.Yu.util.Web
 import com.IceCreamQAQ.Yu.validation.Min
-import com.IceCreamQAQ.Yu.validation.ValidHook
 import javax.inject.Inject
 
-class CustomEvent : com.IceCreamQAQ.Yu.event.events.Event() {
-    override fun cancelAble() = true
-}
+class CustomEvent : AbstractCancelAbleEvent()
 
 @EventListener
 class TestEvent {
@@ -33,7 +25,7 @@ class TestEvent {
     private lateinit var eventBus: EventBus
 
     @Event
-    fun onStart(e: AppStartEvent) {
+    fun onStart(e: AppStatusEvent.AppStarted) {
         println("Baidu:")
         println(web.get("https://www.baidu.com/"))
         println("Baidu.")
@@ -51,7 +43,7 @@ class TestEvent {
     }
 
     @Event
-    fun onClose(e: AppStopEvent) {
+    fun onClose(e: AppStatusEvent.AppStopping) {
         println("AppStopEvent")
     }
 
@@ -77,7 +69,7 @@ class TestEvent {
 
     @Event(weight = Event.Weight.low)
     fun customListenerL(e: CustomEvent) {
-        e.cancel = true
+        e.isCanceled = true
         println("On CustomEvent at low level.")
     }
 

@@ -6,9 +6,9 @@ import com.IceCreamQAQ.Yu.job.JobInfo
 class EventListenerRunExceptionEvent(
     val listenerInfo: EventListenerInfo,
     val throwable: Throwable
-) : Event()
+) : Event
 
 class JobRunExceptionEvent(
     val jobInfo: JobInfo,
     val throwable: Throwable
-) : Event()
+) : Event

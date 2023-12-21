@@ -3,6 +3,7 @@ package com.IceCreamQAQ.Yu.event
 import com.IceCreamQAQ.Yu.annotation.AutoBind
 import com.IceCreamQAQ.Yu.event.events.Event
 import com.IceCreamQAQ.Yu.annotation.Event.Weight
+import com.IceCreamQAQ.Yu.event.events.CancelAbleEvent
 import com.IceCreamQAQ.Yu.event.events.EventListenerRunExceptionEvent
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -33,6 +34,7 @@ class EventBusImpl : EventBus {
     val ss = arrayOf(Weight.highest, Weight.high, Weight.normal, Weight.low, Weight.lowest)
 
     override fun post(event: Event): Boolean {
+        val cancelable = event is CancelAbleEvent
         operator fun EventListenerInfo.invoke(): Boolean {
             try {
                 invoker.invoke(event)
@@ -41,10 +43,10 @@ class EventBusImpl : EventBus {
                 if (event !is EventListenerRunExceptionEvent)
                     post(EventListenerRunExceptionEvent(this, throwable))
             }
-            return event.cancelAble() && event.cancel
+            return cancelable && (event as CancelAbleEvent).isCanceled
         }
         eis[Weight.record]!!.forEach { it() }
-        event.cancel = false
+        if (cancelable)(event as CancelAbleEvent).isCanceled = false
         for (i in 0..4) {
             val width = ss[i]
             for (eventInvoker in eis[width]!!) {
