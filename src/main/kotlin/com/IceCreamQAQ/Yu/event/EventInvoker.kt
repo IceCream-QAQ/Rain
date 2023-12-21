@@ -1,9 +1,7 @@
-package com.IceCreamQAQ.Yu.event;
+package com.IceCreamQAQ.Yu.event
 
-import com.IceCreamQAQ.Yu.event.events.Event;
+import com.IceCreamQAQ.Yu.event.events.Event
 
-public interface EventInvoker {
-
-    void invoke(Event event);
-
+interface EventInvoker {
+    fun invoke(event: Event)
 }
