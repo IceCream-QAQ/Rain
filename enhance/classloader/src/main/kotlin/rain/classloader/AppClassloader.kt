@@ -50,11 +50,11 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainAppClassLo
         blackPackages.addAll(blackList)
 
         blackClasses.apply {
-            add("com.IceCreamQAQ.Yu.loader.IRainClassLoader")
+            add("rain.classloader.IRainClassLoader")
             add("rain.classloader.IRainAppClassLoader")
-            add("com.IceCreamQAQ.Yu.loader.AppClassloader")
+            add("rain.classloader.AppClassloader")
 
-            add("com.IceCreamQAQ.Yu.loader.transformer.ClassTransformer")
+            add("rain.classloader.transformer.ClassTransformer")
         }
     }
 

@@ -1,6 +1,5 @@
 package rain.classloader
 
-import com.IceCreamQAQ.Yu.loader.IRainClassLoader
 import rain.classloader.transformer.ClassTransformer
 
 

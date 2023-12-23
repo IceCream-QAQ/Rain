@@ -1,6 +1,6 @@
 package rain.classloader.enchant
 
-import com.IceCreamQAQ.Yu.loader.IRainClassLoader
+import rain.classloader.IRainClassLoader
 import org.objectweb.asm.tree.ClassNode
 import rain.classloader.transformer.ClassTransformer
 

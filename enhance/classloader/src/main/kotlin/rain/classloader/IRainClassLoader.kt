@@ -1,4 +1,4 @@
-package com.IceCreamQAQ.Yu.loader
+package rain.classloader
 
 interface IRainClassLoader {
 
