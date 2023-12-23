@@ -2,8 +2,8 @@ package rain.function
 
 import java.util.*
 
-internal fun <T> T.sout() = this.apply { println(this) }
-internal fun uuid() = UUID.randomUUID().toString()
+fun <T> T.sout() = this.apply { println(this) }
+fun uuid() = UUID.randomUUID().toString()
 
 inline fun <E, reified R> Collection<E>.arrayMap(body: (E) -> R): Array<R?> {
     val array = arrayOfNulls<R>(size)
