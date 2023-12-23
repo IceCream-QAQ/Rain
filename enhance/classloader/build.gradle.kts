@@ -4,4 +4,5 @@ plugins {
 
 dependencies {
     api(project(":function"))
+    testImplementation(project(":test-base"))
 }
