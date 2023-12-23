@@ -6,3 +6,4 @@ fun includeProject(name: String, dir: String? = null) {
 }
 
 includeProject(":function", "tools/function")
+includeProject(":classloader", "enhance/classloader")
