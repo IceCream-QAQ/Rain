@@ -9,6 +9,8 @@ includeProject(":function", "tools/function")
 includeProject(":classloader", "enhance/classloader")
 includeProject(":hook","enhance/hook")
 
+includeProject(":di", "di")
+
 
 fun test(name: String){
     includeProject(":test-$name", "test/$name")
