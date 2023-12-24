@@ -1,3 +1,5 @@
 package rain.event.events
 
-open class AbstractEvent: Event
+import rain.api.event.Event
+
+open class AbstractEvent : Event

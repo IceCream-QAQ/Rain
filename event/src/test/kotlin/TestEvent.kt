@@ -1,4 +1,3 @@
-import rain.classloader.AppClassloader
 import rain.classloader.SpawnClassLoader
 import rain.event.EventBusImpl
 import rain.event.EventInvokerCreator

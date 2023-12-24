@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    api(project(":function"))
+    api(project(":api"))
     api(project(":classloader"))
     testImplementation(project(":test-base"))
 }

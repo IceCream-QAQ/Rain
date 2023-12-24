@@ -2,9 +2,10 @@ package rain.event
 
 import rain.event.events.EventListenerRunExceptionEvent
 import org.slf4j.LoggerFactory
+import rain.api.event.EventBus
 import rain.event.annotation.Event.Weight
 import rain.event.events.CancelAbleEvent
-import rain.event.events.Event
+import rain.api.event.Event
 import rain.function.annotation
 
 class EventBusImpl(
@@ -40,7 +41,7 @@ class EventBusImpl(
             return cancelable && (event as CancelAbleEvent).isCanceled
         }
         eis[Weight.record]!!.forEach { it() }
-        if (cancelable)(event as CancelAbleEvent).isCanceled = false
+        if (cancelable) (event as CancelAbleEvent).isCanceled = false
         for (i in 0..4) {
             val width = ss[i]
             for (eventInvoker in eis[width]!!) {
@@ -50,15 +51,15 @@ class EventBusImpl(
         return false
     }
 
-    override fun register(info: EventListenerInfo) {
+    fun register(info: EventListenerInfo) {
         eis[info.weight]!!.add(info)
     }
 
-    override fun unregister(info: EventListenerInfo) {
+    fun unregister(info: EventListenerInfo) {
         eis[info.weight]!!.remove(info)
     }
 
-    override fun <T> register(clazz: Class<T>, instance: T) {
+    fun <T> register(clazz: Class<T>, instance: T) {
         clazz.methods.forEach {
             it.annotation<rain.event.annotation.Event> {
                 register(
