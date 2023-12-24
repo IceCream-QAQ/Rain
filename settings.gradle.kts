@@ -13,6 +13,7 @@ includeProject(":hook", "enhance/hook")
 
 includeProject(":di", "di")
 includeProject(":event", "event")
+includeProject(":job", "job")
 
 
 fun test(name: String) {
