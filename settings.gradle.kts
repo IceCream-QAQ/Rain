@@ -10,6 +10,7 @@ includeProject(":classloader", "enhance/classloader")
 includeProject(":hook","enhance/hook")
 
 includeProject(":di", "di")
+includeProject(":event", "event")
 
 
 fun test(name: String){
