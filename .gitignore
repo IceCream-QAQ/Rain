@@ -17,3 +17,6 @@ gradle-app.setting
 
 ### Custom
 .idea
+
+tmp
+log
