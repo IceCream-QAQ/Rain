@@ -1,14 +1,13 @@
 package rain.di.impl
 
+import org.slf4j.LoggerFactory
+import rain.api.di.DiContext
+import rain.di.*
 import rain.di.config.ConfigManager
 import rain.di.config.ConfigReader
-import org.slf4j.LoggerFactory
-import rain.di.*
-import rain.di.din
-import rain.di.impl.*
-import rain.di.isBean
 import rain.function.annotation
 import rain.function.hasAnnotation
+import rain.function.isBean
 import rain.function.type.RelType
 import java.lang.reflect.Constructor
 import java.lang.reflect.Type
@@ -42,12 +41,15 @@ open class ContextImpl(
                 putBinds("appClassloader", LocalInstanceClassContext(classloader))
             }
 
-        contextMap[YuContext::class.java] = NoInstanceClassContext(this, YuContext::class.java)
-            .apply {
-                putBinds(din, LocalInstanceClassContext(this@ContextImpl).apply {
-                    contextMap[ContextImpl::class.java] = this
-                })
-            }
+        LocalInstanceClassContext(this@ContextImpl).apply {
+            contextMap[ContextImpl::class.java] = this
+        }.let {
+            contextMap[DiContext::class.java] = NoInstanceClassContext(this, DiContext::class.java)
+                .apply { putBinds(din, it) }
+            contextMap[YuContext::class.java] = NoInstanceClassContext(this, YuContext::class.java)
+                .apply { putBinds(din, it) }
+        }
+
         contextMap[ConfigManager::class.java] = NoInstanceClassContext(this, ConfigManager::class.java)
             .apply {
                 putBinds(din, LocalInstanceClassContext(configManager).apply {
