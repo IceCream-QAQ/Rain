@@ -30,48 +30,48 @@ object FullStackApplicationLauncher {
 
         // 初始化 EnchantManager
         appClassLoader.apply {
-            registerBlackClass("com.IceCreamQAQ.Yu.annotation.EnchantBy")
-            registerBlackClass("com.IceCreamQAQ.Yu.loader.enchant.Enchanter")
+            registerBlackClass("rain.classloader.enchant.EnchantBy")
+            registerBlackClass("rain.classloader.enchant.Enchanter")
 
             registerTransformer(
-                loadClass("com.IceCreamQAQ.Yu.loader.enchant.EnchantManager").run {
+                loadClass("rain.classloader.enchant.EnchantManager").run {
                     getConstructor(IRainClassLoader::class.java).newInstance(appClassLoader)
                 } as ClassTransformer
             )
         }
 
         // 注入参数验证方法 ValidHook 注解添加 Transformer
-        appClassLoader.apply {
-            registerTransformer(
-                loadClass("com.IceCreamQAQ.Yu.validation.global.ValidHookAddTransformer").run {
-                    getConstructor(IRainClassLoader::class.java).newInstance(appClassLoader)
-                } as ClassTransformer
-            )
-        }
+//        appClassLoader.apply {
+//            registerTransformer(
+//                loadClass("com.IceCreamQAQ.Yu.validation.global.ValidHookAddTransformer").run {
+//                    getConstructor(IRainClassLoader::class.java).newInstance(appClassLoader)
+//                } as ClassTransformer
+//            )
+//        }
 
         // 初始化 YuHook
         appClassLoader.apply {
-            registerBlackClass("com.IceCreamQAQ.Yu.annotation.HookBy")
-            registerBlackClass("com.IceCreamQAQ.Yu.annotation.InstanceMode")
+            registerBlackClass("rain.hook.HookBy")
+            registerBlackClass("rain.hook.InstanceMode")
 
-            registerBlackClass("com.IceCreamQAQ.Yu.hook.IHook")
-            registerBlackClass("com.IceCreamQAQ.Yu.hook.HookRunnable")
-            registerBlackClass("com.IceCreamQAQ.Yu.hook.HookItem")
-            registerBlackClass("com.IceCreamQAQ.Yu.hook.HookInfo")
-            registerBlackClass("com.IceCreamQAQ.Yu.hook.HookContext")
+            registerBlackClass("rain.hook.IHook")
+            registerBlackClass("rain.hook.HookRunnable")
+            registerBlackClass("rain.hook.HookItem")
+            registerBlackClass("rain.hook.HookInfo")
+            registerBlackClass("rain.hook.HookContext")
 
             registerTransformer(
-                loadClass("com.IceCreamQAQ.Yu.hook.HookImpl")
+                loadClass("rain.hook.HookImpl")
                     .getConstructor(IRainClassLoader::class.java, IHook::class.java)
                     .newInstance(this, null) as ClassTransformer
             )
         }
 
         // 注册 Kotlin ByInject 实现
-        appClassLoader.registerTransformer("com.IceCreamQAQ.Yu.di.kotlin.YuContextKotlinInjectTransformer")
+//        appClassLoader.registerTransformer("com.IceCreamQAQ.Yu.di.kotlin.YuContextKotlinInjectTransformer")
 
 
-        val applicationClass = appClassLoader.loadClass("com.IceCreamQAQ.Yu.Application")
+        val applicationClass = appClassLoader.loadClass("rain.application.Application")
         applicationClass.getMethod("start").invoke(applicationClass.newInstance())
     }
 
