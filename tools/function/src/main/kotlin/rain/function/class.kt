@@ -2,4 +2,4 @@ package rain.function
 
 import java.lang.reflect.Modifier
 
-fun Class<*>.isBean() = !(this.isInterface || Modifier.isAbstract(this.modifiers))
+val Class<*>.isBean get() = !(this.isInterface || Modifier.isAbstract(this.modifiers))
