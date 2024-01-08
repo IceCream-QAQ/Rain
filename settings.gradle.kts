@@ -14,6 +14,7 @@ includeProject(":hook", "enhance/hook")
 includeProject(":di", "di")
 includeProject(":event", "event")
 includeProject(":job", "job")
+includeProject(":controller", "controller")
 
 
 fun test(name: String) {

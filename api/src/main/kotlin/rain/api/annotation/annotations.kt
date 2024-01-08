@@ -7,3 +7,5 @@ import kotlin.reflect.KClass
 annotation class AutoBind
 
 annotation class LoadBy(val value: KClass<out Loader>, val mastBean: Boolean = true)
+
+annotation class Nullable(val value: String = "")
