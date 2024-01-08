@@ -17,6 +17,9 @@ includeProject(":job", "job")
 includeProject(":controller", "controller")
 
 
+includeProject(":application", "application")
+
+
 fun test(name: String) {
     includeProject(":test-$name", "test/$name")
 }
