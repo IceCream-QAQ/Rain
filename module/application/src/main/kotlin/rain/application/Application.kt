@@ -30,7 +30,7 @@ class Application {
         asLoader = context.getBean()!!
 
         asLoader.start()
-        eventBus = context.getBean()!!
+        eventBus = context.getBean()
         eventBus?.post(AppStatusEvent.AppStarted())
 
         Runtime.getRuntime().addShutdownHook(Thread { stop() })
