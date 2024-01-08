@@ -18,10 +18,10 @@ class Application {
 
     fun start() {
         val appClassloader = this::class.java.classLoader
-        val runMode = System.getProperty("yu.runMode")?.lowercase(Locale.getDefault())
+        val runMode = System.getProperty("rain.runMode")?.lowercase(Locale.getDefault())
             ?: if (exists("pom.xml", "build.gradle", "build.gradle.kts")) "dev"
             else null
-        val launchPackage = System.getProperty("yu.launchPackage")
+        val launchPackage = System.getProperty("rain.launchPackage")
 
         val configManager = ConfigImpl(appClassloader, runMode, launchPackage).init()
         val context = ContextImpl(appClassloader, configManager).init()

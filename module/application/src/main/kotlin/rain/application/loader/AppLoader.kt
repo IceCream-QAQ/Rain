@@ -22,11 +22,11 @@ open class AppLoader(
     @Named("appClassloader")
     open val classLoader: ClassLoader,
     open val context: ContextImpl,
-    @Config("yu.scanPackages")
+    @Config("rain.scanPackages")
     open val scanPackages: List<String>,
-    @Config("yu.classRegisters")
+    @Config("rain.classRegisters")
     open val classRegister: List<String>,
-    @Config("yu.modules")
+    @Config("rain.modules")
     open val modules: List<String>
 ) {
 

@@ -48,10 +48,10 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
         mergeMode(modeFileMap)
 
         launchPackage?.let {
-            ((rootNode.getOrPut("yu") { ObjectNode() } as ObjectNode)
+            ((rootNode.getOrPut("rain") { ObjectNode() } as ObjectNode)
                 .getOrPut("scanPackages") { ArrayNode() } as ArrayNode).add(StringNode(it))
         }
-        (rootNode.getOrPut("yu") { ObjectNode() } as ObjectNode)["runMode"] = StringNode(runMode!!)
+        (rootNode.getOrPut("rain") { ObjectNode() } as ObjectNode)["runMode"] = StringNode(runMode!!)
 
         log.info("[配置管理器] 初始化完成。")
 
@@ -121,9 +121,9 @@ open class ConfigImpl(val classLoader: ClassLoader, var runMode: String?, val la
     }
 
     protected open val forceArrayPropertiesName = arrayOf(
-        "yu.scanPackages",
-        "yu.classRegisters",
-        "yu.modules",
+        "rain.scanPackages",
+        "rain.classRegisters",
+        "rain.modules",
     )
 
     protected open fun loadConfigFile(mode: String, name: String, inputStream: InputStream, node: ObjectNode) {
