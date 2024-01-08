@@ -2,7 +2,9 @@ package rain.application.loader
 
 import rain.api.annotation.AutoBind
 import rain.api.annotation.LoadBy
+import rain.api.di.DiContext.Companion.getBean
 import rain.api.di.named
+import rain.api.loader.ApplicationService
 import rain.api.loader.LoadItem
 import rain.api.loader.Loader
 import rain.di.BeanFactory
@@ -53,6 +55,7 @@ open class AppLoader(
 
         val bindMap = HashMap<Class<*>, MutableMap<String, Class<*>>>()
         val beanFactoryMap = HashMap<Class<*>, Class<BeanFactory<*>>>()
+        val applicationServices = ArrayList<Class<out ApplicationService>>()
 //        val beanFactoryList = ArrayList<Class<out BeanFactory<*>>>()
 
         classes.forEach { clazz ->
@@ -75,6 +78,8 @@ open class AppLoader(
             }
             registers.forEach { it.register(clazz) }
             searchLoadBy(clazz, clazz, loadItemsMap)
+            if (clazz.isBean && ApplicationService::class.java.isAssignableFrom(clazz))
+                applicationServices.add(clazz as Class<out ApplicationService>)
         }
 
         bindMap.mapMap { (clazz, binds) ->
@@ -104,6 +109,8 @@ open class AppLoader(
         loaders.forEach { loader ->
             loadItemsMap[loader::class.java]?.values?.forEach { loader.load(it.values) }
         }
+
+        context.getBean<ApplicationServiceLoader>()!!.load(applicationServices)
     }
 
     open fun checkAutoBind(clazz: Class<*>, binds: ArrayList<Class<*>>) {
