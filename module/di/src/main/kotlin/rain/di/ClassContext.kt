@@ -1,5 +1,7 @@
 package rain.di
 
+import rain.api.di.DiContext
+
 interface ClassContext<T> : DataReader<T> {
 
     val clazz: Class<T>
@@ -18,8 +20,8 @@ interface ClassContext<T> : DataReader<T> {
 
     fun newBean(): T
     fun getBean(): T?
-    fun getBean(name: String = YuContext.defaultInstanceName): T?
-    fun putBean(name: String = YuContext.defaultInstanceName, instance: T): T
+    fun getBean(name: String = DiContext.defaultInstanceName): T?
+    fun putBean(name: String = DiContext.defaultInstanceName, instance: T): T
 
     fun putBinds(name: String, cc: ClassContext<out T>)
 

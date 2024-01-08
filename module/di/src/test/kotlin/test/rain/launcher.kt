@@ -1,7 +1,7 @@
 package test.rain
 
+import rain.api.di.DiContext.Companion.get
 import rain.di.Config
-import rain.di.YuContext.Companion.get
 import rain.di.config.impl.ConfigImpl
 import rain.di.impl.ContextImpl
 
