@@ -3,6 +3,8 @@ package rain.application
 import rain.classloader.AppClassloader
 import rain.classloader.IRainClassLoader
 import rain.classloader.transformer.ClassTransformer
+import rain.function.getCallPackage
+import rain.function.getCaller
 import rain.hook.IHook
 
 object FullStackApplicationLauncher {
@@ -20,11 +22,13 @@ object FullStackApplicationLauncher {
     }
 
     @JvmStatic
-    fun launch() {
+    @JvmOverloads
+    fun launch(callPackage: String = getCallPackage()) {
 //        Class.forName(Thread.currentThread().stackTrace.last().className).apply {
 //            if (!hasAnnotation<NotSearch>())
 //                System.setProperty("yu.launchPackage", name.substring(name.lastIndexOf(".")))
 //        }
+        if (callPackage.isNotEmpty()) System.setProperty("rain.launchPackage", callPackage)
         val appClassLoader = AppClassloader(Application::class.java.classLoader)
         Thread.currentThread().contextClassLoader = appClassLoader
 
