@@ -3,7 +3,7 @@ package rain.event
 import rain.event.events.EventListenerRunExceptionEvent
 import org.slf4j.LoggerFactory
 import rain.api.event.EventBus
-import rain.event.annotation.Event.Weight
+import rain.event.annotation.SubscribeEvent.Weight
 import rain.event.events.CancelAbleEvent
 import rain.api.event.Event
 import rain.function.annotation
@@ -18,15 +18,15 @@ class EventBusImpl(
 
     private val eis: Map<Weight, MutableList<EventListenerInfo>> =
         hashMapOf(
-            Weight.record to arrayListOf(),
-            Weight.highest to arrayListOf(),
-            Weight.high to arrayListOf(),
-            Weight.normal to arrayListOf(),
-            Weight.low to arrayListOf(),
-            Weight.lowest to arrayListOf(),
+            Weight.RECORD to arrayListOf(),
+            Weight.HIGHEST to arrayListOf(),
+            Weight.HIGH to arrayListOf(),
+            Weight.NORMAL to arrayListOf(),
+            Weight.LOW to arrayListOf(),
+            Weight.LOWEST to arrayListOf(),
         )
 
-    val ss = arrayOf(Weight.highest, Weight.high, Weight.normal, Weight.low, Weight.lowest)
+    val ss = arrayOf(Weight.HIGHEST, Weight.HIGH, Weight.NORMAL, Weight.LOW, Weight.LOWEST)
 
     override fun post(event: Event): Boolean {
         val cancelable = event is CancelAbleEvent
@@ -40,7 +40,7 @@ class EventBusImpl(
             }
             return cancelable && (event as CancelAbleEvent).isCanceled
         }
-        eis[Weight.record]!!.forEach { it() }
+        eis[Weight.RECORD]!!.forEach { it() }
         if (cancelable) (event as CancelAbleEvent).isCanceled = false
         for (i in 0..4) {
             val width = ss[i]
@@ -61,7 +61,7 @@ class EventBusImpl(
 
     fun <T> register(clazz: Class<T>, instance: T) {
         clazz.methods.forEach {
-            it.annotation<rain.event.annotation.Event> {
+            it.annotation<rain.event.annotation.SubscribeEvent> {
                 register(
                     EventListenerInfo(
                         clazz = clazz,

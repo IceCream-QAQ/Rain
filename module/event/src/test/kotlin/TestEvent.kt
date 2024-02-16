@@ -1,12 +1,12 @@
 import rain.classloader.SpawnClassLoader
 import rain.event.EventBusImpl
 import rain.event.EventInvokerCreator
-import rain.event.annotation.Event
+import rain.event.annotation.SubscribeEvent
 import rain.event.events.AbstractCancelAbleEvent
 
 class TestEventListener {
 
-    @Event
+    @SubscribeEvent
     fun onTestEvent(event: TestEvent) {
         println("Test event received")
     }
