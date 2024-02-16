@@ -10,18 +10,6 @@ import rain.hook.IHook
 object FullStackApplicationLauncher {
 
     @JvmStatic
-    fun launch(args: Array<String>) {
-        args.iterator().apply {
-            while (hasNext())
-                when (next()) {
-                    "-runMode" -> if (hasNext()) System.setProperty("yu.runMode", next())
-                }
-        }
-
-        launch()
-    }
-
-    @JvmStatic
     @JvmOverloads
     fun launch(callPackage: String = getCallPackage()) {
 //        Class.forName(Thread.currentThread().stackTrace.last().className).apply {
