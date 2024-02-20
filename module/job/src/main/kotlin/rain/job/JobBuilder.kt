@@ -5,7 +5,7 @@ import rain.function.toTime
 import java.time.ZoneOffset
 
 class JobBuilder(
-    val name: String,
+    val name: String? = null,
 ) {
 
     internal var timeFun: NextTime? = null
@@ -76,6 +76,10 @@ class JobBuilder(
         TODO()
     }
 
+    private fun getInvokerInfo() =
+        Thread.currentThread().stackTrace.first { !it.className.startsWith("rain.job.") }
+            ?.run { "$className.$methodName($fileName:$lineNumber)" }
+
     fun build(): JobRuntime {
         val time =
             timeFun
@@ -86,7 +90,7 @@ class JobBuilder(
                 } ?: error("任务没有正确的执行时间")
 
         return JobRuntime(
-            name,
+            name ?: getInvokerInfo() ?: "未命名任务",
             async,
             time,
             invoker ?: error("任务没有正确的执行体！")

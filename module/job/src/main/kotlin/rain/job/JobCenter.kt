@@ -16,11 +16,6 @@ class JobCenter(
     private val scope = cccPool("Job")
     private var jobs: MutableMap<String, JobRuntime> = HashMap()
 
-    private fun getInvokerInfo() =
-        Thread.currentThread().stackTrace.first { !it.className.startsWith("rain.job.") }
-            ?.run { "$className.$methodName($fileName:$lineNumber)" }
-
-
     override fun registerJob(job: JobRuntime): String {
         val id = uuid()
         job.registerScope(scope)
