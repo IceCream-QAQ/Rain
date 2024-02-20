@@ -5,15 +5,17 @@ import rain.function.toTime
 import java.time.ZoneOffset
 
 class JobBuilder(
-    val jobManager: JobManager,
     val name: String,
 ) {
 
-    internal var firstTime: Long? = null
-    internal var nextTime: Long? = null
+    internal var timeFun: NextTime? = null
     internal var async: Boolean = false
     internal var runWithStart: Boolean = false
     internal var invoker: CronInvoker? = null
+
+
+    internal var firstTime: Long? = null
+    internal var nextTime: Long? = null
 
     private fun of(body: () -> Unit): JobBuilder {
         body()
@@ -21,8 +23,7 @@ class JobBuilder(
     }
 
     fun every(time: Long) = of {
-        firstTime = time
-        nextTime = time
+        timeFun = NextTime { _, _ -> time }
     }
 
     fun every(time: String) = every(time.toTime())
@@ -75,9 +76,21 @@ class JobBuilder(
         TODO()
     }
 
+    fun build(): JobRuntime {
+        val time =
+            timeFun
+                ?: firstTime?.let {
+                    if (nextTime == null) NextTime { i, _ -> if (i != -1L) -1 else it }
+                    else if (it == nextTime) NextTime { _, _ -> it }
+                    else NextTime { i, _ -> if (i != -1L) nextTime!! else it }
+                } ?: error("任务没有正确的执行时间")
 
-    fun register() {
-        jobManager.registerJob(this)
+        return JobRuntime(
+            name,
+            async,
+            time,
+            invoker ?: error("任务没有正确的执行体！")
+        )
     }
 
 }

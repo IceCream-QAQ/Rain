@@ -6,16 +6,27 @@ import java.io.Closeable
 
 class JobRuntime(
     val name: String,
-    private val firstTime: Long,
-    private val nextTime: Long,
     private val async: Boolean,
-    private val runWithStart: Boolean,
+    private val nextTime: NextTime,
     private val invoker: CronInvoker,
-    private val scope: CoroutineScope,
-    private val errorCallback: (JobRuntime, Throwable) -> Unit,
-    private val endCallback: () -> Unit = {}
 ) : Closeable {
 
+
+    private lateinit var scope: CoroutineScope
+    private lateinit var errorCallback: (Throwable) -> Unit
+    private lateinit var endCallback: () -> Unit
+
+    internal fun registerScope(scope: CoroutineScope) {
+        this.scope = scope
+    }
+
+    internal fun registerErrorCallback(errorCallback: (Throwable) -> Unit) {
+        this.errorCallback = errorCallback
+    }
+
+    internal fun registerEndCallback(callback: () -> Unit) {
+        endCallback = callback
+    }
 
     companion object {
         private val log = LoggerFactory.getLogger(JobRuntime::class.java)
@@ -29,21 +40,22 @@ class JobRuntime(
             else invoker()
         }.getOrElse {
             log.error("任务: \"$name\" 运行时异常!", it)
-            errorCallback(this, it)
+            errorCallback(it)
         }
     }
 
     internal fun start() {
         job = scope.launch {
-            if (runWithStart) invoke()
-            var next = firstTime
-            while (next > 0) {
-                delay(next)
-                val start = System.currentTimeMillis()
+            var invokeTime = -1L
+            var endTime = -1L
+            while (true) {
+                val nextTime = nextTime(invokeTime, endTime)
+                if (nextTime < 0) break
+
+                delay(nextTime)
+                invokeTime = System.currentTimeMillis()
                 invoke()
-                val end = System.currentTimeMillis()
-                val cost = (end - start) % nextTime
-                next = nextTime - cost
+                endTime = System.currentTimeMillis()
             }
             endCallback()
         }

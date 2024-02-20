@@ -1,15 +1,17 @@
+import rain.job.JobBuilder
 import rain.job.JobCenter
 
 
 fun main(){
     val jc = JobCenter(null)
 
-    jc.newJob()
+    JobBuilder("aaa")
         .every("5s")
         .task {
             println("on 5s")
         }
-        .register()
+        .build()
+        .let { jc.registerJob(it) }
 
     Thread.sleep(100 * 1000)
 }

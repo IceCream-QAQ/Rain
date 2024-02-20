@@ -20,25 +20,15 @@ class JobCenter(
         Thread.currentThread().stackTrace.first { !it.className.startsWith("rain.job.") }
             ?.run { "$className.$methodName($fileName:$lineNumber)" }
 
-    override fun newJob(name: String?): JobBuilder =
-        JobBuilder(this, name ?: getInvokerInfo() ?: "Unnamed Job")
 
-    override fun registerJob(job: JobBuilder): String {
+    override fun registerJob(job: JobRuntime): String {
         val id = uuid()
-        val jr = JobRuntime(
-            job.name,
-            job.firstTime ?: error("请正确设置任务响应时间！"),
-            job.nextTime ?: 0,
-            job.async,
-            job.runWithStart,
-            job.invoker ?: error("请正确设置任务执行体！"),
-            scope,
-            errorCallback
-        ){
-            jobs.remove(id)
-        }
-        jobs[id] = jr
-        jr.start()
+        job.registerScope(scope)
+        job.registerErrorCallback { errorCallback(job, it) }
+        job.registerEndCallback { jobs.remove(id) }
+
+        jobs[id] = job
+        job.start()
         return id
     }
 
