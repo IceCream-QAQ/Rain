@@ -2,7 +2,7 @@ package rain.job
 
 import rain.api.event.EventBus
 import rain.api.loader.ApplicationService
-import rain.function.cccPool
+import rain.function.coreNumCoroutineScope
 import rain.function.uuid
 
 class JobCenter(
@@ -13,7 +13,7 @@ class JobCenter(
         eventBus?.let { { j, e -> it.post(JobRunExceptionEvent(j, e)) } }
             ?: { _, _ -> }
 
-    private val scope = cccPool("Job")
+    private val scope = coreNumCoroutineScope("Job")
     private var jobs: MutableMap<String, JobRuntime> = HashMap()
 
     override fun registerJob(job: JobRuntime): String {

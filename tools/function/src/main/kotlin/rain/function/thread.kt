@@ -14,16 +14,16 @@ inline fun getCaller(): Class<*> =
     Class.forName(Thread.currentThread().stackTrace[1].className)
 
 
-fun ccPool(name: String) =
+fun coreNumThreadPool(name: String) =
     newFixedThreadPoolContext(Runtime.getRuntime().availableProcessors(), name)
 
-fun cc2pool(name: String) =
+fun coreNum2ThreadPool(name: String) =
     newFixedThreadPoolContext(Runtime.getRuntime().availableProcessors() * 2, name)
 
-fun cccPool(name: String) = object : CoroutineScope {
-    override val coroutineContext = ccPool(name)
+fun coreNumCoroutineScope(name: String) = object : CoroutineScope {
+    override val coroutineContext = coreNumThreadPool(name)
 }
 
-fun ccc2pool(name: String) = object : CoroutineScope {
-    override val coroutineContext = cc2pool(name)
+fun coreNum2CoroutineScope(name: String) = object : CoroutineScope {
+    override val coroutineContext = coreNum2ThreadPool(name)
 }
