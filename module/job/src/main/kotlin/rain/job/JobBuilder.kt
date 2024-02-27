@@ -2,7 +2,7 @@ package rain.job
 
 import rain.function.DateUtil
 import rain.function.toTime
-import java.time.ZoneOffset
+import java.time.ZoneId
 
 class JobBuilder(
     val name: String? = null,
@@ -37,39 +37,34 @@ class JobBuilder(
     fun task(runnable: Runnable) = of { invoker = CronInvoker.runnable(runnable) }
     fun task(body: suspend () -> Unit) = of { invoker = CronInvoker.dsl(body) }
 
-    private var at: Int? = null
+    private var at: Long? = null
     fun at(time: String) = of {
         val tf = time.split(":")
-        fun e(): Nothing = error("时间格式解析失败！at 必须接受为 HH:mm 或是 HH:mm:ss 格式！")
+        fun e(): Nothing = error("时间格式解析失败！at 必须接受为 mm:ss 或是 HH:mm:ss 格式！")
 
-        val t = when (tf.size) {
+        val ts = when (tf.size) {
             1 -> e()
             2 -> {
-                at = 1
-                DateUtil.parseDate("${DateUtil.formatDate()} ${tf[0]}:${tf[1]}:00")
-                    .toInstant(ZoneOffset.UTC)
-                    .let {
-
-                    }
-                TODO()
+                at = 60 * 60 * 1000
+                "${DateUtil.formatDateTime().substring(0, 14)}${tf[0]}:${tf[1]}"
             }
 
             3 -> {
-                at = 2
-                TODO()
+                at = 24 * 60 * 60 * 1000
+                "${DateUtil.formatDate()} ${tf[0]}:${tf[1]}:00"
             }
 
             else -> e()
         }
+        var tl = DateUtil.parseDateTime(ts).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val cl = System.currentTimeMillis()
+        if (tl < cl) tl += at!!
+        firstTime = tl - cl
     }
 
     fun alaways() = of {
         if (at == null) error("请正确调用 at 函数提供执行时间！")
-        when (at) {
-            0 -> nextTime = 60 * 1000
-            1 -> nextTime = 60 * 60 * 1000
-            2 -> nextTime = 24 * 60 * 60 * 1000
-        }
+        nextTime = at
     }
 
     fun cron(time: String) {

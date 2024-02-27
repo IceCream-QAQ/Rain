@@ -6,7 +6,7 @@ fun main(){
     val jc = JobCenter(null)
 
     JobBuilder("aaa")
-        .every("5s")
+        .at("32:00")
         .task {
             println("on 5s")
         }
