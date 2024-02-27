@@ -2,6 +2,7 @@ package rain.job
 
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
+import rain.function.currentTimeMillis
 import java.io.Closeable
 
 class JobRuntime(
@@ -53,9 +54,9 @@ class JobRuntime(
                 if (nextTime < 0) break
 
                 delay(nextTime)
-                invokeTime = System.currentTimeMillis()
+                invokeTime = currentTimeMillis
                 invoke()
-                endTime = System.currentTimeMillis()
+                endTime = currentTimeMillis
             }
             endCallback()
         }

@@ -1,6 +1,7 @@
 package rain.job
 
 import rain.function.DateUtil
+import rain.function.currentTimeMillis
 import rain.function.toTime
 import java.time.ZoneId
 
@@ -57,7 +58,7 @@ class JobBuilder(
             else -> e()
         }
         var tl = DateUtil.parseDateTime(ts).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-        val cl = System.currentTimeMillis()
+        val cl = currentTimeMillis
         if (tl < cl) tl += at!!
         firstTime = tl - cl
     }
