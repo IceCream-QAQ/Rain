@@ -55,6 +55,8 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainAppClassLo
             add("rain.classloader.AppClassloader")
 
             add("rain.classloader.transformer.ClassTransformer")
+
+            add("rain.hook.IHook")
         }
     }
 
@@ -163,7 +165,9 @@ class AppClassloader(parent: ClassLoader) : ClassLoader(parent), IRainAppClassLo
                 || name.startsWith("ch.qos.logback.core.")
                 || name.startsWith("org.xml.")
                 || name.startsWith("org.slf4j.")
-                || name.startsWith("org.jboss."))
+                || name.startsWith("org.jboss.")
+                || name.startsWith("org.junit."))
+
         if (b) return true
         for (s in blackPackages) {
             if (name.startsWith(s)) return true

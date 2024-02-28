@@ -1,5 +1,6 @@
 package rain.application
 
+import rain.api.di.DiContext
 import rain.api.event.EventBus
 import rain.api.di.getBean
 import rain.api.di.DiContext.Companion.getBean
@@ -19,6 +20,7 @@ class Application {
 
     var eventBus: EventBus? = null
     lateinit var asLoader: ApplicationServiceLoader
+    lateinit var context: DiContext
 
     fun start() {
         val appClassloader = this::class.java.classLoader
@@ -28,10 +30,10 @@ class Application {
         val launchPackage = System.getProperty("rain.launchPackage")
 
         val configManager = ConfigImpl(appClassloader, runMode, launchPackage).init()
-        val context = ContextImpl(appClassloader, configManager).init()
+        context = ContextImpl(appClassloader, configManager).init()
 
         if (appClassloader is AppClassloader){
-            context.contextMap[IRainClassLoader::class.java] = NoInstanceClassContext(context, IRainClassLoader::class.java)
+            (context as ContextImpl).contextMap[IRainClassLoader::class.java] = NoInstanceClassContext(context as ContextImpl, IRainClassLoader::class.java)
                 .apply {
                     putBinds("", LocalInstanceClassContext(appClassloader))
                 }

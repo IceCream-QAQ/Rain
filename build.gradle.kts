@@ -12,8 +12,13 @@ val dependencySlf4j by extra("2.0.9")
 group = "com.IceCreamQAQ.Rain"
 version = "1.0.0-DEV1"
 
-subprojects {
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven("https://maven.icecreamqaq.com/repository/maven-public/")
+}
 
+subprojects {
     apply {
         plugin("java")
         plugin("java-library")
@@ -76,6 +81,14 @@ subprojects {
                         password = ""
                     }
                 }
+            }
+        }
+    }
+
+    tasks{
+        test{
+            useJUnitPlatform{
+                excludeEngines("junit-jupiter")
             }
         }
     }

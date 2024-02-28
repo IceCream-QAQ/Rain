@@ -7,6 +7,7 @@ fun includeProject(name: String, dir: String? = null) {
 
 includeProject(":function", "tools/function")
 includeProject(":api", "tools/api")
+includeProject(":rain-test","tools/rain-test")
 
 includeProject(":classloader", "enhance/classloader")
 includeProject(":hook", "enhance/hook")
@@ -24,3 +25,4 @@ fun test(name: String) {
     includeProject(":test-$name", "test/$name")
 }
 test("base")
+test("fullstack")
