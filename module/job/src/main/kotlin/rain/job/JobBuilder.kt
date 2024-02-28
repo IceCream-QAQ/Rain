@@ -52,7 +52,7 @@ class JobBuilder(
 
             3 -> {
                 at = 24 * 60 * 60 * 1000
-                "${DateUtil.formatDate()} ${tf[0]}:${tf[1]}:00"
+                "${DateUtil.formatDate()} ${tf[0]}:${tf[1]}:${tf[2]}"
             }
 
             else -> e()
