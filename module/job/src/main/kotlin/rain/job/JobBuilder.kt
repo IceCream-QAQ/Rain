@@ -37,6 +37,8 @@ class JobBuilder(
 
     fun task(runnable: Runnable) = of { invoker = CronInvoker.runnable(runnable) }
     fun task(body: suspend () -> Unit) = of { invoker = CronInvoker.dsl(body) }
+    fun task(invoker: CronInvoker) = of { this.invoker = invoker }
+
 
     private var at: Long? = null
     fun at(time: String) = of {
