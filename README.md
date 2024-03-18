@@ -68,3 +68,7 @@ Rain 是一个功能相对复杂的开发框架，以 "后端开发" 为基础�
 * [asm](https://asm.ow2.org/) ([License](https://asm.ow2.io/license.html))
 * [javax.inject](https://github.com/javax-inject/javax-inject) ([Apache-2.0 license](https://github.com/javax-inject/javax-inject#license))
 </details>
+
+## 鸣谢
+
+特别感谢 [JetBrains](https://www.jetbrains.com/) 为开源项目提供免费的 [IntelliJ IDEA](https://www.jetbrains.com/idea) 等 IDE 的授权
