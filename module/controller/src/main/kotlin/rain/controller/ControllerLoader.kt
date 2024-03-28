@@ -7,10 +7,13 @@ import rain.api.loader.Loader
 import rain.controller.annotation.After
 import rain.controller.annotation.Before
 import rain.controller.annotation.Catch
+import rain.controller.annotation.Global
 import rain.function.allMethod
 import rain.function.annotation
+import rain.function.hasAnnotation
 import rain.function.isBean
 import java.lang.reflect.Method
+import kotlin.reflect.KProperty1
 
 abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : RootRouterProcessFlowInfo<CTX, ROT>>(
     val context: DiContext
@@ -50,17 +53,27 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
 
             it.clazz.allMethod.forEach { m ->
 
+                fun ProcessInfo<CTX>.checkGlobal(
+                    field: KProperty1<ProcessFlowInfo<CTX>, MutableList<ProcessInfo<CTX>>>
+                ) {
+                    val isGlobal = m.hasAnnotation<Global>()
+                    let {
+                        if (isGlobal) field.get(rootRouter)
+                        else field.get(controllerFlow)
+                    }.add(this)
+                }
+
                 m.annotation<Before> {
                     makeBefore(this, type, m, getter)
-                        ?.let { p -> controllerFlow.beforeProcesses.add(p) }
+                        ?.checkGlobal(ProcessFlowInfo<CTX>::beforeProcesses)
                 }
                 m.annotation<After> {
                     makeAfter(this, type, m, getter)
-                        ?.let { p -> controllerFlow.afterProcesses.add(p) }
+                        ?.checkGlobal(ProcessFlowInfo<CTX>::afterProcesses)
                 }
                 m.annotation<Catch> {
                     makeCatch(this, type, m, getter)
-                        ?.let { p -> controllerFlow.catchProcesses.add(p) }
+                        ?.checkGlobal(ProcessFlowInfo<CTX>::catchProcesses)
                 }
 
 

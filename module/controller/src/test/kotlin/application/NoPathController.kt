@@ -1,10 +1,16 @@
 package application
 
 import controller.*
+import rain.controller.annotation.Before
 
 
 @TestController
 class NoPathController {
+
+    @Before
+    fun testBefore(){
+        println("testBefore")
+    }
 
     @TestAction("testAction")
     fun testAction(): String {

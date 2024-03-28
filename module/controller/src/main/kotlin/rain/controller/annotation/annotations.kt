@@ -17,3 +17,4 @@ annotation class Catch(
 )
 
 annotation class Path(val value: String)
+annotation class Global
