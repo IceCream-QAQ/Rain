@@ -37,6 +37,10 @@ subprojects {
         api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     }
 
+    java {
+        withSourcesJar()
+    }
+
     configure<PublishingExtension> {
         publications {
             create<MavenPublication>(name) {
@@ -85,9 +89,9 @@ subprojects {
         }
     }
 
-    tasks{
-        test{
-            useJUnitPlatform{
+    tasks {
+        test {
+            useJUnitPlatform {
                 excludeEngines("junit-jupiter")
             }
         }
