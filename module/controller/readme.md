@@ -1,4 +1,5 @@
 # Controller 
+Controller 模块，通用的 MVC 功能模块。
 
 ## 文件内容
 - Controller 主包内为通用 Controller 框架，下游应用可以考虑直接通过其集成。
