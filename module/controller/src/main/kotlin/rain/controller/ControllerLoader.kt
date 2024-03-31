@@ -159,7 +159,3 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
     ): ProcessInfo<CTX>?
 
 }
-
-private fun <T> Method.findAnnotation(block: () -> Unit) {
-
-}
