@@ -79,7 +79,7 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
             }
             type.checkProcessBy()
 
-            it.clazz.allMethod.forEach { m ->
+            type.allMethod.forEach { m ->
 
                 fun ProcessInfo<CTX>.checkGlobal(
                     field: KProperty1<ProcessFlowInfo<CTX>, MutableList<ProcessInfo<CTX>>>
