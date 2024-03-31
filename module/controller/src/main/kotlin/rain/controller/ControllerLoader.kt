@@ -4,16 +4,12 @@ import rain.api.di.DiContext
 import rain.api.di.named
 import rain.api.loader.LoadItem
 import rain.api.loader.Loader
-import rain.controller.annotation.After
-import rain.controller.annotation.Before
-import rain.controller.annotation.Catch
-import rain.controller.annotation.Global
-import rain.function.allMethod
-import rain.function.annotation
-import rain.function.hasAnnotation
-import rain.function.isBean
+import rain.controller.annotation.*
+import rain.function.*
+import java.lang.reflect.AnnotatedElement
 import java.lang.reflect.Method
 import kotlin.reflect.KProperty1
+import kotlin.reflect.jvm.javaGetter
 
 abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : RootRouterProcessFlowInfo<CTX, ROT>>(
     val context: DiContext
@@ -48,8 +44,40 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
             val rootRouter = findRootRouter(it.clazz.named) ?: return@forEach
             val controllerFlow = controllerInfo(rootRouter, it.annotation, type, getter) ?: return@forEach
 
-            // 后续应该做出扫描 Controller类 所有注解，并扫描注解是否具有 BeforeBy 等注解，然后根据相应工厂类，创建 Before 等 Process。
+            fun AnnotatedElement.checkProcessBy() {
+                val isMethod = this is Method
+                this.annotations.forEach { an ->
+                    an.annotationAnnotation<ProcessBy>().forEach { pb ->
+                        val pbt = pb.value.java as Class<out ProcessProvider<CTX>>
+                        val pbi = context.getBean(pbt) ?: error("无法获取 ProcessBy: ${pbt.name} 的实例！")
 
+                        fun <T : Annotation> checkProcess(
+                            field: KProperty1<ProcessFlowInfo<CTX>, MutableList<ProcessInfo<CTX>>>,
+                            annotationField: KProperty1<T, Int>
+                        ) {
+                            val annotationClass = annotationField.javaGetter!!.declaringClass as Class<T>
+                            val can = pbt.getAnnotation(annotationClass) ?: return
+                            val w = annotationField.get(can)
+                            val invoker =
+                                pbi(an, can, type as Class<Any>, instance, if (isMethod) this as Method else null)
+                            field.get(controllerFlow)
+                                .add(
+                                    ProcessInfo(
+                                        w,
+                                        emptyArray(),
+                                        if (isMethod) arrayOf((this as Method).name) else emptyArray(),
+                                        invoker
+                                    )
+                                )
+
+                        }
+                        checkProcess(ProcessFlowInfo<CTX>::beforeProcesses, Before::weight)
+                        checkProcess(ProcessFlowInfo<CTX>::afterProcesses, After::weight)
+                        checkProcess(ProcessFlowInfo<CTX>::catchProcesses, Catch::weight)
+                    }
+                }
+            }
+            type.checkProcessBy()
 
             it.clazz.allMethod.forEach { m ->
 
@@ -80,7 +108,7 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
                 makeAction(rootRouter, controllerFlow, type, m, getter)
                     ?.let { action ->
                         controllerFlow.actions.add(action)
-                        // 后续应该做出扫描 Action方法 所有注解，并扫描注解是否具有 BeforeBy 等注解，然后根据相应工厂类，创建 Before 等 Process。
+                        m.checkProcessBy()
                     }
 
             }

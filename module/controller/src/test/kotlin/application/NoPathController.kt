@@ -33,6 +33,7 @@ class NoPathController {
     }
 
     @TestAction4("testAction4")
+    @TestProcess
     fun testAction4(): String {
         return "testAction4"
     }
