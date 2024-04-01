@@ -118,10 +118,27 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
         postLoad()
     }
 
+    // 加载后处理
     abstract fun postLoad()
 
 
+    /**
+     * 查找具有给定名称的根路由器。
+     *
+     * @param name 要查找的根路由器的名称。
+     * @return 如果找到，则返回根路由器，否则返回 null。
+     */
     abstract fun findRootRouter(name: String): RootInfo?
+
+    /**
+     * 创建一个控制器过程流信息对象。
+     *
+     * @param root 根路由器。
+     * @param annotation 控制器上的注解。
+     * @param controllerClass 控制器的类。
+     * @param instanceGetter 控制器实例的获取器。
+     * @return 创建的控制器过程流信息对象。
+     */
     abstract fun controllerInfo(
         root: RootInfo,
         annotation: Annotation?,
@@ -129,6 +146,16 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
         instanceGetter: ControllerInstanceGetter
     ): ControllerProcessFlowInfo<CTX, ROT>?
 
+    /**
+     * 创建一个动作过程流信息对象。
+     *
+     * @param rootRouter 根路由器。
+     * @param controllerFlow 控制器过程流信息。
+     * @param controllerClass 控制器的类。
+     * @param actionMethod 动作方法。
+     * @param instanceGetter 控制器实例的获取器。
+     * @return 创建的动作过程流信息对象。
+     */
     abstract fun makeAction(
         rootRouter: RootInfo,
         controllerFlow: ControllerProcessFlowInfo<CTX, ROT>,
@@ -137,6 +164,16 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
         instanceGetter: ControllerInstanceGetter
     ): ActionProcessFlowInfo<CTX>?
 
+
+    /**
+     * 为 before 创建一个过程信息对象。
+     *
+     * @param beforeAnnotation before 注解。
+     * @param controllerClass 控制器的类。
+     * @param beforeMethod before 方法。
+     * @param instanceGetter 控制器实例的获取器。
+     * @return 创建的过程信息对象。
+     */
     abstract fun makeBefore(
         beforeAnnotation: Before,
         controllerClass: Class<*>,
@@ -144,6 +181,15 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
         instanceGetter: ControllerInstanceGetter
     ): ProcessInfo<CTX>?
 
+    /**
+     * 为 after 创建一个过程信息对象。
+     *
+     * @param afterAnnotation after 注解。
+     * @param controllerClass 控制器的类。
+     * @param afterMethod after 方法。
+     * @param instanceGetter 控制器实例的获取器。
+     * @return 创建的过程信息对象。
+     */
     abstract fun makeAfter(
         afterAnnotation: After,
         controllerClass: Class<*>,
@@ -151,6 +197,15 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
         instanceGetter: ControllerInstanceGetter
     ): ProcessInfo<CTX>?
 
+    /**
+     * 为 catch 创建一个过程信息对象。
+     *
+     * @param catchAnnotation catch 注解。
+     * @param controllerClass 控制器的类。
+     * @param catchMethod catch 方法。
+     * @param instanceGetter 控制器实例的获取器。
+     * @return 创建的过程信息对象。
+     */
     abstract fun makeCatch(
         catchAnnotation: Catch,
         controllerClass: Class<*>,
