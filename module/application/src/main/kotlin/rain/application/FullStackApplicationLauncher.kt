@@ -6,6 +6,7 @@ import rain.classloader.transformer.ClassTransformer
 import rain.function.getCallPackage
 import rain.function.getCaller
 import rain.hook.IHook
+import java.lang.reflect.InvocationTargetException
 
 object FullStackApplicationLauncher {
 
@@ -63,8 +64,12 @@ object FullStackApplicationLauncher {
 //        appClassLoader.registerTransformer("com.IceCreamQAQ.Yu.di.kotlin.YuContextKotlinInjectTransformer")
 
 
-        val applicationClass = appClassLoader.loadClass("rain.application.Application")
-        applicationClass.getMethod("start").invoke(applicationClass.newInstance())
+        try {
+            val applicationClass = appClassLoader.loadClass("rain.application.Application")
+            applicationClass.getMethod("start").invoke(applicationClass.newInstance())
+        } catch (e: InvocationTargetException) {
+            throw e.targetException
+        }
     }
 
 }
