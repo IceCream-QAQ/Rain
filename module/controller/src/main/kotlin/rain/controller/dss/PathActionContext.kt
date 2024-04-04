@@ -8,6 +8,7 @@ open class PathActionContext(val path: Array<String>) : ActionContext {
     val saves = HashMap<String, Any>()
 
     override var user: IUser? = null
+        protected set
 
     override var runtimeError: Throwable? = null
     override var result: Any? = null
