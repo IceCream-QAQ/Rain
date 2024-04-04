@@ -113,36 +113,40 @@ open class ContextImpl(
         val createByPrimaryConstructor = !clazz.hasAnnotation<NotSearch>()
         val isKClass = clazz.hasAnnotation<Metadata>()
 
-        return if (isKClass) {
-            val kClass = clazz.kotlin
-            var constructor: KFunction<T>? = null
-            if (createByPrimaryConstructor && isKClass)
-                constructor = kClass.primaryConstructor
-                    ?.let { if (it.visibility == KVisibility.PUBLIC) it else null }
+        return kotlin.runCatching {
+            if (isKClass) {
+                val kClass = clazz.kotlin
+                var constructor: KFunction<T>? = null
+                if (createByPrimaryConstructor && isKClass)
+                    constructor = kClass.primaryConstructor
+                        ?.let { if (it.visibility == KVisibility.PUBLIC) it else null }
 
-            var defaultConstructor: KFunction<T>? = null
+                var defaultConstructor: KFunction<T>? = null
 
-            kClass.constructors.forEach {
-                if (it.parameters.isEmpty()) defaultConstructor = it
-                if (it.hasAnnotation<Inject>()) constructor = it
+                kClass.constructors.forEach {
+                    if (it.parameters.isEmpty()) defaultConstructor = it
+                    if (it.hasAnnotation<Inject>()) constructor = it
+                }
+
+                constructor?.let { KInjectConstructorBeanCreator(this, it, it.javaConstructor!!) }
+                    ?: defaultConstructor?.javaConstructor?.let { DefaultConstructorBeanCreator(it) }
+                    ?: NoPublicConstructorBeanCreator(clazz)
+            } else {
+                var constructor: Constructor<T>? = null
+
+                var defaultConstructor: Constructor<T>? = null
+                clazz.constructors.forEach {
+                    it as Constructor<T>
+                    if (it.parameters.isEmpty()) defaultConstructor = it
+                    it.annotation<Inject> { constructor = it }
+                }
+
+                constructor?.let { InjectConstructorBeanCreator(this, it) }
+                    ?: defaultConstructor?.let { DefaultConstructorBeanCreator(it) }
+                    ?: NoPublicConstructorBeanCreator(clazz)
             }
-
-            constructor?.let { KInjectConstructorBeanCreator(this, it, it.javaConstructor!!) }
-                ?: defaultConstructor?.javaConstructor?.let { DefaultConstructorBeanCreator(it) }
-                ?: NoPublicConstructorBeanCreator(clazz)
-        } else {
-            var constructor: Constructor<T>? = null
-
-            var defaultConstructor: Constructor<T>? = null
-            clazz.constructors.forEach {
-                it as Constructor<T>
-                if (it.parameters.isEmpty()) defaultConstructor = it
-                it.annotation<Inject> { constructor = it }
-            }
-
-            constructor?.let { InjectConstructorBeanCreator(this, it) }
-                ?: defaultConstructor?.let { DefaultConstructorBeanCreator(it) }
-                ?: NoPublicConstructorBeanCreator(clazz)
+        }.getOrElse {
+            rain.function.error("无法创建 BeanCreator：${clazz.name}。", it)
         }
     }
 
