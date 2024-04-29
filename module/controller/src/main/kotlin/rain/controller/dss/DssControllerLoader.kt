@@ -21,6 +21,12 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
     context: DiContext
 ) : ControllerLoader<CTX, ROT, RootInfo>(context) {
 
+    open fun margePath(path: Array<String>): String =
+        path.joinToString("/")
+
+    open fun splitPath(path:String): Array<String> =
+        path.split("/").toTypedArray()
+
 
     override fun makeBefore(
         beforeAnnotation: Before,
@@ -117,19 +123,38 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
     ): ControllerProcessFlowInfo<CTX, ROT>? {
         val channels = controllerChannel(annotation, controllerClass)
         var controllerRouter = root.router
-        controllerClass.annotation<Path>()?.value?.split("/")?.forEach {
-            controllerRouter = makePathMatcher(it).let { (path, matchers) ->
-                if (matchers.isEmpty()) getSubStaticRouter(controllerRouter, path)
-                else {
-                    getSubDynamicRouter(
-                        controllerRouter,
-                        if (path.isEmpty() && matchers.size == 1 && matchers[0].second == ".*")
-                            NamedVariableMatcher(matchers[0].first)
-                        else RegexMatcher(path, matchers.map { item -> item.first }.toTypedArray())
-                    )
+
+        val pathList = ArrayList<String>()
+        var pathClass: Class<*>? = controllerClass
+        while (pathClass != null) {
+            pathClass.annotation<Path> { pathList.add(value) }
+            pathClass = pathClass.superclass
+        }
+
+        val margePathList = ArrayList<String>()
+        for (it in pathList) {
+            margePathList.add(it)
+            if (it.startsWith("/")) break
+        }
+
+        val path = splitPath(margePath(margePathList.reversed().toTypedArray()))
+
+        if (path.isNotEmpty())
+            path.forEach {
+                controllerRouter = makePathMatcher(it).let { (path, matchers) ->
+                    if (matchers.isEmpty()) getSubStaticRouter(controllerRouter, path)
+                    else {
+                        getSubDynamicRouter(
+                            controllerRouter,
+                            if (path.isEmpty() && matchers.size == 1 && matchers[0].second == ".*")
+                                NamedVariableMatcher(matchers[0].first)
+                            else RegexMatcher(path, matchers.map { item -> item.first }.toTypedArray())
+                        )
+                    }
                 }
             }
-        }
+
+
 
         return ControllerProcessFlowInfo(controllerClass, channels, controllerRouter)
     }
