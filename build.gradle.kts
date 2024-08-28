@@ -80,10 +80,9 @@ subprojects {
                     val releasesRepoUrl = "https://maven.icecreamqaq.com/repository/maven-releases/"
                     url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
 
-
                     credentials {
-                        username = ""
-                        password = ""
+                        System.getenv("MAVEN_USER")?.let { username = it }
+                        System.getenv("MAVEN_TOKEN")?.let { password = it }
                     }
                 }
             }
