@@ -1,16 +1,16 @@
 plugins {
-    java
     kotlin("jvm") version "2.0.10"
+    java
     `java-library`
     `maven-publish`
 }
 
-val dependencyAsm by extra("9.3")
+val dependencyAsm by extra("9.7.1")
 val dependencyFastJSON2 by extra("2.0.46")
 val dependencySlf4j by extra("2.0.9")
 
 group = "com.IceCreamQAQ.Rain"
-version = "1.0.0-DEV1"
+version = "1.0.0-DEV2"
 
 allprojects {
     repositories {
@@ -52,7 +52,7 @@ subprojects {
             create<MavenPublication>(name) {
                 groupId = "com.IceCreamQAQ.Rain"
                 artifactId = name
-                version = "1.0.0-DEV1"
+                version = rootProject.version.toString()
 
                 pom {
                     name.set("Rain Java Dev Framework")
