@@ -6,7 +6,7 @@ plugins {
 }
 
 val dependencyAsm by extra("9.7.1")
-val dependencyFastJSON2 by extra("2.0.46")
+val dependencyFastJSON2 by extra("2.0.53")
 val dependencySlf4j by extra("2.0.9")
 
 group = "com.IceCreamQAQ.Rain"
