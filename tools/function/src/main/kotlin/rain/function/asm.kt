@@ -25,6 +25,15 @@ fun getLoad(type: String): Int =
         else -> ALOAD
     }
 
+fun getStore(type: String): Int =
+    when (type[0]) {
+        'B', 'S', 'I', 'Z', 'C' -> ISTORE
+        'J' -> LSTORE
+        'F' -> FSTORE
+        'D' -> DSTORE
+        else -> ASTORE
+    }
+
 fun getReturn(type: String): Int =
     when (type[0]) {
         'B', 'S', 'I', 'Z', 'C' -> IRETURN
