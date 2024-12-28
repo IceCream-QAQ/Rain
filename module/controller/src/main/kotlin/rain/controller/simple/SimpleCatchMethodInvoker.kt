@@ -9,7 +9,7 @@ class SimpleCatchMethodInvoker<CTX : ActionContext>(
 ) : ProcessInvoker<CTX> {
 
     override suspend fun invoke(context: CTX): Any? {
-        if (context.runtimeError == null || errorType.isAssignableFrom(context.runtimeError!!::class.java)) return null
+        if (context.runtimeError == null || !errorType.isInstance(context.runtimeError)) return null
         return invoker.invoke(context)
     }
 
