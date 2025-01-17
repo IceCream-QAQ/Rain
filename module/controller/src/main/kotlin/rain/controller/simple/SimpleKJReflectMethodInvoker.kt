@@ -116,7 +116,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
 
     val resultFlag = method.returnType.name != "void"
 
-    init {
+    open fun init(): ProcessInvoker<CTX> {
         method.kotlinFunction?.let { kFun ->
             var instanceParam: KParameter? = null
             kFun.parameters.mapNotNull {
@@ -166,6 +166,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
                 }
             }
 
+        return this
     }
 
     abstract fun initParam(method: Method, params: Array<MethodParam<ATT>>)

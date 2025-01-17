@@ -12,7 +12,8 @@ class EnchantManager(private val classloader: IRainClassLoader) : ClassTransform
             for (annotation in node.visibleAnnotations) {
                 val annotationClassName =
                     annotation.desc.substring(1, annotation.desc.length - 1).replace("/", ".")
-                val annotationClass = classloader.forName(annotationClassName, false)
+                val annotationClass =
+                    kotlin.runCatching { classloader.forName(annotationClassName, false) }.getOrNull() ?: continue
                 val aa = annotationClass.annotations
                 for (a in aa) {
                     if (a is EnchantBy) {
