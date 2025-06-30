@@ -24,7 +24,7 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
     open fun margePath(path: Array<String>): String =
         path.joinToString("/")
 
-    open fun splitPath(path:String): Array<String> =
+    open fun splitPath(path: String): Array<String> =
         path.split("/").toTypedArray()
 
 
@@ -137,7 +137,8 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
             if (it.startsWith("/")) break
         }
 
-        val path = splitPath(margePath(margePathList.reversed().toTypedArray()))
+        val path = if (margePathList.isNotEmpty()) splitPath(margePath(margePathList.reversed().toTypedArray()))
+        else emptyArray()
 
         if (path.isNotEmpty())
             path.forEach {
@@ -168,7 +169,7 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         instanceGetter: ControllerInstanceGetter
     ): ActionProcessFlowInfo<CTX>? {
         var (pathString, channels) = actionInfo(controllerFlow.controllerChannels, actionMethod) ?: return null
-        val rootFlag = if (pathString.first() == '/') {
+        val rootFlag = if (pathString.isNotEmpty() && pathString.first() == '/') {
             pathString = pathString.substring(1)
             true
         } else false

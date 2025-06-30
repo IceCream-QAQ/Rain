@@ -10,7 +10,7 @@ val dependencyFastJSON2 by extra("2.0.54")
 val dependencySlf4j by extra("2.0.9")
 
 group = "com.IceCreamQAQ.Rain"
-version = "1.0.0-DEV2"
+version = "1.0.0-DEV3"
 
 allprojects {
     repositories {
