@@ -3,7 +3,9 @@ package rain.controller.dss
 import rain.api.permission.IUser
 import rain.controller.ActionContext
 
-open class PathActionContext(val path: Array<String>) : ActionContext {
+abstract class PathActionContext : ActionContext {
+
+    abstract val path: Array<String>
 
     val saves = HashMap<String, Any>()
 

@@ -17,9 +17,12 @@ import kotlin.reflect.KProperty1
  *
  * 路由做了基础的静态匹配与动态匹配分离。
  */
-abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>, RootInfo : RootRouterProcessFlowInfo<CTX, ROT>>(
-    context: DiContext
-) : ControllerLoader<CTX, ROT, RootInfo>(context) {
+abstract class DssControllerLoader<
+        CTX : PathActionContext,
+        ROT : DssRouter<CTX, *>,
+        RootInfo : RootRouterProcessFlowInfo<CTX, ROT>,
+        AI : ActionInvoker<CTX>
+        >(context: DiContext) : ControllerLoader<CTX, ROT, RootInfo>(context) {
 
     open fun margePath(path: Array<String>): String =
         path.joinToString("/")
@@ -137,27 +140,31 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
             if (it.startsWith("/")) break
         }
 
-        val path = if (margePathList.isNotEmpty()) splitPath(margePath(margePathList.reversed().toTypedArray()))
-        else emptyArray()
-
-        if (path.isNotEmpty())
-            path.forEach {
-                controllerRouter = makePathMatcher(it).let { (path, matchers) ->
-                    if (matchers.isEmpty()) getSubStaticRouter(controllerRouter, path)
-                    else {
-                        getSubDynamicRouter(
-                            controllerRouter,
-                            if (path.isEmpty() && matchers.size == 1 && matchers[0].second == ".*")
-                                NamedVariableMatcher(matchers[0].first)
-                            else RegexMatcher(path, matchers.map { item -> item.first }.toTypedArray())
-                        )
-                    }
-                }
-            }
-
-
+        if (margePathList.isNotEmpty())
+            controllerRouter = pathToRouter(controllerRouter, margePath(margePathList.reversed().toTypedArray()))
 
         return ControllerProcessFlowInfo(controllerClass, channels, controllerRouter)
+    }
+
+    open fun pathToRouter(router: ROT, path: String): ROT {
+        if (path.isEmpty()) return router
+        val path = splitPath(path)
+        if (path.isEmpty()) return router
+        var currentRouter = router
+        path.forEach {
+            currentRouter = makePathMatcher(it).let { (path, matchers) ->
+                if (matchers.isEmpty()) getSubStaticRouter(currentRouter, path)
+                else {
+                    getSubDynamicRouter(
+                        currentRouter,
+                        if (path.isEmpty() && matchers.size == 1 && matchers[0].second == ".*")
+                            NamedVariableMatcher(matchers[0].first)
+                        else RegexMatcher(path, matchers.map { item -> item.first }.toTypedArray())
+                    )
+                }
+            }
+        }
+        return currentRouter
     }
 
 
@@ -177,19 +184,8 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
 
         val actionName = actionMethod.name
 
-        val paths = pathString.split("/")
-
-        val actionRouter = (if (rootFlag) rootRouter.router else controllerFlow.controllerRouter)
-
-        val actionMatchers = paths.map {
-            makePathMatcher(it).let { (path, matchers) ->
-                if (matchers.isEmpty()) StaticActionMatcher<CTX>(it)
-                else if (path.isEmpty() && matchers.size == 1 && matchers[0].second == ".*")
-                    NamedVariableMatcher(matchers[0].first)
-                else RegexMatcher(path, matchers.map { item -> item.first }.toTypedArray())
-
-            }
-        }
+        val actionRouter =
+            pathToRouter(if (rootFlag) rootRouter.router else controllerFlow.controllerRouter, pathString)
 
         val actionFlow = ActionProcessFlowInfo<CTX>(controllerClass, actionMethod)
 
@@ -210,28 +206,13 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
         actionFlow.creator = ActionInvokerCreator {
             createActionInvoker(
                 channels,
-                actionRouter.level + 1,
-                actionMatchers.subList(1, actionMatchers.size),
                 controllerClass,
                 actionMethod,
                 instanceGetter,
                 checkPf(ProcessFlowInfo<CTX>::beforeProcesses),
                 checkPf(ProcessFlowInfo<CTX>::afterProcesses),
                 checkPf(ProcessFlowInfo<CTX>::catchProcesses)
-            ).apply {
-                actionMatchers.first().let { first ->
-                    if (first is StaticActionMatcher)
-                        actionRouter.staticActions.getOrPut(paths[0]) { ArrayList() }.add(this)
-                    else
-                        let {
-                            actionRouter.dynamicActions.firstOrNull { it.first == first }
-                                ?: let {
-                                    first to ArrayList<ActionInvoker<CTX>>()
-                                }.apply { actionRouter.dynamicActions.add(this) }
-                        }.second.add(this)
-                }
-
-            }
+            ).apply { putAction(actionRouter, channels, this) }
         }
 
         return actionFlow
@@ -242,17 +223,17 @@ abstract class DssControllerLoader<CTX : PathActionContext, ROT : DssRouter<CTX>
     abstract fun controllerChannel(annotation: Annotation?, controllerClass: Class<*>): List<String>
     abstract fun actionInfo(controllerChannel: List<String>, actionMethod: Method): Pair<String, List<String>>?
 
+    abstract fun putAction(router: ROT, channels: List<String>, actionInvoker: AI)
+
     abstract fun createActionInvoker(
         channels: List<String>,
-        level: Int,
-        matchers: List<RouterMatcher<CTX>>,
         actionClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter,
         beforeProcesses: Array<ProcessInvoker<CTX>>,
         afterProcesses: Array<ProcessInvoker<CTX>>,
         catchProcesses: Array<ProcessInvoker<CTX>>,
-    ): DssActionInvoker<CTX>
+    ): AI
 
     abstract fun createMethodInvoker(
         controllerClass: Class<*>,
