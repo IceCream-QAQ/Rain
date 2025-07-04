@@ -1,0 +1,13 @@
+deploy:
+  push:
+    - docker:
+        image:
+          name: eclipse-temurin:21-jdk
+      stages:
+        - name: Grant execute permission for gradlew
+          script: chmod +x ./gradlew
+        - name: Build with Gradle
+          script: ./gradlew publish
+          env:
+            MAVEN_USER: $CNB_TOKEN_USER_NAME
+            MAVEN_TOKEN: $CNB_TOKEN

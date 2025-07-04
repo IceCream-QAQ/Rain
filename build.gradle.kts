@@ -81,8 +81,8 @@ subprojects {
             repositories {
                 mavenLocal()
                 maven {
-                    val snapshotsRepoUrl = "https://maven.icecreamqaq.com/repository/maven-snapshots/"
-                    val releasesRepoUrl = "https://maven.icecreamqaq.com/repository/maven-releases/"
+                    val snapshotsRepoUrl = "https://maven.cnb.cool/IceCream/maven/-/packages/"
+                    val releasesRepoUrl = "https://maven.cnb.cool/IceCream/maven/-/packages/"
                     url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
 
                     credentials {
