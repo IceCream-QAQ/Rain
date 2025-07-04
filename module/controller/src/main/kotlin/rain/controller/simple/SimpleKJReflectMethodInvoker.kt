@@ -5,6 +5,7 @@ import rain.controller.ActionContext
 import rain.controller.ControllerInstanceGetter
 import rain.controller.ProcessInvoker
 import rain.api.di.named
+import rain.function.annotation
 import rain.function.arrayMap
 import rain.function.hasAnnotation
 import rain.function.nameWithParamsFullClass
@@ -12,8 +13,10 @@ import rain.function.type.RelType
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.Parameter
+import javax.inject.Named
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.callSuspendBy
+import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.javaType
 import kotlin.reflect.jvm.kotlinFunction
 
@@ -125,7 +128,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
                     null
                 } else MethodParam<ATT>(
                     method,
-                    it.name ?: "",
+                    it.findAnnotation<Named>()?.value ?: it.name ?: "",
                     RelType.create(it.type.javaType),
                     it.type.isMarkedNullable,
                     it.isOptional,
@@ -148,7 +151,7 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
         } ?: method.parameters.mapNotNull {
             MethodParam<ATT>(
                 method,
-                it.named,
+                it.annotation<Named>()?.value ?: it.name,
                 RelType.create(it.type),
                 it.hasAnnotation<Nullable>(),
                 false,
