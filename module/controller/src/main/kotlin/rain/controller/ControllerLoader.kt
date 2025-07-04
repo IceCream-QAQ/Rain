@@ -23,7 +23,7 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
      *     ActionInvoker ({ BeforeProcesses -> Action -> AfterProcesses} CatchProcesses)
      *
      * 同上一代相比，分离的 ActionInvoker 继承自 Router 的结构。
-     * 将 Action 直接置于 Router 之下，并且单一路由允许绑定多个 Action。
+     * 将 Action 直接置于 Router 之下，并且 Action 是直接应用于当前路由结构。
      *
      * 同时对上一代 Action 处理链路中的拦截器进行改进，改进为流程。
      * 保留上一代 Before，After，Catch 特性的同时，引入外部流程。
@@ -146,8 +146,9 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
         instanceGetter: ControllerInstanceGetter
     ): ControllerProcessFlowInfo<CTX, ROT>?
 
-    /**
-     * 创建一个动作过程流信息对象。
+    /** 尝试对目标函数创建 Action
+     * 如果目标是正确的 Action函数，则返回一个 Action 过程流信息对象。
+     * 如果不是，则返回 Null。
      *
      * @param rootRouter 根路由器。
      * @param controllerFlow 控制器过程流信息。
