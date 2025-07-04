@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     kotlin("jvm") version "2.0.10"
     java
@@ -34,7 +36,9 @@ subprojects {
     }
 
     kotlin {
-        jvmToolchain(8)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_1_8)
+        }
     }
 
     dependencies {
