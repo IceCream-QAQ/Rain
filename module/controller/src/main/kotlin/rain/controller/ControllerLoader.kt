@@ -157,6 +157,7 @@ abstract class ControllerLoader<
 
                 makeAction(rootRouter, controllerFlow, type, m, getter)
                     ?.let { action ->
+                        m.checkProcessBy()
                         controllerFlow.actions.add(action)
                     }
             }
@@ -229,6 +230,7 @@ abstract class ControllerLoader<
             val parts = script.split('@', limit = 2)
             val name = parts[0]
             if (name != methodName) return false
+            if (actionMethod.parameters.size == 0 && parts[1].isEmpty()) return true
             val params = parts[1].split(",")
             if (params.size != actionMethod.parameterTypes.size) return false
             params.forEachIndexed { index, s ->

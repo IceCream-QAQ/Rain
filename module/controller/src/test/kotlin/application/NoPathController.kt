@@ -18,6 +18,7 @@ class NoPathController {
     }
 
     @TestAction1("testAction1")
+    @Channel("test2")
     fun testAction1(): String {
         return "testAction1"
     }
