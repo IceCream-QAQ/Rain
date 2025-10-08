@@ -16,34 +16,39 @@ import java.lang.reflect.Method
 
 class TestControllerLoader(
     context: DiContext
-) : DssControllerLoader<TestActionContext, DssRouter<TestActionContext>, RootRouterProcessFlowInfo<TestActionContext, DssRouter<TestActionContext>>>(
+) : DssControllerLoader<
+        TestActionContext,
+        TestRouter,
+        TestRootRouterProcessFlowInfo,
+        TestActionInvoker
+        >(
     context
 ) {
 
-    val root = RootRouterProcessFlowInfo<TestActionContext, DssRouter<TestActionContext>>(DssRouter(0))
+    val root = TestRootRouterProcessFlowInfo(TestRouter(0))
 
-    lateinit var rootRouter: RootRouter<TestActionContext, DssRouter<TestActionContext>>
+    lateinit var rootRouter: TestRootRouter
 
-    override fun findRootRouter(name: String): RootRouterProcessFlowInfo<TestActionContext, DssRouter<TestActionContext>> =
+    override fun findRootRouter(name: String): TestRootRouterProcessFlowInfo =
         root
 
 
     override fun getSubStaticRouter(
-        router: DssRouter<TestActionContext>,
+        router: TestRouter,
         subPath: String
-    ): DssRouter<TestActionContext> =
-        router.staticSubrouter.getOrPut(subPath) {
+    ): TestRouter =
+        router.static.getOrPut(subPath) {
             DssRouter(router.level + 1)
         }
 
     override fun getSubDynamicRouter(
-        router: DssRouter<TestActionContext>,
+        router: TestRouter,
         matcher: RouterMatcher<TestActionContext>
-    ): DssRouter<TestActionContext> =
+    ): TestRouter =
         let {
-            router.dynamicSubrouter.firstOrNull { it.matcher == matcher }
-                ?: DynamicRouter(matcher, DssRouter(router.level + 1))
-                    .apply { router.dynamicSubrouter.add(this) }
+            router.dynamic.firstOrNull { it.matcher == matcher }
+                ?: TestDynamicRouter(matcher, DssRouter(router.level + 1))
+                    .apply { router.dynamic.add(this) }
         }.router
 
     override fun controllerChannel(annotation: Annotation?, controllerClass: Class<*>): List<String> =
@@ -58,12 +63,32 @@ class TestControllerLoader(
         return null
     }
 
+    override fun putAction(
+        router: TestRouter,
+        channels: List<String>,
+        actionInvoker: TestActionInvoker
+    ) {
+        var action = router.action
+        if (action == null){
+            action = TestActionChannelMapping()
+            router.action = action
+        }
+        channels.forEach {
+            when(it){
+                "test1" -> action.test1 = actionInvoker
+                "test2" -> action.test2 = actionInvoker
+                "test3" -> action.test3 = actionInvoker
+                "test4" -> action.test4 = actionInvoker
+            }
+        }
+    }
+
     override fun createMethodInvoker(
         controllerClass: Class<*>,
         targetMethod: Method,
         instanceGetter: ControllerInstanceGetter
     ): ProcessInvoker<TestActionContext> =
-        TestMethodInvoker(targetMethod, instanceGetter)
+        TestMethodInvoker(targetMethod, instanceGetter).init()
 
     override fun createCatchMethodInvoker(
         throwableType: Class<out Throwable>,
@@ -71,43 +96,26 @@ class TestControllerLoader(
         targetMethod: Method,
         instanceGetter: ControllerInstanceGetter
     ): ProcessInvoker<TestActionContext> =
-        SimpleCatchMethodInvoker(throwableType, TestMethodInvoker(targetMethod, instanceGetter))
+        SimpleCatchMethodInvoker(throwableType, TestMethodInvoker(targetMethod, instanceGetter).init())
 
     override fun createActionInvoker(
         channels: List<String>,
-        level: Int,
-        matchers: List<RouterMatcher<TestActionContext>>,
         actionClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter,
         beforeProcesses: Array<ProcessInvoker<TestActionContext>>,
         afterProcesses: Array<ProcessInvoker<TestActionContext>>,
         catchProcesses: Array<ProcessInvoker<TestActionContext>>
-    ): DssActionInvoker<TestActionContext> =
+    ): TestActionInvoker =
         TestActionInvoker(
-            channels,
-            level,
-            matchers,
-            TestMethodInvoker(actionMethod, instanceGetter),
+            TestMethodInvoker(actionMethod, instanceGetter).init(),
             beforeProcesses,
             afterProcesses,
             catchProcesses
         )
 
     override fun postLoad() {
-        val actionList = ArrayList<ActionInfo<TestActionContext>>()
-        root.controllers.forEach {
-            it.actions.forEach {
-                actionList.add(
-                    ActionInfo(
-                        it.actionClass,
-                        it.actionMethod,
-                        it.creator()
-                    )
-                )
-            }
-        }
-        rootRouter = RootRouter(root.router, actionList)
+        rootRouter = buildRootInfo(root)
     }
 
 

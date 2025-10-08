@@ -11,9 +11,45 @@ import java.lang.reflect.Method
 import kotlin.reflect.KProperty1
 import kotlin.reflect.jvm.javaGetter
 
-abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : RootRouterProcessFlowInfo<CTX, ROT>>(
+abstract class ControllerLoader<
+        CTX : ActionContext,
+        ROT : Router,
+        RootInfo : RootRouterProcessFlowInfo<CTX, ROT, AI>,
+        AI : ActionInvoker<CTX>
+        >(
     val context: DiContext
 ) : Loader {
+
+    private fun checkProcessFilter(
+        provideAnnotation: Annotation,
+        functionAnnotation: Annotation,
+        controllerFlow: ControllerProcessFlowInfo<CTX, ROT, AI>,
+        controllerInstance: Any,
+        source: AnnotatedElement
+    ): Array<String> {
+        val pfb = source.annotation<ProcessFilterBy>() ?: return emptyArray()
+        val processFilterProviderClass = pfb.value.java
+        val pfp = context.getBean(processFilterProviderClass)
+            ?: error("无法获取 ProcessFilterProvider: ${processFilterProviderClass.name} 的实例！")
+
+        return controllerFlow.actions.filter {
+            !pfp(
+                provideAnnotation,
+                functionAnnotation,
+                controllerFlow.controllerClass as Class<Any>,
+                controllerInstance,
+                it.actionMethod
+            )
+        }.map { it.actionMethod.nameAtParams }
+            .toTypedArray()
+    }
+
+    open fun AnnotatedElement.processFilter(): ProcessFilter? {
+        val pfb = annotation<ProcessFilterBy>() ?: return null
+        val processFilterProviderClass = pfb.value.java
+        return context.getBean(processFilterProviderClass)
+            ?: error("无法获取 ProcessFilterProvider: ${processFilterProviderClass.name} 的实例")
+    }
 
     /** Controller 处理流程
      * 上一代路由
@@ -60,15 +96,18 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
                             val w = annotationField.get(can)
                             val invoker =
                                 pbi(an, can, type as Class<Any>, instance, if (isMethod) this as Method else null)
-                            field.get(controllerFlow)
-                                .add(
-                                    ProcessInfo(
-                                        w,
-                                        emptyArray(),
-                                        if (isMethod) arrayOf((this as Method).name) else emptyArray(),
-                                        invoker
-                                    )
+
+                            field.get(controllerFlow).add(
+                                ProcessInfo(
+                                    an,
+                                    can,
+                                    this.processFilter(),
+                                    w,
+                                    emptyArray(),
+                                    if (isMethod) arrayOf(this.nameAtParams) else emptyArray(),
+                                    invoker
                                 )
+                            )
 
                         }
                         checkProcess(ProcessFlowInfo<CTX>::beforeProcesses, Before::weight)
@@ -91,6 +130,18 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
                     }.add(this)
                 }
 
+                fun ProcessInfo<CTX>.checkFilter(annotation: Annotation): ProcessInfo<CTX> {
+                    val except = checkProcessFilter(
+                        annotation,
+                        annotation,
+                        controllerFlow,
+                        instance,
+                        type
+                    )
+                    return if (except.isEmpty()) this
+                    else this.copy(except = this.except + except)
+                }
+
                 m.annotation<Before> {
                     makeBefore(this, type, m, getter)
                         ?.checkGlobal(ProcessFlowInfo<CTX>::beforeProcesses)
@@ -104,14 +155,13 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
                         ?.checkGlobal(ProcessFlowInfo<CTX>::catchProcesses)
                 }
 
-
                 makeAction(rootRouter, controllerFlow, type, m, getter)
                     ?.let { action ->
                         controllerFlow.actions.add(action)
-                        m.checkProcessBy()
                     }
-
             }
+
+
             rootRouter.controllers.add(controllerFlow)
         }
 
@@ -121,6 +171,80 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
     // 加载后处理
     abstract fun postLoad()
 
+    open fun buildRootInfo(info: RootInfo): RootRouter<CTX, ROT, AI> {
+        val actions = info.controllers.flatMap { ci ->
+            ci.actions.map { ac ->
+                val befores = ArrayList<ProcessInfo<CTX>>()
+                val afters = ArrayList<ProcessInfo<CTX>>()
+                val catchs = ArrayList<ProcessInfo<CTX>>()
+
+                fun checkProcesses(
+                    processes: List<ProcessInfo<CTX>>,
+                    target: MutableList<ProcessInfo<CTX>>,
+                ) {
+                    processes.forEach {
+                        if (checkProcessSupportAction(it, ci.controllerClass, ci.controllerInstance, ac.actionMethod))
+                            target.add(it)
+                    }
+                }
+
+                checkProcesses(info.beforeProcesses, befores)
+                checkProcesses(ci.beforeProcesses, befores)
+                checkProcesses(info.afterProcesses, afters)
+                checkProcesses(ci.afterProcesses, afters)
+                checkProcesses(info.catchProcesses, catchs)
+                checkProcesses(ci.catchProcesses, catchs)
+
+                fun MutableList<ProcessInfo<CTX>>.doProcesses(): Array<ProcessInvoker<CTX>> {
+                    sortBy { it.priority }
+                    return map { it.invoker }.toTypedArray()
+                }
+
+                ac.creator(befores.doProcesses(), afters.doProcesses(), catchs.doProcesses())
+            }
+        }
+        return buildRootRouter(info.router, actions)
+    }
+
+    open fun buildRootRouter(router: ROT, actions: List<AI>) = RootRouter(router, actions)
+
+    open fun checkProcessSupportAction(
+        process: ProcessInfo<CTX>,
+        controllerClass: Class<*>,
+        controllerInstance: Any,
+        actionMethod: Method,
+    ): Boolean {
+        process.filter?.invoke(
+            process.providerAnnotation,
+            process.functionAnnotation,
+            controllerClass as Class<Any>,
+            controllerInstance,
+            actionMethod
+        )?.let { if (!it) return false }
+        val methodName = actionMethod.name
+        val paramTypeNames by lazy { actionMethod.parameterTypes.map { it.name } }
+        val paramTypeSimpleNames by lazy { actionMethod.parameterTypes.map { it.simpleName } }
+        fun check(script: String): Boolean {
+            if (script.contains('@').not()) return script == methodName
+            val parts = script.split('@', limit = 2)
+            val name = parts[0]
+            if (name != methodName) return false
+            val params = parts[1].split(",")
+            if (params.size != actionMethod.parameterTypes.size) return false
+            params.forEachIndexed { index, s ->
+                if (s.isEmpty()) return false
+                run {
+                    if (s[0] == '.')
+                        s.substring(1) != paramTypeSimpleNames[index]
+                    else s != paramTypeNames[index]
+                }.let { if (!it) return false }
+            }
+            return true
+        }
+        if (process.only.isNotEmpty()) if (process.only.none { check(it) }) return false
+        if (process.except.isNotEmpty()) if (process.except.any { check(it) }) return false
+        return true
+    }
 
     /**
      * 查找具有给定名称的根路由器。
@@ -136,15 +260,15 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
      * @param root 根路由器。
      * @param annotation 控制器上的注解。
      * @param controllerClass 控制器的类。
-     * @param instanceGetter 控制器实例的获取器。
+     * @param controllerInstance 控制器实例的获取器。
      * @return 创建的控制器过程流信息对象。
      */
     abstract fun controllerInfo(
         root: RootInfo,
         annotation: Annotation?,
         controllerClass: Class<*>,
-        instanceGetter: ControllerInstanceGetter
-    ): ControllerProcessFlowInfo<CTX, ROT>?
+        controllerInstance: Any,
+    ): ControllerProcessFlowInfo<CTX, ROT, AI>?
 
     /** 尝试对目标函数创建 Action
      * 如果目标是正确的 Action函数，则返回一个 Action 过程流信息对象。
@@ -159,12 +283,24 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
      */
     abstract fun makeAction(
         rootRouter: RootInfo,
-        controllerFlow: ControllerProcessFlowInfo<CTX, ROT>,
+        controllerFlow: ControllerProcessFlowInfo<CTX, ROT, AI>,
         controllerClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ActionProcessFlowInfo<CTX>?
+    ): ActionCreator<CTX, AI>?
 
+    /** 创建一个过程调用器。
+     *
+     * @param processClass 过程类。
+     * @param processMethod 过程方法。
+     * @param processInstance 过程实例的获取器。
+     * @return 创建的过程调用器。
+     */
+    abstract fun makeProcessInvoker(
+        processClass: Class<*>,
+        processMethod: Method,
+        processInstance: ControllerInstanceGetter,
+    ): ProcessInvoker<CTX>?
 
     /**
      * 为 before 创建一个过程信息对象。
@@ -175,12 +311,24 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
      * @param instanceGetter 控制器实例的获取器。
      * @return 创建的过程信息对象。
      */
-    abstract fun makeBefore(
+    open fun makeBefore(
         beforeAnnotation: Before,
         controllerClass: Class<*>,
         beforeMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ProcessInfo<CTX>?
+    ): ProcessInfo<CTX>? =
+        makeProcessInvoker(controllerClass, beforeMethod, instanceGetter)
+            ?.let {
+                ProcessInfo(
+                    beforeAnnotation,
+                    beforeAnnotation,
+                    beforeMethod.processFilter(),
+                    beforeAnnotation.weight,
+                    beforeAnnotation.except,
+                    beforeAnnotation.only,
+                    it
+                )
+            }
 
     /**
      * 为 after 创建一个过程信息对象。
@@ -191,12 +339,24 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
      * @param instanceGetter 控制器实例的获取器。
      * @return 创建的过程信息对象。
      */
-    abstract fun makeAfter(
+    open fun makeAfter(
         afterAnnotation: After,
         controllerClass: Class<*>,
         afterMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ProcessInfo<CTX>?
+    ): ProcessInfo<CTX>? =
+        makeProcessInvoker(controllerClass, afterMethod, instanceGetter)
+            ?.let {
+                ProcessInfo(
+                    afterAnnotation,
+                    afterAnnotation,
+                    afterMethod.processFilter(),
+                    afterAnnotation.weight,
+                    afterAnnotation.except,
+                    afterAnnotation.only,
+                    it
+                )
+            }
 
     /**
      * 为 catch 创建一个过程信息对象。
@@ -207,11 +367,23 @@ abstract class ControllerLoader<CTX : ActionContext, ROT : Router, RootInfo : Ro
      * @param instanceGetter 控制器实例的获取器。
      * @return 创建的过程信息对象。
      */
-    abstract fun makeCatch(
+    open fun makeCatch(
         catchAnnotation: Catch,
         controllerClass: Class<*>,
         catchMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ProcessInfo<CTX>?
+    ): ProcessInfo<CTX>? =
+        makeProcessInvoker(controllerClass, catchMethod, instanceGetter)
+            ?.let {
+                ProcessInfo(
+                    catchAnnotation,
+                    catchAnnotation,
+                    catchMethod.processFilter(),
+                    catchAnnotation.weight,
+                    catchAnnotation.except,
+                    catchAnnotation.only,
+                    it
+                )
+            }
 
 }

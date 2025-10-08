@@ -13,11 +13,6 @@ abstract class DssActionInvoker<CTX : PathActionContext>(
     catchsProcesses: Array<ProcessInvoker<CTX>>
 ) : SimpleActionInvoker<CTX>(action, beforeProcesses, aftersProcesses, catchsProcesses) {
 
-    override suspend fun invoke(context: CTX): Boolean {
-        matchers.forEachIndexed { i, matcher ->
-            if (!matcher(runCatching { context.path[i + level] }.getOrNull(), context)) return false
-        }
-        return super.invoke(context)
-    }
+
 
 }

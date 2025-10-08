@@ -1,0 +1,4 @@
+
+rain:
+  scanPackages:
+    - application

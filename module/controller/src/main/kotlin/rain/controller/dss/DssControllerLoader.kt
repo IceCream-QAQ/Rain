@@ -2,9 +2,6 @@ package rain.controller.dss
 
 import rain.api.di.DiContext
 import rain.controller.*
-import rain.controller.annotation.After
-import rain.controller.annotation.Before
-import rain.controller.annotation.Catch
 import rain.controller.annotation.Path
 import rain.controller.dss.router.*
 import rain.function.annotation
@@ -20,44 +17,17 @@ import kotlin.reflect.KProperty1
 abstract class DssControllerLoader<
         CTX : PathActionContext,
         ROT : DssRouter<CTX, *>,
-        RootInfo : RootRouterProcessFlowInfo<CTX, ROT>,
+        RootInfo : RootRouterProcessFlowInfo<CTX, ROT, AI>,
         AI : ActionInvoker<CTX>
-        >(context: DiContext) : ControllerLoader<CTX, ROT, RootInfo>(context) {
+        >(
+    context: DiContext
+) : ControllerLoader<CTX, ROT, RootInfo, AI>(context) {
 
     open fun margePath(path: Array<String>): String =
         path.joinToString("/")
 
     open fun splitPath(path: String): Array<String> =
         path.split("/").toTypedArray()
-
-
-    override fun makeBefore(
-        beforeAnnotation: Before,
-        controllerClass: Class<*>,
-        beforeMethod: Method,
-        instanceGetter: ControllerInstanceGetter
-    ): ProcessInfo<CTX>? =
-        createMethodInvoker(controllerClass, beforeMethod, instanceGetter)
-            ?.let { ProcessInfo(beforeAnnotation.weight, beforeAnnotation.except, beforeAnnotation.only, it) }
-
-
-    override fun makeAfter(
-        afterAnnotation: After,
-        controllerClass: Class<*>,
-        afterMethod: Method,
-        instanceGetter: ControllerInstanceGetter
-    ): ProcessInfo<CTX>? =
-        createMethodInvoker(controllerClass, afterMethod, instanceGetter)
-            ?.let { ProcessInfo(afterAnnotation.weight, afterAnnotation.except, afterAnnotation.only, it) }
-
-    override fun makeCatch(
-        catchAnnotation: Catch,
-        controllerClass: Class<*>,
-        catchMethod: Method,
-        instanceGetter: ControllerInstanceGetter
-    ): ProcessInfo<CTX>? =
-        createCatchMethodInvoker(catchAnnotation.error.java, controllerClass, catchMethod, instanceGetter)
-            ?.let { ProcessInfo(catchAnnotation.weight, catchAnnotation.except, catchAnnotation.only, it) }
 
     open fun makePathMatcher(path: String): Pair<String, ArrayList<Pair<String, String?>>> {
         val realPathBuilder = StringBuilder()
@@ -122,8 +92,8 @@ abstract class DssControllerLoader<
         root: RootInfo,
         annotation: Annotation?,
         controllerClass: Class<*>,
-        instanceGetter: ControllerInstanceGetter
-    ): ControllerProcessFlowInfo<CTX, ROT>? {
+        controllerInstance: Any
+    ): ControllerProcessFlowInfo<CTX, ROT, AI>? {
         val channels = controllerChannel(annotation, controllerClass)
         var controllerRouter = root.router
 
@@ -143,7 +113,7 @@ abstract class DssControllerLoader<
         if (margePathList.isNotEmpty())
             controllerRouter = pathToRouter(controllerRouter, margePath(margePathList.reversed().toTypedArray()))
 
-        return ControllerProcessFlowInfo(controllerClass, channels, controllerRouter)
+        return ControllerProcessFlowInfo(controllerClass, controllerInstance, channels, controllerRouter)
     }
 
     open fun pathToRouter(router: ROT, path: String): ROT {
@@ -167,55 +137,40 @@ abstract class DssControllerLoader<
         return currentRouter
     }
 
+    override fun makeProcessInvoker(
+        processClass: Class<*>,
+        processMethod: Method,
+        processInstance: ControllerInstanceGetter
+    ): ProcessInvoker<CTX>? = createMethodInvoker(processClass, processMethod, processInstance)
+
 
     override fun makeAction(
         rootRouter: RootInfo,
-        controllerFlow: ControllerProcessFlowInfo<CTX, ROT>,
+        controllerFlow: ControllerProcessFlowInfo<CTX, ROT, AI>,
         controllerClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter
-    ): ActionProcessFlowInfo<CTX>? {
+    ): ActionCreator<CTX, AI>? {
         var (pathString, channels) = actionInfo(controllerFlow.controllerChannels, actionMethod) ?: return null
         val rootFlag = if (pathString.isNotEmpty() && pathString.first() == '/') {
             pathString = pathString.substring(1)
             true
         } else false
 
-
-        val actionName = actionMethod.name
-
         val actionRouter =
             pathToRouter(if (rootFlag) rootRouter.router else controllerFlow.controllerRouter, pathString)
 
-        val actionFlow = ActionProcessFlowInfo<CTX>(controllerClass, actionMethod)
-
-        fun checkPf(property: KProperty1<ProcessFlowInfo<CTX>, MutableList<ProcessInfo<CTX>>>): Array<ProcessInvoker<CTX>> =
-            ArrayList<ProcessInfo<CTX>>()
-                .apply {
-                    val checkPi = { it: ProcessInfo<CTX> ->
-                        if (actionName !in it.except && (it.only.isEmpty() || actionName in it.only)) add(it)
-                    }
-                    property.get(rootRouter).forEach(checkPi)
-                    property.get(controllerFlow).forEach(checkPi)
-                    property.get(actionFlow).forEach(checkPi)
-                    sortBy { it.priority }
-                }
-                .map { it.invoker }
-                .toTypedArray()
-
-        actionFlow.creator = ActionInvokerCreator {
+        return ActionCreator(controllerClass, actionMethod) { beforeProcesses, afterProcesses, catchProcesses ->
             createActionInvoker(
                 channels,
                 controllerClass,
                 actionMethod,
                 instanceGetter,
-                checkPf(ProcessFlowInfo<CTX>::beforeProcesses),
-                checkPf(ProcessFlowInfo<CTX>::afterProcesses),
-                checkPf(ProcessFlowInfo<CTX>::catchProcesses)
+                beforeProcesses,
+                afterProcesses,
+                catchProcesses
             ).apply { putAction(actionRouter, channels, this) }
         }
-
-        return actionFlow
     }
 
     abstract fun getSubStaticRouter(router: ROT, subPath: String): ROT

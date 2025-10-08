@@ -8,6 +8,7 @@ import org.junit.jupiter.engine.descriptor.JupiterEngineDescriptor
 import org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor
 import org.junit.jupiter.engine.discovery.DiscoverySelectorResolver
 import org.junit.platform.engine.EngineDiscoveryRequest
+import org.junit.platform.engine.ExecutionRequest
 import org.junit.platform.engine.TestDescriptor
 import org.junit.platform.engine.TestEngine
 import org.junit.platform.engine.UniqueId
@@ -16,8 +17,8 @@ import rain.function.annotation
 import rain.function.hasAnnotation
 import java.lang.reflect.Method
 
-
-class RainTestEngine : TestEngine by JupiterTestEngine() {
+val engine = JupiterTestEngine()
+class RainTestEngine : TestEngine by engine {
 
     val appClassLoader: AppClassloader
 
@@ -43,6 +44,11 @@ class RainTestEngine : TestEngine by JupiterTestEngine() {
             local.addChild(descriptor)
         }
         return local
+    }
+
+    override fun execute(request: ExecutionRequest?) {
+        Thread.currentThread().contextClassLoader = appClassLoader
+        engine.execute(request)
     }
 
     fun <T> Class<T>.ofApp(): Class<T> =

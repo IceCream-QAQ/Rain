@@ -1,5 +1,6 @@
 package rain.controller.annotation
 
+import rain.controller.ProcessFilter
 import rain.controller.ProcessProvider
 import kotlin.reflect.KClass
 
@@ -13,6 +14,11 @@ annotation class Catch(
     val except: Array<String> = [],
     val only: Array<String> = []
 )
+
+/** 声明一个注解的过程过滤器
+ * 该注解应该标记于一个 Before，After，Catch 注解一起。
+ */
+annotation class ProcessFilterBy(val value: KClass<out ProcessFilter>)
 
 annotation class Path(val value: String)
 annotation class Global
