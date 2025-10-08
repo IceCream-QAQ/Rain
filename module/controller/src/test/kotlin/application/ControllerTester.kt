@@ -26,6 +26,7 @@ class ControllerTester {
                         router(this)
                             .let {
                                 println("Path: ${StringBuilder().apply { path.forEach { append("/").append(it) } }}, Channel: $channel, Flag: $it, Result: $result.")
+                                println("------------------------------------------------")
                             }
                     }
             }

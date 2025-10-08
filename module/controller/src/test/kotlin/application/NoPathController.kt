@@ -1,13 +1,30 @@
 package application
 
 import controller.*
+import rain.controller.ProcessFilter
 import rain.controller.annotation.Before
+import rain.controller.annotation.ProcessFilterBy
+import java.lang.reflect.Method
 
+
+class TestProcessFilter: ProcessFilter{
+    override fun <T> invoke(
+        provideAnnotation: Annotation,
+        functionAnnotation: Annotation,
+        controllerClass: Class<T>,
+        controllerInstance: T,
+        action: Method?
+    ): Boolean {
+        return !(action != null && action.name == "testAction3")
+    }
+
+}
 
 @TestController
 class NoPathController {
 
     @Before
+    @ProcessFilterBy(TestProcessFilter::class)
     fun testBefore(){
         println("testBefore")
     }
