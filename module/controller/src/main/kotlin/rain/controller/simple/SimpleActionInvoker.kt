@@ -7,8 +7,11 @@ import rain.controller.ProcessInvoker
 import rain.controller.special.DoNone
 import rain.controller.special.SkipMe
 import rain.function.toLowerCaseFirstOne
+import java.lang.reflect.Method
 
 abstract class SimpleActionInvoker<CTX : ActionContext>(
+    override val actionClass: Class<*>?,
+    override val actionMethod: Method?,
     open val action: ProcessInvoker<CTX>,
     open val beforeProcesses: Array<ProcessInvoker<CTX>>,
     open val aftersProcesses: Array<ProcessInvoker<CTX>>,

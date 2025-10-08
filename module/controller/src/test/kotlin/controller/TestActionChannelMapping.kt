@@ -1,6 +1,7 @@
 package controller
 
 import rain.controller.ActionInvoker
+import java.lang.reflect.Method
 
 class TestActionChannelMapping: ActionInvoker<TestActionContext> {
 
@@ -8,6 +9,11 @@ class TestActionChannelMapping: ActionInvoker<TestActionContext> {
     var test2: TestActionInvoker? = null
     var test3: TestActionInvoker? = null
     var test4: TestActionInvoker? = null
+
+    override val actionClass: Class<*>?
+        get() = null
+    override val actionMethod: Method?
+        get() = null
 
     override suspend fun invoke(context: TestActionContext): Boolean {
         return when(context.channel){

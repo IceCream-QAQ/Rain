@@ -1,14 +1,10 @@
 package controller
 
 import rain.api.di.DiContext
-import rain.controller.ActionInfo
 import rain.controller.ControllerInstanceGetter
 import rain.controller.ProcessInvoker
-import rain.controller.RootRouterProcessFlowInfo
-import rain.controller.dss.DssActionInvoker
 import rain.controller.dss.DssControllerLoader
 import rain.controller.dss.router.DssRouter
-import rain.controller.dss.router.DynamicRouter
 import rain.controller.dss.router.RouterMatcher
 import rain.controller.simple.SimpleCatchMethodInvoker
 import rain.function.annotation
@@ -108,6 +104,8 @@ class TestControllerLoader(
         catchProcesses: Array<ProcessInvoker<TestActionContext>>
     ): TestActionInvoker =
         TestActionInvoker(
+            actionClass,
+            actionMethod,
             TestMethodInvoker(actionMethod, instanceGetter).init(),
             beforeProcesses,
             afterProcesses,
