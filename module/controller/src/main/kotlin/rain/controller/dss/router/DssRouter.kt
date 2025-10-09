@@ -13,12 +13,12 @@ import rain.controller.dss.PathActionContext
  * 路由匹配完全交由路由实现，而不是 Action 实现。
  * Action 与路由完全无关。
  */
-open class DssRouter<CTX : PathActionContext, AI : ActionInvoker<CTX>>(
+open class DssRouter<CTX : PathActionContext, AI : ActionInvoker<CTX>, STATIC : DssRouter<CTX, AI, STATIC, DYNAMIC>, DYNAMIC : DynamicRouter<CTX, AI, STATIC>>(
     val level: Int
 ) : Router {
 
-    val static = HashMap<String, DssRouter<CTX, AI>>()
-    val dynamic = ArrayList<DynamicRouter<CTX, AI>>()
+    val static = HashMap<String, STATIC>()
+    val dynamic = ArrayList<DYNAMIC>()
 
     var action: AI? = null
 

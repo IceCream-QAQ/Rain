@@ -16,7 +16,7 @@ import kotlin.reflect.KProperty1
  */
 abstract class DssControllerLoader<
         CTX : PathActionContext,
-        ROT : DssRouter<CTX, *>,
+        ROT : DssRouter<CTX, *, *, *>,
         RootInfo : RootRouterProcessFlowInfo<CTX, ROT, AI>,
         AI : ActionInvoker<CTX>
         >(
@@ -129,7 +129,8 @@ abstract class DssControllerLoader<
                         currentRouter,
                         if (path.isEmpty() && matchers.size == 1 && matchers[0].second == ".*")
                             NamedVariableMatcher(matchers[0].first)
-                        else RegexMatcher(path, matchers.map { item -> item.first }.toTypedArray())
+                        else RegexMatcher(path, matchers.map { item -> item.first }.toTypedArray()),
+                        matchers.map { item -> item.first }
                     )
                 }
             }
@@ -166,6 +167,7 @@ abstract class DssControllerLoader<
                 controllerClass,
                 actionMethod,
                 instanceGetter,
+                actionRouter,
                 beforeProcesses,
                 afterProcesses,
                 catchProcesses
@@ -174,7 +176,7 @@ abstract class DssControllerLoader<
     }
 
     abstract fun getSubStaticRouter(router: ROT, subPath: String): ROT
-    abstract fun getSubDynamicRouter(router: ROT, matcher: RouterMatcher<CTX>): ROT
+    abstract fun getSubDynamicRouter(router: ROT, matcher: RouterMatcher<CTX>, names: List<String>): ROT
     abstract fun controllerChannel(annotation: Annotation?, controllerClass: Class<*>): List<String>
     abstract fun actionInfo(controllerChannel: List<String>, actionMethod: Method): Pair<String, List<String>>?
 
@@ -185,6 +187,7 @@ abstract class DssControllerLoader<
         actionClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter,
+        actionRouter: ROT,
         beforeProcesses: Array<ProcessInvoker<CTX>>,
         afterProcesses: Array<ProcessInvoker<CTX>>,
         catchProcesses: Array<ProcessInvoker<CTX>>,
