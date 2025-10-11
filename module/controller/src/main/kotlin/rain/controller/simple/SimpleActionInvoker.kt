@@ -14,8 +14,8 @@ abstract class SimpleActionInvoker<CTX : ActionContext>(
     override val actionMethod: Method?,
     open val action: ProcessInvoker<CTX>,
     open val beforeProcesses: Array<ProcessInvoker<CTX>>,
-    open val aftersProcesses: Array<ProcessInvoker<CTX>>,
-    open val catchsProcesses: Array<ProcessInvoker<CTX>>
+    open val afterProcesses: Array<ProcessInvoker<CTX>>,
+    open val catchProcesses: Array<ProcessInvoker<CTX>>
 ) : ActionInvoker<CTX> {
 
     override suspend fun invoke(context: CTX): Boolean {
@@ -23,11 +23,11 @@ abstract class SimpleActionInvoker<CTX : ActionContext>(
         kotlin.runCatching {
             if (beforeProcesses.any { onProcessResult(context, it(context)) }) return@runCatching
             if (onActionResult(context, action(context))) return@runCatching
-            if (aftersProcesses.any { onProcessResult(context, it(context)) }) return@runCatching
+            if (afterProcesses.any { onProcessResult(context, it(context)) }) return@runCatching
         }.getOrElse {
             if (it !is ActionResult) {
                 context.runtimeError = it
-                kotlin.runCatching { catchsProcesses.any { onProcessResult(context, it(context)) } }
+                kotlin.runCatching { catchProcesses.any { onProcessResult(context, it(context)) } }
                     .getOrElse { exception ->
                         if (exception is ActionResult) {
                             context.runtimeError = null
