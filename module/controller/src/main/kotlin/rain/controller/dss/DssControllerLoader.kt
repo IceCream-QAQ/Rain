@@ -18,10 +18,11 @@ abstract class DssControllerLoader<
         CTX : PathActionContext,
         ROT : DssRouter<CTX, *, *, *>,
         RootInfo : RootRouterProcessFlowInfo<CTX, ROT, AI>,
-        AI : ActionInvoker<CTX>
+        AI : ActionInvoker<CTX>,
+        ControllerInfo : ControllerProcessFlowInfo<CTX, ROT, AI>
         >(
     context: DiContext
-) : ControllerLoader<CTX, ROT, RootInfo, AI>(context) {
+) : ControllerLoader<CTX, ROT, RootInfo, AI, ControllerInfo>(context) {
 
     open fun margePath(path: Array<String>): String =
         path.joinToString("/")
@@ -88,12 +89,19 @@ abstract class DssControllerLoader<
         return (if (locationFlag) realPathBuilder.toString() else "") to matchList
     }
 
+    abstract fun controllerInfo(
+        controllerClass: Class<*>,
+        controllerInstance: Any,
+        controllerChannels: List<String>,
+        controllerRouter: ROT
+    ): ControllerInfo?
+
     override fun controllerInfo(
         root: RootInfo,
         annotation: Annotation?,
         controllerClass: Class<*>,
         controllerInstance: Any
-    ): ControllerProcessFlowInfo<CTX, ROT, AI>? {
+    ): ControllerInfo? {
         val channels = controllerChannel(annotation, controllerClass)
         var controllerRouter = root.router
 
@@ -113,7 +121,7 @@ abstract class DssControllerLoader<
         if (margePathList.isNotEmpty())
             controllerRouter = pathToRouter(controllerRouter, margePath(margePathList.reversed().toTypedArray()))
 
-        return ControllerProcessFlowInfo(controllerClass, controllerInstance, channels, controllerRouter)
+        return controllerInfo(controllerClass, controllerInstance, channels, controllerRouter)
     }
 
     open fun pathToRouter(router: ROT, path: String): ROT {
@@ -139,15 +147,16 @@ abstract class DssControllerLoader<
     }
 
     override fun makeProcessInvoker(
+        controllerInfo: ControllerInfo,
         processClass: Class<*>,
         processMethod: Method,
         processInstance: ControllerInstanceGetter
-    ): ProcessInvoker<CTX>? = createMethodInvoker(processClass, processMethod, processInstance)
+    ): ProcessInvoker<CTX>? = createMethodInvoker(controllerInfo, processClass, processMethod, processInstance)
 
 
     override fun makeAction(
         rootRouter: RootInfo,
-        controllerFlow: ControllerProcessFlowInfo<CTX, ROT, AI>,
+        controllerFlow: ControllerInfo,
         controllerClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter
@@ -164,6 +173,7 @@ abstract class DssControllerLoader<
         return ActionCreator(controllerClass, actionMethod) { beforeProcesses, afterProcesses, catchProcesses ->
             createActionInvoker(
                 channels,
+                controllerFlow,
                 controllerClass,
                 actionMethod,
                 instanceGetter,
@@ -184,6 +194,7 @@ abstract class DssControllerLoader<
 
     abstract fun createActionInvoker(
         channels: List<String>,
+        controllerInfo: ControllerInfo,
         actionClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter,
@@ -194,13 +205,7 @@ abstract class DssControllerLoader<
     ): AI
 
     abstract fun createMethodInvoker(
-        controllerClass: Class<*>,
-        targetMethod: Method,
-        instanceGetter: ControllerInstanceGetter
-    ): ProcessInvoker<CTX>?
-
-    abstract fun createCatchMethodInvoker(
-        throwableType: Class<out Throwable>,
+        controllerInfo: ControllerInfo,
         controllerClass: Class<*>,
         targetMethod: Method,
         instanceGetter: ControllerInstanceGetter

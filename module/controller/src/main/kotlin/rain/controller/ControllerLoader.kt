@@ -15,7 +15,8 @@ abstract class ControllerLoader<
         CTX : ActionContext,
         ROT : Router,
         RootInfo : RootRouterProcessFlowInfo<CTX, ROT, AI>,
-        AI : ActionInvoker<CTX>
+        AI : ActionInvoker<CTX>,
+        ControllerInfo : ControllerProcessFlowInfo<CTX, ROT, AI>
         >(
     val context: DiContext
 ) : Loader {
@@ -143,15 +144,15 @@ abstract class ControllerLoader<
                 }
 
                 m.annotation<Before> {
-                    makeBefore(this, type, m, getter)
+                    makeBefore(controllerFlow, this, type, m, getter)
                         ?.checkGlobal(ProcessFlowInfo<CTX>::beforeProcesses)
                 }
                 m.annotation<After> {
-                    makeAfter(this, type, m, getter)
+                    makeAfter(controllerFlow, this, type, m, getter)
                         ?.checkGlobal(ProcessFlowInfo<CTX>::afterProcesses)
                 }
                 m.annotation<Catch> {
-                    makeCatch(this, type, m, getter)
+                    makeCatch(controllerFlow, this, type, m, getter)
                         ?.checkGlobal(ProcessFlowInfo<CTX>::catchProcesses)
                 }
 
@@ -270,7 +271,7 @@ abstract class ControllerLoader<
         annotation: Annotation?,
         controllerClass: Class<*>,
         controllerInstance: Any,
-    ): ControllerProcessFlowInfo<CTX, ROT, AI>?
+    ): ControllerInfo?
 
     /** 尝试对目标函数创建 Action
      * 如果目标是正确的 Action函数，则返回一个 Action 过程流信息对象。
@@ -285,7 +286,7 @@ abstract class ControllerLoader<
      */
     abstract fun makeAction(
         rootRouter: RootInfo,
-        controllerFlow: ControllerProcessFlowInfo<CTX, ROT, AI>,
+        controllerFlow: ControllerInfo,
         controllerClass: Class<*>,
         actionMethod: Method,
         instanceGetter: ControllerInstanceGetter
@@ -299,6 +300,7 @@ abstract class ControllerLoader<
      * @return 创建的过程调用器。
      */
     abstract fun makeProcessInvoker(
+        controllerInfo: ControllerInfo,
         processClass: Class<*>,
         processMethod: Method,
         processInstance: ControllerInstanceGetter,
@@ -314,12 +316,13 @@ abstract class ControllerLoader<
      * @return 创建的过程信息对象。
      */
     open fun makeBefore(
+        controllerInfo: ControllerInfo,
         beforeAnnotation: Before,
         controllerClass: Class<*>,
         beforeMethod: Method,
         instanceGetter: ControllerInstanceGetter
     ): ProcessInfo<CTX>? =
-        makeProcessInvoker(controllerClass, beforeMethod, instanceGetter)
+        makeProcessInvoker(controllerInfo, controllerClass, beforeMethod, instanceGetter)
             ?.let {
                 ProcessInfo(
                     beforeAnnotation,
@@ -342,12 +345,13 @@ abstract class ControllerLoader<
      * @return 创建的过程信息对象。
      */
     open fun makeAfter(
+        controllerInfo: ControllerInfo,
         afterAnnotation: After,
         controllerClass: Class<*>,
         afterMethod: Method,
         instanceGetter: ControllerInstanceGetter
     ): ProcessInfo<CTX>? =
-        makeProcessInvoker(controllerClass, afterMethod, instanceGetter)
+        makeProcessInvoker(controllerInfo, controllerClass, afterMethod, instanceGetter)
             ?.let {
                 ProcessInfo(
                     afterAnnotation,
@@ -370,12 +374,13 @@ abstract class ControllerLoader<
      * @return 创建的过程信息对象。
      */
     open fun makeCatch(
+        controllerInfo: ControllerInfo,
         catchAnnotation: Catch,
         controllerClass: Class<*>,
         catchMethod: Method,
         instanceGetter: ControllerInstanceGetter
     ): ProcessInfo<CTX>? =
-        makeProcessInvoker(controllerClass, catchMethod, instanceGetter)
+        makeProcessInvoker(controllerInfo, controllerClass, catchMethod, instanceGetter)
             ?.let {
                 ProcessInfo(
                     catchAnnotation,
