@@ -5,6 +5,7 @@ import rain.api.di.named
 import rain.api.loader.LoadItem
 import rain.api.loader.Loader
 import rain.controller.annotation.*
+import rain.controller.simple.SimpleCatchMethodInvoker
 import rain.function.*
 import java.lang.reflect.AnnotatedElement
 import java.lang.reflect.Method
@@ -381,7 +382,8 @@ abstract class ControllerLoader<
         instanceGetter: ControllerInstanceGetter
     ): ProcessInfo<CTX>? =
         makeProcessInvoker(controllerInfo, controllerClass, catchMethod, instanceGetter)
-            ?.let {
+            ?.let {SimpleCatchMethodInvoker(catchAnnotation.error.java, it)  }
+        ?.let {
                 ProcessInfo(
                     catchAnnotation,
                     catchAnnotation,
