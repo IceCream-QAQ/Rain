@@ -141,9 +141,10 @@ abstract class SimpleKJReflectMethodInvoker<CTX : ActionContext, ATT>(
                     invoker = { context ->
                         val paramMap = HashMap<KParameter, Any?>(kFun.parameters.size)
                         paramMap[instanceParam!!] = instance()
-                        it.forEach {
-                            it.valueChecker(getParam(it, context))
-                                ?.let { value -> paramMap[it.kReflectParam!!] = value }
+                        it.forEach { p->
+                            val value = p.valueChecker(getParam(p, context))
+                            if (value != null || !p.optional)
+                                paramMap[p.kReflectParam!!] = value
                         }
                         kFun.callSuspendBy(paramMap)
                     }
