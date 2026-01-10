@@ -7,4 +7,5 @@ dependencies {
     api(project(":classloader"))
     api(project(":hook"))
     testImplementation(project(":test-base"))
+    testImplementation(project(":event"))
 }
