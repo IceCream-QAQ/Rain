@@ -61,7 +61,7 @@ object FullStackApplicationLauncher {
         }
 
         // 注册 Kotlin ByInject 实现
-//        appClassLoader.registerTransformer("com.IceCreamQAQ.Yu.di.kotlin.YuContextKotlinInjectTransformer")
+        appClassLoader.registerTransformer("rain.classloader.enchant.YuContextKotlinInjectTransformer")
 
 
         try {
