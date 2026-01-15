@@ -94,14 +94,14 @@ open class NoInstanceClassContext<T>(
     override fun getBean(): T? =
         bindMap[din]?.getBean()
 
-    private fun getConfigName(name: String): String{
-        return if(name.startsWith("{") && name.endsWith("}")){
-            context.configManager.getConfig<String>(name.substring(1,name.length - 1)) ?: name
-
-        }else{
+    private fun getConfigName(name: String): String {
+        return if (name.startsWith("{") && name.endsWith("}")) {
+            context.configManager.getConfig<String>(name.substring(1, name.length - 1)) ?: name
+        } else {
             name
         }
     }
+
     override fun getBean(name: String): T? =
         bindMap[getConfigName(name)]?.getBean()
 
@@ -144,14 +144,15 @@ open class InstanceAbleClassContext<T>(
     override fun getBean(): T? =
         defaultInstance ?: injector(creator().apply { defaultInstance = this })
 
-    private fun getConfigName(name: String): String{
+    private fun getConfigName(name: String): String {
         println("getConfigName $name")
-        return if(name.startsWith("{") && name.endsWith("}")){
-            context.configManager.getConfig<String>(name.substring(1,name.length - 1)) ?: name
-        }else{
+        return if (name.startsWith("{") && name.endsWith("}")) {
+            context.configManager.getConfig<String>(name.substring(1, name.length - 1)) ?: name
+        } else {
             name
         }
     }
+
     override fun getBean(name: String): T? =
         if (name == din) getBean() else instanceMap[getConfigName(name)]
 
@@ -190,5 +191,80 @@ open class LocalInstanceClassContext<T : Any>(
 
     override fun putBinds(name: String, cc: ClassContext<out T>) {
         error("Local 实例 ${clazz.name} 无法关联类型 $name: ${cc.clazz.name}!")
+    }
+}
+
+open class KotlinObjectClassContext<T : Any>(
+    val context: ContextImpl,
+    override val clazz: Class<T>
+) : ClassContext<T> {
+
+    private val instance: T by lazy {
+        val kObject = clazz.kotlin.objectInstance ?: error("Kotlin Object 实例 ${clazz.name} 无法获取单例对象！")
+        context.injectBean(kObject)
+    }
+
+    private var _injector: BeanInjector<T>? = null
+    open fun recreateBeanInjector(): BeanInjector<T> {
+        return (context.makeBeanInjector(clazz as Class<Any>) as BeanInjector<T>).also { _injector = it }
+    }
+
+    override val multi: Boolean = false
+    override val instanceAble: Boolean = false
+    override val bindAble: Boolean = false
+    override val creator: BeanCreator<T>
+        get() = error("Kotlin Object 实例 ${clazz.name} 无法提供 Creator!")
+    override val injector: BeanInjector<T>
+        get() = _injector ?: recreateBeanInjector()
+
+    override fun newBean(): T = error("Kotlin Object 实例 ${clazz.name} 无法创建新的 Bean!")
+
+    override fun getBean(): T? = instance
+
+    override fun getBean(name: String): T? =
+        if (name == din) instance else error("Kotlin Object 实例 ${clazz.name} 无法提供名为 $name 的 Bean!")
+
+    override fun putBean(name: String, instance: T): T = error("Kotlin Object 实例 ${clazz.name} 无法保存新的 Bean!")
+
+    override fun putBinds(name: String, cc: ClassContext<out T>) {
+        error("Kotlin Object 实例 ${clazz.name} 无法关联类型 $name: ${cc.clazz.name}!")
+    }
+}
+
+open class KotlinCompanionObjectClassContext<T : Any>(
+    val context: ContextImpl,
+    override val clazz: Class<T>
+) : ClassContext<T> {
+
+    private val instance: T by lazy {
+        val kCompanion = clazz.kotlin.objectInstance
+            ?: error("Kotlin Companion Object 实例 ${clazz.name} 无法获取单例对象！")
+        context.injectBean(kCompanion)
+    }
+
+    private var _injector: BeanInjector<T>? = null
+    open fun recreateBeanInjector(): BeanInjector<T> {
+        return (context.makeBeanInjector(clazz as Class<Any>) as BeanInjector<T>).also { _injector = it }
+    }
+
+    override val multi: Boolean = false
+    override val instanceAble: Boolean = false
+    override val bindAble: Boolean = false
+    override val creator: BeanCreator<T>
+        get() = error("Kotlin Companion Object 实例 ${clazz.name} 无法提供 Creator!")
+    override val injector: BeanInjector<T>
+        get() = _injector ?: recreateBeanInjector()
+
+    override fun newBean(): T = error("Kotlin Companion Object 实例 ${clazz.name} 无法创建新的 Bean!")
+
+    override fun getBean(): T? = instance
+
+    override fun getBean(name: String): T? =
+        if (name == din) instance else error("Kotlin Companion Object 实例 ${clazz.name} 无法提供名为 $name 的 Bean!")
+
+    override fun putBean(name: String, instance: T): T = error("Kotlin Companion Object 实例 ${clazz.name} 无法保存新的 Bean!")
+
+    override fun putBinds(name: String, cc: ClassContext<out T>) {
+        error("Kotlin Companion Object 实例 ${clazz.name} 无法关联类型 $name: ${cc.clazz.name}!")
     }
 }

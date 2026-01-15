@@ -5,6 +5,7 @@ import rain.api.di.DiContext
 import rain.di.*
 import rain.di.config.ConfigManager
 import rain.di.config.ConfigReader
+import rain.di.`fun`.KHelper
 import rain.function.annotation
 import rain.function.hasAnnotation
 import rain.function.isBean
@@ -66,10 +67,17 @@ open class ContextImpl(
     open fun <T> findContextOrNull(clazz: Class<T>): ClassContext<T>? = contextMap[clazz] as? ClassContext<T>
     open fun <T> findContext(clazz: Class<T>): ClassContext<T> =
         contextMap.getOrPut(clazz) {
-            if (clazz.isBean) {
-                clazz as Class<Any>
-                InstanceAbleClassContext(this, clazz)
-            } else NoInstanceClassContext(this, clazz)
+            clazz as Class<Any>
+            val km = clazz.annotation<Metadata>()
+            val kmClass = km?.let { KHelper.parseKmClass(it) }
+            val flag = kmClass?.let { KHelper.getKmKindFlag(it) }
+            flag?.let { KHelper.isObject(it) }
+                ?.takeIf { it }
+                ?.let { KotlinObjectClassContext(this@ContextImpl, clazz) }
+                ?: flag?.let { KHelper.isCompanionObject(it) }
+                    ?.takeIf { it }
+                    ?.let { KotlinCompanionObjectClassContext(this@ContextImpl, clazz) }
+                ?: if (clazz.isBean) InstanceAbleClassContext(this, clazz) else NoInstanceClassContext(this, clazz)
         } as ClassContext<T>
 
     override fun <T> getBean(clazz: Class<T>, instanceName: String): T? =
