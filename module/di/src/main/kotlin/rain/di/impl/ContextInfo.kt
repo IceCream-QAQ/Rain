@@ -39,8 +39,8 @@ open class BeanFactoryClassContext<T>(
 
     private fun getConfigName(name: String): String =
         name.takeIf { name.startsWith("{") && name.endsWith("}") }
-            .let { name.substring(1, name.length - 1) }
-            .let { context.configManager.getConfig<String>(name.substring(1, name.length - 1)) }
+            ?.substring(1, name.length - 1)
+            ?.let { context.configManager.getConfig<String>(it) }
             ?: name
 
     override fun getBean(name: String): T? = factory.createBean(getConfigName(name))
