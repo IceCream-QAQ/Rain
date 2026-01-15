@@ -37,13 +37,12 @@ open class BeanFactoryClassContext<T>(
     private val factory: BeanFactory<T>
         get() = _factory ?: recreateBeanFactory()
 
-    private fun getConfigName(name: String): String{
-        return if(name.startsWith("{") && name.endsWith("}")){
-            context.configManager.getConfig<String>(name.substring(1,name.length - 1)) ?: name
-        }else{
-            name
-        }
-    }
+    private fun getConfigName(name: String): String =
+        name.takeIf { name.startsWith("{") && name.endsWith("}") }
+            .let { name.substring(1, name.length - 1) }
+            .let { context.configManager.getConfig<String>(name.substring(1, name.length - 1)) }
+            ?: name
+
     override fun getBean(name: String): T? = factory.createBean(getConfigName(name))
     override fun putBinds(name: String, cc: ClassContext<out T>) {
         error("您无法向一个由 BeanFactory(${factory::class.java.name}) 管理的上下文 (${this.name}) 中提交绑定类。")
@@ -262,7 +261,8 @@ open class KotlinCompanionObjectClassContext<T : Any>(
     override fun getBean(name: String): T? =
         if (name == din) instance else error("Kotlin Companion Object 实例 ${clazz.name} 无法提供名为 $name 的 Bean!")
 
-    override fun putBean(name: String, instance: T): T = error("Kotlin Companion Object 实例 ${clazz.name} 无法保存新的 Bean!")
+    override fun putBean(name: String, instance: T): T =
+        error("Kotlin Companion Object 实例 ${clazz.name} 无法保存新的 Bean!")
 
     override fun putBinds(name: String, cc: ClassContext<out T>) {
         error("Kotlin Companion Object 实例 ${clazz.name} 无法关联类型 $name: ${cc.clazz.name}!")
