@@ -7,7 +7,7 @@ plugins {
     `maven-publish`
 }
 
-val dependencyAsm by extra("9.7.1")
+val dependencyAsm by extra("9.9.1")
 val dependencyFastJSON2 by extra("2.0.54")
 val dependencySlf4j by extra("2.0.9")
 
