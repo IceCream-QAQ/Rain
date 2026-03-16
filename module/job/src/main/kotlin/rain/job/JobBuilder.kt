@@ -3,6 +3,8 @@ package rain.job
 import rain.function.DateUtil
 import rain.function.currentTimeMillis
 import rain.function.toTime
+import rain.job.next.AtTimeNext
+import rain.job.next.EveryNext
 import java.time.ZoneId
 
 class JobBuilder(
@@ -24,10 +26,7 @@ class JobBuilder(
     }
 
     fun every(time: Long) = of {
-        timeFun = NextTime { invokeTime, endTime ->
-            if (invokeTime == -1L || endTime == -1L) time
-            else (endTime - invokeTime).let{ time - (it % time)}
-        }
+        timeFun = EveryNext(time)
     }
 
     fun every(time: String) = every(time.toTime())
@@ -86,8 +85,8 @@ class JobBuilder(
             timeFun
                 ?: firstTime?.let {
                     if (nextTime == null) NextTime { i, _ -> if (i != -1L) -1 else it }
-                    else if (it == nextTime) NextTime { _, _ -> it }
-                    else NextTime { i, _ -> if (i != -1L) nextTime!! else it }
+                    else if (it == nextTime) EveryNext(it)
+                    else AtTimeNext(it, nextTime!!)
                 } ?: error("任务没有正确的执行时间")
 
         return JobRuntime(
