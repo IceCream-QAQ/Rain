@@ -1,8 +1,11 @@
 package rain.job
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import rain.api.event.EventBus
 import rain.api.loader.ApplicationService
-import rain.function.coreNumCoroutineScope
+import rain.function.coreNumThreadPool
 import rain.function.uuid
 
 class JobCenter(
@@ -13,7 +16,9 @@ class JobCenter(
         eventBus?.let { { j, e -> it.post(JobRunExceptionEvent(j, e)) } }
             ?: { _, _ -> }
 
-    private val scope = coreNumCoroutineScope("Job")
+    private val threadPool = coreNumThreadPool("Job")
+    private val scope = CoroutineScope(SupervisorJob() + threadPool)
+
     private var jobs: MutableMap<String, JobRuntime> = HashMap()
 
     override fun registerJob(job: JobRuntime): String {
@@ -36,5 +41,7 @@ class JobCenter(
 
     override fun stop() {
         jobs.values.forEach { it.close() }
+        scope.cancel()
+        threadPool.close()
     }
 }
