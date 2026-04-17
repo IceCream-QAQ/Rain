@@ -7,6 +7,7 @@ import rain.api.event.EventBus
 import rain.api.loader.ApplicationService
 import rain.function.coreNumThreadPool
 import rain.function.uuid
+import java.util.concurrent.ConcurrentHashMap
 
 class JobCenter(
     eventBus: EventBus?
@@ -19,7 +20,7 @@ class JobCenter(
     private val threadPool = coreNumThreadPool("Job")
     private val scope = CoroutineScope(SupervisorJob() + threadPool)
 
-    private var jobs: MutableMap<String, JobRuntime> = HashMap()
+    private var jobs: MutableMap<String, JobRuntime> = ConcurrentHashMap()
 
     override fun registerJob(job: JobRuntime): String {
         val id = uuid()
