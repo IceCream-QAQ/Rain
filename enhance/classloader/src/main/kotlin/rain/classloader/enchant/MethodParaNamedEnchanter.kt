@@ -11,6 +11,8 @@ class MethodParaNamedEnchanter : Enchanter {
     annotation class MethodParaNamed
 
     override fun enchantClass(cn: ClassNode): Boolean {
+        cn.visibleAnnotations?.find { it.desc == "Lkotlin/Metadata;" }?.let { return false }
+
         var write = false
         for (method in cn.methods) {
             if (method.name == "<init>") continue

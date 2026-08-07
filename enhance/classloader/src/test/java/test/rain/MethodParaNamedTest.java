@@ -25,4 +25,18 @@ public class MethodParaNamedTest {
         });
     }
 
+    @Test
+    public void testKMethodParaNamed() throws ClassNotFoundException {
+        ClassLoader classLoader = MakeClassLoader.INSTANCE.classloader();
+        Class<?> clazz = classLoader.loadClass("test.rain.KMethodParaNamedClass");
+        Arrays.stream(clazz.getMethods()).filter(it -> it.getName().startsWith("method")).forEach(method -> {
+            System.out.println("Method: " + method.getName());
+            Arrays.stream(method.getParameters()).forEach(parameter -> {
+                Named namedAnnotation = parameter.getAnnotation(Named.class);
+                if (namedAnnotation != null) throw new RuntimeException("Parameter " + parameter.getName() + " of method " + method.getName() + " is annotated with @Named");
+                System.out.println("Parameter: " + parameter.getName() + ", Named: " + parameter.getAnnotation(Named.class));
+            });
+        });
+    }
+
 }
