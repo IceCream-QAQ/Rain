@@ -6,6 +6,10 @@ import org.objectweb.asm.tree.LocalVariableNode
 import org.objectweb.asm.tree.MethodNode
 
 class MethodParaNamedEnchanter : Enchanter {
+
+    @EnchantBy(MethodParaNamedEnchanter::class)
+    annotation class MethodParaNamed
+
     override fun enchantClass(cn: ClassNode) {
         for (method in cn.methods) {
             if (method.name == "<init>") continue
