@@ -1,5 +1,7 @@
 package rain.controller.annotation
 
+import rain.classloader.enchant.EnchantBy
+import rain.classloader.enchant.MethodParaNamedEnchanter
 import rain.controller.ProcessFilter
 import rain.controller.ProcessProvider
 import kotlin.reflect.KClass
@@ -20,6 +22,7 @@ annotation class Catch(
  */
 annotation class ProcessFilterBy(val value: KClass<out ProcessFilter>)
 
+@EnchantBy(MethodParaNamedEnchanter::class)
 annotation class Path(val value: String)
 annotation class Global
 
