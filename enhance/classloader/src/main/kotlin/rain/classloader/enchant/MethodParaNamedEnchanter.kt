@@ -10,7 +10,8 @@ class MethodParaNamedEnchanter : Enchanter {
     @EnchantBy(MethodParaNamedEnchanter::class)
     annotation class MethodParaNamed
 
-    override fun enchantClass(cn: ClassNode) {
+    override fun enchantClass(cn: ClassNode): Boolean {
+        var write = false
         for (method in cn.methods) {
             if (method.name == "<init>") continue
 
@@ -27,19 +28,33 @@ class MethodParaNamedEnchanter : Enchanter {
                 }
             }
 
-            if (thisNode == null) return
+            if (thisNode == null) continue
 
             for (localVariable in method.localVariables) {
                 if (localVariable.name == "this") continue
 
-                if (thisNode.start === localVariable.start && thisNode.end === localVariable.end) paraName.add(
-                    localVariable.name
-                )
+                if (thisNode.start === localVariable.start && thisNode.end === localVariable.end)
+                    paraName.add(localVariable.name)
+            }
+
+            var changed = false
+
+            fun writeAnnotation(na: MutableList<AnnotationNode>, i: Int) {
+                val an = AnnotationNode("Ljavax/inject/Named;")
+                val values: MutableList<Any> = ArrayList()
+
+                values.add("value")
+                values.add(paraName[i])
+
+                an.values = values
+
+                na.add(an)
+                changed = true
+                write = true
             }
 
             var pas = method.visibleParameterAnnotations
             if (pas == null) pas = arrayOfNulls<MutableList<AnnotationNode>>(paraName.size)
-            method.visibleParameterAnnotations = pas
 
             for (i in pas.indices) {
                 val ans = pas[i]
@@ -47,16 +62,7 @@ class MethodParaNamedEnchanter : Enchanter {
                 if (ans == null) {
                     val na: MutableList<AnnotationNode> = ArrayList()
                     pas[i] = na
-
-                    val an = AnnotationNode("Ljavax/inject/Named;")
-                    val values: MutableList<Any> = ArrayList()
-
-                    values.add("value")
-                    values.add(paraName[i])
-
-                    an.values = values
-
-                    na.add(an)
+                    writeAnnotation(na, i)
                 } else {
                     var haveNamed = false
                     for (an in ans) {
@@ -67,17 +73,11 @@ class MethodParaNamedEnchanter : Enchanter {
 
                     if (haveNamed) continue
 
-                    val an = AnnotationNode("Ljavax/inject/Named;")
-                    val values: MutableList<Any> = ArrayList()
-                    values.add("value")
-                    values.add(paraName[i])
-                    an.values = values
-                    ans.add(an)
+                    writeAnnotation(ans, i)
                 }
             }
+            if (changed) method.visibleParameterAnnotations = pas
         }
-    }
-
-    override fun enchantMethod(cn: ClassNode, mn: MethodNode) {
+        return write
     }
 }

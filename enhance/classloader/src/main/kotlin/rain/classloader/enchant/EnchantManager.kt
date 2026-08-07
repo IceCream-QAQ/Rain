@@ -20,9 +20,8 @@ class EnchantManager(private val classloader: IRainClassLoader) : ClassTransform
                 val aa = annotationClass.annotations
                 for (a in aa) {
                     if (a is EnchantBy) {
-                        en = true
                         val enchanter = a.value.java.let { enchanters.getOrPut(it) { it.newInstance() } }
-                        enchanter.enchantClass(node)
+                        if (enchanter.enchantClass(node)) en = true
                     }
                 }
             }
