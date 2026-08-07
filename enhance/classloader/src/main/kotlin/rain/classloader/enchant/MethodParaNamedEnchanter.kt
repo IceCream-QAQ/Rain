@@ -3,7 +3,6 @@ package rain.classloader.enchant
 import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.LocalVariableNode
-import org.objectweb.asm.tree.MethodNode
 
 class MethodParaNamedEnchanter : Enchanter {
 
