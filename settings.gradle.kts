@@ -26,3 +26,13 @@ fun test(name: String) {
 }
 test("base")
 test("fullstack")
+
+
+fun kMetadata(name: String) {
+    includeProject(":k-metadata-$name", "tools/k-metadata/k-metadata-$name")
+}
+
+kMetadata("common")
+kMetadata("2-0-0")
+kMetadata("2-4-0")
+kMetadata("tool")

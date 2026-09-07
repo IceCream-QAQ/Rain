@@ -5,7 +5,7 @@ import rain.api.di.DiContext
 import rain.di.*
 import rain.di.config.ConfigManager
 import rain.di.config.ConfigReader
-import rain.di.`fun`.KHelper
+import rain.`fun`.kt.metadata.KMetadataTool
 import rain.function.annotation
 import rain.function.hasAnnotation
 import rain.function.isBean
@@ -69,12 +69,12 @@ open class ContextImpl(
         contextMap.getOrPut(clazz) {
             clazz as Class<Any>
             val km = clazz.annotation<Metadata>()
-            val kmClass = km?.let { KHelper.parseKmClass(it) }
-            val flag = kmClass?.let { KHelper.getKmKindFlag(it) }
-            flag?.let { KHelper.isObject(it) }
+            val kmClass = km?.let { KMetadataTool.instance().parseKmClass(it) }
+            val flag = kmClass?.let { KMetadataTool.instance().getKmKindFlag(it) }
+            flag?.let { KMetadataTool.instance().isObject(it) }
                 ?.takeIf { it }
                 ?.let { KotlinObjectClassContext(this@ContextImpl, clazz) }
-                ?: flag?.let { KHelper.isCompanionObject(it) }
+                ?: flag?.let { KMetadataTool.instance().isCompanionObject(it) }
                     ?.takeIf { it }
                     ?.let { KotlinCompanionObjectClassContext(this@ContextImpl, clazz) }
                 ?: if (clazz.isBean) InstanceAbleClassContext(this, clazz) else NoInstanceClassContext(this, clazz)
