@@ -82,19 +82,24 @@ open class AppLoader(
                 applicationServices.add(clazz as Class<out ApplicationService>)
         }
 
-        bindMap.mapMap { (clazz, binds) ->
-            NoInstanceClassContext(context, clazz).also { context.registerClass(it) } to binds
-        }.forEach { (ctx, binds) ->
-            ctx.putBinds(binds.mapMap { (named, bindClass) -> named to context.findContext(bindClass) })
+        bindMap.forEach { (clazz, binds) ->
+            // ClassRegister 可以主动提供上下文。非 bindAble 上下文已接管该类型，
+            // 自动发现不得覆盖；可绑定上下文也应复用，保留已创建的 DataReader 引用。
+            val ctx = context.findContext(clazz) as ClassContext<Any>
+            if (ctx.bindAble) {
+                binds.forEach { (named, bindClass) ->
+                    ctx.putBinds(named, context.findContext(bindClass) as ClassContext<Any>)
+                }
+            }
         }
 
         beanFactoryMap.forEach { (type, factoryType) ->
+            if (context.findContextOrNull(type)?.bindAble == false) return@forEach
             BeanFactoryClassContext(
                 context,
                 context.findContext(factoryType) as ClassContext<BeanFactory<Any>>,
                 type as Class<Any>
-            )
-                .apply { context.registerClass(this) }
+            ).apply { context.registerClass(this) }
         }
 
         val loaders = ArrayList<Loader>()
