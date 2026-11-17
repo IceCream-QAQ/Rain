@@ -1,5 +1,11 @@
 rootProject.name = "Rain"
 
+pluginManagement{
+    repositories {
+        maven("https://mirrors.cloud.tencent.com/nexus/repository/maven-public")
+    }
+}
+
 fun includeProject(name: String, dir: String? = null) {
     include(name)
     dir?.let { project(name).projectDir = file(it) }
@@ -7,6 +13,7 @@ fun includeProject(name: String, dir: String? = null) {
 
 includeProject(":function", "tools/function")
 includeProject(":api", "tools/api")
+includeProject(":validator", "tools/validator")
 includeProject(":rain-test","tools/rain-test")
 
 includeProject(":classloader", "enhance/classloader")

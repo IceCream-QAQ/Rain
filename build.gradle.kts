@@ -17,7 +17,7 @@ version = "1.0.0-DEV15"
 allprojects {
     repositories {
         mavenLocal()
-        mavenCentral()
+//        mavenCentral()
         maven("https://maven.icecreamqaq.com/repository/maven-public/")
     }
 }
